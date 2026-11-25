@@ -91,13 +91,19 @@
             height: 100%;
             display: block;
         }
+        @media (min-width: 1024px) {
+            body {
+                background-image: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08), transparent 45%),
+                                  radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.06), transparent 35%);
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-empire-bg text-slate-100">
 
     <!-- Top Persistent Status Bar -->
-    <header class="sticky top-0 z-30 bg-empire-surface/95 backdrop-blur-md border-b border-empire-border px-3 py-2.5">
-        <div class="max-w-xl mx-auto flex items-center justify-between gap-2">
+    <header class="sticky top-0 z-30 bg-empire-surface/95 backdrop-blur-md border-b border-empire-border px-3 sm:px-6 lg:px-8 py-2.5">
+        <div class="w-full max-w-none mx-auto flex items-center justify-between gap-2">
             <!-- Cash & Income -->
             <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
@@ -124,7 +130,7 @@
         </div>
 
         <!-- Secondary Multiplier Pill Strip -->
-        <div class="max-w-xl mx-auto mt-1.5 flex items-center justify-between text-[11px] text-slate-400 px-0.5 gap-1.5">
+        <div class="w-full max-w-none mx-auto mt-1.5 flex items-center justify-between text-[11px] text-slate-400 px-0.5 gap-1.5">
             <div class="flex items-center gap-1.5 truncate">
                 <span>Binder: <strong id="header-binder-mult" class="text-emerald-400">1.00x</strong></span>
                 <span class="text-slate-600">•</span>
@@ -143,7 +149,7 @@
     <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1.5 pointer-events-none w-full max-w-sm px-4"></div>
 
     <!-- Main Content Viewport -->
-    <main class="flex-1 max-w-xl w-full mx-auto px-3 pt-3 pb-24">
+    <main class="flex-1 w-full max-w-none mx-auto px-3 sm:px-6 lg:px-8 pt-3 pb-24">
 
         <!-- ==================== TAB 1: RIP PACKS ==================== -->
         <section id="tab-rip" class="space-y-4">
@@ -181,7 +187,7 @@
             </div>
 
             <!-- Pack Tiers Grid -->
-            <div id="pack-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div id="pack-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 <!-- Populated via JS -->
             </div>
 
@@ -198,7 +204,7 @@
                     </div>
                 </div>
 
-                <div id="revealed-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 min-h-[120px]">
+                <div id="revealed-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 min-h-[120px]">
                     <div class="col-span-full flex flex-col items-center justify-center py-8 text-center text-slate-500 border border-dashed border-slate-800 rounded-xl">
                         <span class="text-2xl mb-1">📦</span>
                         <p class="text-xs font-medium">Rip a pack above to reveal cards!</p>
@@ -353,7 +359,7 @@
             </div>
 
             <!-- Binder Cards Grid -->
-            <div id="binder-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div id="binder-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 <!-- Populated via JS -->
             </div>
 
@@ -466,8 +472,8 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 inset-x-0 z-40 bg-empire-surface/95 backdrop-blur-md border-t border-empire-border px-2 py-1.5">
-        <div class="max-w-xl mx-auto grid grid-cols-4 gap-1">
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-empire-surface/95 backdrop-blur-md border-t border-empire-border px-2 sm:px-6 lg:px-8 py-1.5">
+        <div class="w-full max-w-none mx-auto grid grid-cols-4 gap-1 sm:gap-3">
             <button data-tab="rip" onclick="switchTab('rip')" class="nav-tab-btn btn-press flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 bg-sky-500/10">
                 <span class="text-base leading-none">📦</span>
                 <span class="text-[11px] font-bold mt-1">Rip</span>
