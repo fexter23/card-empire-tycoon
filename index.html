@@ -294,6 +294,10 @@
                         <span>🏷️ List All</span>
                         <span class="text-[10px] text-slate-400">Queue All Singles</span>
                     </button>
+                    <button id="btn-list-slabs" onclick="listAllSlabs()" class="col-span-2 btn-press bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 font-bold text-[11px] py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 leading-tight">
+                        <span>🏆 List All Slabs (<span id="slab-count-badge">0</span>)</span>
+                        <span id="slab-list-val" class="text-[10px] text-amber-300 font-semibold">$0.00 net</span>
+                    </button>
                 </div>
 
                 <!-- Inventory List -->
@@ -587,6 +591,10 @@
             { id: 'f1_10', theme: 'F1', emoji: '🇧🇷', name: 'Ayrton Senna-12', baseVal: 16.00 },
             { id: 'f1_11', theme: 'F1', emoji: '🇩🇪', name: 'Michael Schumi-7', baseVal: 13.50 },
             { id: 'f1_12', theme: 'F1', emoji: '🇮🇹', name: 'Kimi Antonelli', baseVal: 1.90 },
+            { id: 'f1_ins_helmet_1', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Visor Carbon Helmet', baseVal: 6.40 },
+            { id: 'f1_ins_helmet_2', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Aero Lid Insert', baseVal: 11.20 },
+            { id: 'f1_ins_car_1', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'Ground-Effect Chassis', baseVal: 7.50 },
+            { id: 'f1_ins_car_2', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'DRS Wind-Tunnel Car', baseVal: 13.80 },
 
             // GOLF (12 cards)
             { id: 'golf_1', theme: 'GOLF', emoji: '⛳', name: 'Tour Caddie', baseVal: 1.20 },
@@ -876,10 +884,40 @@
             const themes = Object.keys(SPORT_LABELS);
             let completed = 0;
             themes.forEach(t => {
-                const setCards = CARD_CATALOG.filter(c => c.theme === t);
+                // Base 12-card set determines core set completion
+                const setCards = CARD_CATALOG.filter(c => c.theme === t && !c.insertType);
                 if (setCards.length > 0 && setCards.every(c => state.binder[c.id])) completed++;
             });
             return completed;
+        }
+
+        function getBinderUniqueCount() {
+            return Object.keys(state.binder).length;
+        }
+
+        // Renders relatable inline SVG artwork for F1 Helmet and Car inserts, with emoji fallback
+        function renderCardArtwork(card, sizeClass = 'text-xl') {
+            if (card && card.insertType === 'HELMET') {
+                return `
+                <svg viewBox="0 0 64 48" class="w-8 h-6 shrink-0" aria-hidden="true">
+                    <path d="M8 31C8 17 19 8 34 8C46 8 55 15 57 25L40 27C35 27 31 30 28 35H10C8.8 35 8 33.5 8 31Z" fill="#ef4444" stroke="#fca5a5" stroke-width="2"/>
+                    <path d="M29 25L56 22C57 25 56 28 53 29L30 31C28.5 31 27.8 26.5 29 25Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.6"/>
+                    <path d="M12 22C20 14 33 11 47 14" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="6" y="34" width="24" height="4" rx="2" fill="#94a3b8"/>
+                </svg>`;
+            }
+            if (card && card.insertType === 'CAR') {
+                return `
+                <svg viewBox="0 0 64 48" class="w-8 h-6 shrink-0" aria-hidden="true">
+                    <rect x="4" y="34" width="56" height="4" rx="1.5" fill="#e2e8f0"/>
+                    <path d="M12 31L23 23H39L52 28L56 33H12V31Z" fill="#38bdf8" stroke="#bae6fd" stroke-width="1.5"/>
+                    <path d="M27 23L31 17H40L43 23Z" fill="#0f172a" stroke="#7dd3fc" stroke-width="1.2"/>
+                    <rect x="46" y="13" width="9" height="4" rx="1" fill="#f59e0b"/>
+                    <circle cx="18" cy="34" r="6.5" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="47" cy="34" r="6.5" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+                </svg>`;
+            }
+            return `<span class="${sizeClass} leading-none">${card ? card.emoji : '🎴'}</span>`;
         }
 
         function getBinderUniqueCount() {
@@ -1239,36 +1277,18 @@
             updateAllUI();
         }
 
-        function submitCardForGrading(uid) {
-            const maxSlots = getMaxGradingSlots();
-            if (!Array.isArray(state.gradingQueue)) state.gradingQueue = [];
-            if (state.gradingQueue.length >= maxSlots) return;
-            const idx = state.inventory.findIndex(i => i.uid === uid);
-            if (idx === -1) return;
-
-            const item = state.inventory[idx];
-            if (item.graded) return;
-
-            const card = CARD_CATALOG.find(c => c.id === item.cardId) || CARD_CATALOG[0];
-            const rarity = RARITIES.find(r => r.id === item.rarityId) || RARITIES[0];
-            const gradingFee = Math.max(10, calculateCardValue(card, rarity, false) * 0.55);
-
-            if (state.cash < gradingFee) return;
-            state.cash -= gradingFee;
-            state.inventory.splice(idx, 1);
-
-            const now = Date.now();
-            const durationMs = 18000;
-            state.gradingQueue.push({
-                uid: item.uid || (now + '_' + Math.random().toString(36).slice(2, 8)),
-                cardId: card.id,
-                rarityId: rarity.id,
-                startTime: now,
-                endTime: now + durationMs
-            });
-
-            SoundFX.click();
-            saveGame();
+        // Lists every graded slab currently sitting in the player's inventory
+        function listAllSlabs() {
+            const slabItems = state.inventory.filter(item => Boolean(item.graded));
+            if (slabItems.length === 0) {
+                SoundFX.click();
+                spawnFloatingCash('No graded slabs to list!', 'text-slate-300', 26);
+                return;
+            }
+            const count = slabItems.length;
+            slabItems.forEach(item => listCardUid(item.uid));
+            SoundFX.cash();
+            spawnFloatingCash(`Listed ${count} slab${count > 1 ? 's' : ''}!`, 'text-amber-300', 24);
             updateAllUI();
         }
 
@@ -1606,7 +1626,7 @@
                                 ${isNewBinderEntry ? '<span class="text-[8px] font-extrabold bg-emerald-500 text-slate-950 px-1 rounded">NEW</span>' : ''}
                             </div>
                             <div class="text-center my-0.5">
-                                <div class="text-2xl leading-none">${card.emoji}</div>
+                                <div class="flex items-center justify-center">${renderCardArtwork(card, 'text-2xl')}</div>
                                 <div class="text-[10px] font-bold text-white leading-tight mt-1 line-clamp-1">${card.name}</div>
                             </div>
                             <div class="text-center border-t border-slate-800 pt-1">
@@ -1709,19 +1729,30 @@
             let dupeQuickTotal = 0;
             const dupeUidsSet = new Set(dupes);
             let allQuickTotal = 0;
+            let slabCount = 0;
+            let slabNetTotal = 0;
 
             state.inventory.forEach(item => {
                 const c = CARD_CATALOG.find(x => x.id === item.cardId) || CARD_CATALOG[0];
                 const r = RARITIES.find(x => x.id === item.rarityId) || RARITIES[0];
-                const q = calculateQuickSellPayout(calculateCardValue(c, r, item.graded, true));
+                const gross = calculateCardValue(c, r, item.graded, true);
+                const q = calculateQuickSellPayout(gross);
                 allQuickTotal += q;
                 if (dupeUidsSet.has(item.uid)) dupeQuickTotal += q;
+                if (item.graded) {
+                    slabCount++;
+                    slabNetTotal += calculateNetListingPayout(gross);
+                }
             });
 
             document.getElementById('dupe-count-badge').textContent = dupes.length;
             document.getElementById('dupe-quicksell-val').textContent = `${formatMoney(dupeQuickTotal)} instant (70%)`;
             document.getElementById('all-count-badge').textContent = state.inventory.length;
             document.getElementById('all-quicksell-val').textContent = `${formatMoney(allQuickTotal)} instant (70%)`;
+            const slabBadgeEl = document.getElementById('slab-count-badge');
+            const slabValEl = document.getElementById('slab-list-val');
+            if (slabBadgeEl) slabBadgeEl.textContent = slabCount;
+            if (slabValEl) slabValEl.textContent = `${formatMoney(slabNetTotal)} net`;
             document.getElementById('total-inv-cards').textContent = `${state.inventory.length} cards`;
 
             renderGradingQueue();
@@ -1757,8 +1788,8 @@
                 return `
                 <div class="bg-slate-900 border ${item.graded ? 'border-amber-500/60' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-10 h-10 rounded-xl bg-slate-950 border ${rarity.border} flex items-center justify-center text-xl shrink-0 relative">
-                            ${card.emoji}
+                        <div class="w-10 h-10 rounded-xl bg-slate-950 border ${rarity.border} flex items-center justify-center shrink-0 relative">
+                            ${renderCardArtwork(card, 'text-xl')}
                             ${item.graded ? '<span class="absolute -top-1.5 -right-1.5 bg-amber-400 text-slate-950 text-[8px] font-black px-1 rounded">PSA 10</span>' : ''}
                         </div>
                         <div class="min-w-0">
@@ -1859,7 +1890,7 @@
                 return `
                 <div class="bg-slate-900 border ${rarity.border} rounded-xl p-2 flex flex-col items-center justify-between text-center h-[96px] shadow">
                     <span class="text-[8px] font-bold uppercase px-1.5 py-0.2 rounded ${rarity.badge}">${rarity.name}</span>
-                    <div class="text-xl leading-none">${card.emoji}</div>
+                    <div class="flex items-center justify-center">${renderCardArtwork(card, 'text-xl')}</div>
                     <div class="w-full">
                         <div class="text-[10px] font-bold text-white truncate">${card.name}</div>
                         <div class="text-[8px] text-slate-400">${SPORT_LABELS[card.theme]}</div>
