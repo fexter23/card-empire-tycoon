@@ -1285,6 +1285,7 @@
         let passiveAccumulator = 0;
         let marketAccumulator = 0;
         let lastFrameTime = performance.now();
+        let lastUiSyncTime = 0;
 
         function formatMoney(val) {
             const num = Number.isFinite(val) ? val : 0;
@@ -1424,14 +1425,21 @@
             const urls = [];
             if (card.tcgdexUrl) urls.push(card.tcgdexUrl);
             const era = card.tcgdexEra || THEMES[card.theme]?.tcgdexEra || 'sm';
-            const setId = card.teamCode && card.teamCode !== 'POKEMON' ? card.teamCode : 'sm4';
+            const rawSetId = String(card.teamCode || 'sm4').toLowerCase();
+            const isKnownTcgSet = /^(base\d+|gym\d+|neo\d+|ecard\d+|ex\d+|pop\d+|dp\d+|pl\d+|hgss\d+|col\d+|bw\d+|xy\d+|sm\d+|swsh\d+(?:pt\d+)?|sv\d+(?:pt\d+)?)$/i.test(rawSetId);
+            const setId = isKnownTcgSet ? rawSetId : 'sm4';
             const rawNum = String(card.cardNum || card.jerseyNum || '001');
-            const padded = rawNum.padStart(3, '0');
-            const numNoPad = String(parseInt(rawNum, 10) || 1);
+            const parsedNum = parseInt(rawNum, 10);
+            const safeNum = Number.isFinite(parsedNum) && parsedNum > 0
+                ? (isKnownTcgSet ? parsedNum : ((parsedNum - 1) % 124) + 1)
+                : 1;
+            const padded = String(safeNum).padStart(3, '0');
+            const numNoPad = String(safeNum);
 
             urls.push(`https://assets.tcgdex.net/en/${era}/${setId}/${padded}/high.webp`);
             urls.push(`https://assets.tcgdex.net/en/${era}/${setId}/${padded}/low.webp`);
             urls.push(`https://assets.tcgdex.net/en/sm/sm4/${padded}/high.webp`);
+            urls.push(`https://assets.tcgdex.net/en/base/base1/004/high.webp`);
             urls.push(`https://images.pokemontcg.io/${setId}/${numNoPad}.png`);
             return [...new Set(urls)];
         }
@@ -1802,7 +1810,6 @@
         function completeGradingJob(index) {
             const job = state.gradingQueue[index];
             if (!job) return;
-            state.gradingQueue.splice(index, 1);
 
             const cSub = (8 + Math.random() * 2).toFixed(1);
             const crSub = (8 + Math.random() * 2).toFixed(1);
