@@ -233,6 +233,14 @@
                     <button onclick="setThemeFilter('TCG')" data-theme="TCG" class="theme-pill shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-800">🐉 Mythic TCG</button>
                 </div>
 
+                <!-- NHL Team Filter (Shown when Hockey / Ice is active) -->
+                <div id="rip-nhl-team-bar" class="hidden flex items-center justify-between gap-2 bg-slate-900/90 border border-slate-800 rounded-xl px-2.5 py-1.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 shrink-0">🏒 NHL Team Pool</span>
+                    <select id="rip-nhl-team-select" onchange="setNhlTeamFilter(this.value)" class="bg-slate-950 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg px-2 py-1 flex-1 min-w-0">
+                        <option value="ALL">All 32 NHL Teams (640 cards)</option>
+                    </select>
+                </div>
+
                 <!-- Sealed Packs Storefront -->
                 <div class="space-y-2.5" id="pack-list">
                     <!-- Injected via JS -->
@@ -393,23 +401,35 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <h3 class="text-sm font-bold text-white">Master Collector Binder</h3>
-                            <p class="text-[11px] text-slate-400">+4% cash/card • +30% full 12-card set</p>
+                            <p id="binder-bonus-subtitle" class="text-[11px] text-slate-400">+4% cash/card • +30% full set / NHL team</p>
                         </div>
                         <div class="text-right">
-                            <span id="binder-progress-text" class="font-display font-bold text-sm text-sky-400">0 / 84</span>
+                            <span id="binder-progress-text" class="font-display font-bold text-sm text-sky-400">0 / 724</span>
                         </div>
                     </div>
 
                     <!-- Binder Sport Filter -->
                     <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2">
-                        <button onclick="setBinderFilter('ALL')" data-bfilter="ALL" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-sky-500 text-slate-950">All (84)</button>
+                        <button onclick="setBinderFilter('ALL')" data-bfilter="ALL" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-sky-500 text-slate-950">All</button>
                         <button onclick="setBinderFilter('BASKETBALL')" data-bfilter="BASKETBALL" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🏀 Hoops</button>
                         <button onclick="setBinderFilter('FOOTBALL')" data-bfilter="FOOTBALL" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🏈 Gridiron</button>
                         <button onclick="setBinderFilter('SOCCER')" data-bfilter="SOCCER" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">⚽ Pitch</button>
-                        <button onclick="setBinderFilter('HOCKEY')" data-bfilter="HOCKEY" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🏒 Ice</button>
+                        <button onclick="setBinderFilter('HOCKEY')" data-bfilter="HOCKEY" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🏒 NHL (32)</button>
                         <button onclick="setBinderFilter('F1')" data-bfilter="F1" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🏎️ F1</button>
                         <button onclick="setBinderFilter('GOLF')" data-bfilter="GOLF" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">⛳ Golf</button>
                         <button onclick="setBinderFilter('TCG')" data-bfilter="TCG" class="binder-pill shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-900 text-slate-300 border border-slate-800">🐉 TCG</button>
+                    </div>
+
+                    <!-- NHL Team Selector & Completion Strip -->
+                    <div id="binder-nhl-controls" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 mb-2.5 space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">NHL Team Roster</span>
+                            <span id="nhl-completed-teams-badge" class="text-[10px] font-bold text-emerald-400">0 / 32 Teams Done</span>
+                        </div>
+                        <select id="binder-nhl-team-select" onchange="setNhlTeamFilter(this.value)" class="w-full bg-slate-950 border border-slate-700 text-white text-xs font-semibold rounded-xl px-2.5 py-1.5">
+                            <option value="ALL">All 32 Teams Overview</option>
+                        </select>
+                        <div id="nhl-team-summary-strip" class="flex items-center gap-1.5 overflow-x-auto pb-1"></div>
                     </div>
 
                     <div id="binder-grid" class="grid grid-cols-3 gap-2">
@@ -559,169 +579,215 @@
             BASKETBALL: '🏀 Hoops',
             FOOTBALL: '🏈 Gridiron',
             SOCCER: '⚽ Pitch',
-            HOCKEY: '🏒 Ice',
+            HOCKEY: '🏒 NHL',
             F1: '🏎️ Apex F1',
             GOLF: '⛳ Links',
             TCG: '🐉 TCG'
         };
 
-        const CARD_CATALOG = [
-            // BASKETBALL (12 cards)
-            { id: 'bask_1', theme: 'BASKETBALL', emoji: '🏀', name: 'Vic Wemby-Tower', baseVal: 1.40 },
-            { id: 'bask_2', theme: 'BASKETBALL', emoji: '👌', name: 'Steph Splash-30', baseVal: 2.30 },
-            { id: 'bask_3', theme: 'BASKETBALL', emoji: '🪄', name: 'Luka Magic-77', baseVal: 3.10 },
-            { id: 'bask_4', theme: 'BASKETBALL', emoji: '🃏', name: 'Nikola Joker-15', baseVal: 4.50 },
-            { id: 'bask_5', theme: 'BASKETBALL', emoji: '👑', name: 'LeBron King-23', baseVal: 8.00 },
-            { id: 'bask_6', theme: 'BASKETBALL', emoji: '🐐', name: 'Air Jordan-23', baseVal: 16.00 },
-            { id: 'bask_7', theme: 'BASKETBALL', emoji: '🐜', name: 'Ant-Man Edwards', baseVal: 2.10 },
-            { id: 'bask_8', theme: 'BASKETBALL', emoji: '⚡', name: 'Shai SGA-2', baseVal: 2.75 },
-            { id: 'bask_9', theme: 'BASKETBALL', emoji: '🦌', name: 'Giannis Freak-34', baseVal: 3.80 },
-            { id: 'bask_10', theme: 'BASKETBALL', emoji: '🐍', name: 'Kobe Mamba-24', baseVal: 12.50 },
-            { id: 'bask_11', theme: 'BASKETBALL', emoji: '☘️', name: 'Jayson Tatum-0', baseVal: 2.90 },
-            { id: 'bask_12', theme: 'BASKETBALL', emoji: '🎯', name: 'KD Slim-Reaper', baseVal: 5.40 },
-
-            // FOOTBALL (12 cards)
-            { id: 'foot_1', theme: 'FOOTBALL', emoji: '🏈', name: 'Caleb Ice-QB1', baseVal: 1.35 },
-            { id: 'foot_2', theme: 'FOOTBALL', emoji: '✈️', name: 'Justin Griddy-18', baseVal: 2.20 },
-            { id: 'foot_3', theme: 'FOOTBALL', emoji: '⚡', name: 'Lamar MVP-8', baseVal: 3.25 },
-            { id: 'foot_4', theme: 'FOOTBALL', emoji: '🏃', name: 'Christian CMC-23', baseVal: 4.60 },
-            { id: 'foot_5', theme: 'FOOTBALL', emoji: '⏰', name: 'Patrick Showtime', baseVal: 8.50 },
-            { id: 'foot_6', theme: 'FOOTBALL', emoji: '💍', name: 'Tom Terrific-12', baseVal: 15.50 },
-            { id: 'foot_7', theme: 'FOOTBALL', emoji: '🐆', name: 'Tyreek Cheetah-10', baseVal: 2.60 },
-            { id: 'foot_8', theme: 'FOOTBALL', emoji: '🦬', name: 'Josh Allen-17', baseVal: 3.60 },
-            { id: 'foot_9', theme: 'FOOTBALL', emoji: '🐅', name: 'Joe Cool-9', baseVal: 3.40 },
-            { id: 'foot_10', theme: 'FOOTBALL', emoji: '🦁', name: 'Barry Sanders-20', baseVal: 11.50 },
-            { id: 'foot_11', theme: 'FOOTBALL', emoji: '🛡️', name: 'Micah Lion-11', baseVal: 2.45 },
-            { id: 'foot_12', theme: 'FOOTBALL', emoji: '🚀', name: 'Jerry Rice-80', baseVal: 13.00 },
-
-            // SOCCER (12 cards)
-            { id: 'socc_1', theme: 'SOCCER', emoji: '⚽', name: 'Lamine Wonderkid', baseVal: 1.45 },
-            { id: 'socc_2', theme: 'SOCCER', emoji: '💎', name: 'Jude Hey-Belling', baseVal: 2.40 },
-            { id: 'socc_3', theme: 'SOCCER', emoji: '🤖', name: 'Erling Cyborg-9', baseVal: 3.40 },
-            { id: 'socc_4', theme: 'SOCCER', emoji: '🚀', name: 'Kylian Jet-Mbappe', baseVal: 5.00 },
-            { id: 'socc_5', theme: 'SOCCER', emoji: '🇵🇹', name: 'Cristiano CR7', baseVal: 9.00 },
-            { id: 'socc_6', theme: 'SOCCER', emoji: '🇦🇷', name: 'Lionel La-Pulga', baseVal: 16.50 },
-            { id: 'socc_7', theme: 'SOCCER', emoji: '🇧🇷', name: 'Vini Jr Samba-7', baseVal: 3.10 },
-            { id: 'socc_8', theme: 'SOCCER', emoji: '🎯', name: 'Kevin De-Bruyne', baseVal: 3.70 },
-            { id: 'socc_9', theme: 'SOCCER', emoji: '🇪🇬', name: 'Mo Salah-King', baseVal: 3.90 },
-            { id: 'socc_10', theme: 'SOCCER', emoji: '🇧🇷', name: 'Pele O-Rei-10', baseVal: 14.50 },
-            { id: 'socc_11', theme: 'SOCCER', emoji: '🪄', name: 'Zinedine Zizou-5', baseVal: 10.50 },
-            { id: 'socc_12', theme: 'SOCCER', emoji: '🧤', name: 'Endrick Prodigy', baseVal: 1.85 },
-
-            // HOCKEY (12 cards)
-            { id: 'hock_1', theme: 'HOCKEY', emoji: '🏒', name: 'Rookie Grinder', baseVal: 1.25 },
-            { id: 'hock_2', theme: 'HOCKEY', emoji: '🥅', name: 'Brickwall Goalie', baseVal: 2.15 },
-            { id: 'hock_3', theme: 'HOCKEY', emoji: '⚡', name: 'Bedard Sniper', baseVal: 3.20 },
-            { id: 'hock_4', theme: 'HOCKEY', emoji: '🍁', name: 'Captain Sid-87', baseVal: 4.80 },
-            { id: 'hock_5', theme: 'HOCKEY', emoji: '🚀', name: 'McJesus 97', baseVal: 7.80 },
-            { id: 'hock_6', theme: 'HOCKEY', emoji: '👑', name: 'The Great 99', baseVal: 15.00 },
-            { id: 'hock_7', theme: 'HOCKEY', emoji: '🚨', name: 'Ovi Gr8-8', baseVal: 6.50 },
-            { id: 'hock_8', theme: 'HOCKEY', emoji: '🌵', name: 'Auston Papi-34', baseVal: 3.95 },
-            { id: 'hock_9', theme: 'HOCKEY', emoji: '🏔️', name: 'Nate Dogg-29', baseVal: 4.10 },
-            { id: 'hock_10', theme: 'HOCKEY', emoji: '🛡️', name: 'Cale Makar-8', baseVal: 3.35 },
-            { id: 'hock_11', theme: 'HOCKEY', emoji: '🐧', name: 'Super Mario-66', baseVal: 12.00 },
-            { id: 'hock_12', theme: 'HOCKEY', emoji: '🦈', name: 'Macklin Celebrini', baseVal: 1.95 },
-            { id: 'hock_ins_mask_1', theme: 'HOCKEY', emoji: '🎭', insertType: 'GOALIE_MASK', name: 'Cage Crusher Mask', baseVal: 6.20 },
-            { id: 'hock_ins_mask_2', theme: 'HOCKEY', emoji: '🛡️', insertType: 'GOALIE_MASK', name: 'Iron Crease Mask', baseVal: 11.50 },
-
-            // F1 RACING (12 cards + 4 inserts)
-            { id: 'f1_3', theme: 'F1', emoji: '🧡', name: 'Lando Papaya', baseVal: 3.30 },
-            { id: 'f1_4', theme: 'F1', emoji: '🐎', name: 'Charles Tifosi', baseVal: 4.90 },
-            { id: 'f1_5', theme: 'F1', emoji: '🦁', name: 'Max Mad-Dutch', baseVal: 8.20 },
-            { id: 'f1_6', theme: 'F1', emoji: '🏆', name: 'Sir Lewis 44', baseVal: 14.50 },
-            { id: 'f1_7', theme: 'F1', emoji: '🇦🇺', name: 'Oscar Piastri-81', baseVal: 2.85 },
-            { id: 'f1_8', theme: 'F1', emoji: '🇪🇸', name: 'Fernando El-Plan', baseVal: 5.80 },
-            { id: 'f1_9', theme: 'F1', emoji: '🇬🇧', name: 'George Russell-63', baseVal: 2.65 },
-            { id: 'f1_10', theme: 'F1', emoji: '🇧🇷', name: 'Ayrton Senna-12', baseVal: 16.00 },
-            { id: 'f1_11', theme: 'F1', emoji: '🇩🇪', name: 'Michael Schumi-7', baseVal: 13.50 },
-            { id: 'f1_12', theme: 'F1', emoji: '🇮🇹', name: 'Kimi Antonelli', baseVal: 1.90 },
-            { id: 'f1_ins_helmet_1', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Visor Carbon Helmet', baseVal: 6.40 },
-            { id: 'f1_ins_helmet_2', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Aero Lid Insert', baseVal: 11.20 },
-            { id: 'f1_ins_car_1', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'Ground-Effect Chassis', baseVal: 7.50 },
-            { id: 'f1_ins_car_2', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'DRS Wind-Tunnel Car', baseVal: 13.80 },
-
-            // GOLF (12 cards)
-            { id: 'golf_1', theme: 'GOLF', emoji: '⛳', name: 'Tour Caddie', baseVal: 1.20 },
-            { id: 'golf_2', theme: 'GOLF', emoji: '🏌️', name: '350-Yd Bomber', baseVal: 2.10 },
-            { id: 'golf_3', theme: 'GOLF', emoji: '🍀', name: 'Rory Emerald', baseVal: 3.15 },
-            { id: 'golf_4', theme: 'GOLF', emoji: '🧥', name: 'Scottie #1', baseVal: 4.70 },
-            { id: 'golf_5', theme: 'GOLF', emoji: '🐻', name: 'Golden Bear 18', baseVal: 7.90 },
-            { id: 'golf_6', theme: 'GOLF', emoji: '🐅', name: 'Sunday Red Tiger', baseVal: 15.20 },
-            { id: 'golf_7', theme: 'GOLF', emoji: '🧪', name: 'Bryson Scientist', baseVal: 3.45 },
-            { id: 'golf_8', theme: 'GOLF', emoji: '🥇', name: 'Xander Gold-Medal', baseVal: 3.25 },
-            { id: 'golf_9', theme: 'GOLF', emoji: '🇪🇸', name: 'Jon Rahmbo', baseVal: 3.60 },
-            { id: 'golf_10', theme: 'GOLF', emoji: '🦁', name: 'Arnie The-King', baseVal: 11.00 },
-            { id: 'golf_11', theme: 'GOLF', emoji: '🇸🇪', name: 'Ludvig Aberg', baseVal: 2.35 },
-            { id: 'golf_12', theme: 'GOLF', emoji: '🏖️', name: 'Bunker Magician', baseVal: 1.65 },
-
-            // MYTHIC TCG (12 cards)
-            { id: 'tcg_1', theme: 'TCG', emoji: '🌿', name: 'Moss Sprite', baseVal: 1.35 },
-            { id: 'tcg_2', theme: 'TCG', emoji: '🔮', name: 'Mana Crystal', baseVal: 2.35 },
-            { id: 'tcg_3', theme: 'TCG', emoji: '⚡', name: 'Volt Mascot', baseVal: 3.45 },
-            { id: 'tcg_4', theme: 'TCG', emoji: '🦊', name: 'Nine-Tail Spirit', baseVal: 5.10 },
-            { id: 'tcg_5', theme: 'TCG', emoji: '🐉', name: 'Shadow Wyvern', baseVal: 8.80 },
-            { id: 'tcg_6', theme: 'TCG', emoji: '🌸', name: 'Alpha Black Lotus', baseVal: 17.50 },
-            { id: 'tcg_7', theme: 'TCG', emoji: '🔥', name: 'Base Set Char-Z', baseVal: 14.00 },
-            { id: 'tcg_8', theme: 'TCG', emoji: '🌊', name: 'Hydro Tortoise', baseVal: 5.60 },
-            { id: 'tcg_9', theme: 'TCG', emoji: '🌙', name: 'Umbreon Moon-Cat', baseVal: 9.20 },
-            { id: 'tcg_10', theme: 'TCG', emoji: '👁️', name: 'Blue-Eyes Wyrm', baseVal: 7.40 },
-            { id: 'tcg_11', theme: 'TCG', emoji: '⏳', name: 'Time Walk Relic', baseVal: 11.80 },
-            { id: 'tcg_12', theme: 'TCG', emoji: '🗡️', name: 'Aether Paladin', baseVal: 2.60 }
+        // 32 NHL teams with 18 skaters + 2 goalies each (640 cards total)
+        const NHL_TEAMS_DATA = [
+            { code: 'ANA', name: 'Anaheim Ducks', city: 'Anaheim', skaters: ['Leo Carlsson', 'Mason McTavish', 'Troy Terry', 'Trevor Zegras', 'Alex Killorn', 'Frank Vatrano', 'Isac Lundestrom', 'Sam Colangelo', 'Cutter Gauthier', 'Jackson LaCombe', 'Pavel Mintyukov', 'Radko Gudas', 'Olen Zellweger', 'Drew Helleson', 'Cam Fowler', 'Robby Fabbri', 'Brock McGinn', 'Ryan Strome'], goalies: ['Lukas Dostal', 'John Gibson'] },
+            { code: 'BOS', name: 'Boston Bruins', city: 'Boston', skaters: ['David Pastrnak', 'Brad Marchand', 'Pavel Zacha', 'Elias Lindholm', 'Charlie Coyle', 'Morgan Geekie', 'Trent Frederic', 'Justin Brazeau', 'Johnny Beecher', 'Charlie McAvoy', 'Hampus Lindholm', 'Brandon Carlo', 'Nikita Zadorov', 'Mason Lohrei', 'Andrew Peeke', 'Parker Wotherspoon', 'Cole Koepke', 'Mark Kastelic'], goalies: ['Jeremy Swayman', 'Joonas Korpisalo'] },
+            { code: 'BUF', name: 'Buffalo Sabres', city: 'Buffalo', skaters: ['Tage Thompson', 'Alex Tuch', 'JJ Peterka', 'Dylan Cozens', 'Owen Power', 'Rasmus Dahlin', 'Jack Quinn', 'Zach Benson', 'Ryan McLeod', 'Jason Zucker', 'Jordan Greenway', 'Bowen Byram', 'Henri Jokiharju', 'Mattias Samuelsson', 'Connor Clifton', 'Peyton Krebs', 'Beck Malenstyn', 'Tyson Kozak'], goalies: ['Ukko-Pekka Luukkonen', 'Devon Levi'] },
+            { code: 'CGY', name: 'Calgary Flames', city: 'Calgary', skaters: ['Nazem Kadri', 'Jonathan Huberdeau', 'Matt Coronato', 'Connor Zary', 'Mikael Backlund', 'Blake Coleman', 'Yegor Sharangovich', 'Martin Pospisil', 'Rasmus Andersson', 'MacKenzie Weegar', 'Kevin Bahl', 'Daniil Miromanov', 'Jake Bean', 'Joel Hanley', 'Walker Duehr', 'Ryan Lomberg', 'Adam Klapka', 'Justin Kirkland'], goalies: ['Dustin Wolf', 'Dan Vladar'] },
+            { code: 'CAR', name: 'Carolina Hurricanes', city: 'Raleigh', skaters: ['Sebastian Aho', 'Seth Jarvis', 'Martin Necas', 'Andrei Svechnikov', 'Jordan Staal', 'Jack Roslovic', 'Eric Robinson', 'Jesperi Kotkaniemi', 'William Carrier', 'Jaccob Slavin', 'Brent Burns', 'Dmitry Orlov', 'Sean Walker', 'Shayne Gostisbehere', 'Jalen Chatfield', ' Tyson Jost', 'Jackson Blake', 'Taylor Hall'], goalies: ['Pyotr Kochetkov', 'Frederik Andersen'] },
+            { code: 'CHI', name: 'Chicago Blackhawks', city: 'Chicago', skaters: ['Connor Bedard', 'Taylor Hall', 'Philipp Kurashev', 'Teuvo Teravainen', 'Tyler Bertuzzi', 'Nick Foligno', 'Ryan Donato', 'Jason Dickinson', 'Lukas Reichel', 'Seth Jones', 'Alex Vlasic', 'Connor Murphy', 'Wyatt Kaiser', 'Kevin Korchinski', 'TJ Brodie', 'Alec Martinez', 'Pat Maroon', 'Frank Nazar'], goalies: ['Petr Mrazek', 'Arvid Soderblom'] },
+            { code: 'COL', name: 'Colorado Avalanche', city: 'Denver', skaters: ['Nathan MacKinnon', 'Mikko Rantanen', 'Cale Makar', 'Devon Toews', 'Artturi Lehkonen', 'Valeri Nichushkin', 'Casey Mittelstadt', 'Ross Colton', 'Jonathan Drouin', 'Joel Kiviranta', 'Logan OConnor', 'Sam Girard', 'Josh Manson', 'Calvin de Haan', 'Oliver Kylington', 'Parker Kelly', 'Ivan Ivan', 'Nikolai Kovalenko'], goalies: ['Alexandar Georgiev', 'Justus Annunen'] },
+            { code: 'CBJ', name: 'Columbus Blue Jackets', city: 'Columbus', skaters: ['Zach Werenski', 'Kirill Marchenko', 'Sean Monahan', 'Kent Johnson', 'Adam Fantilli', 'Dmitri Voronkov', 'Cole Sillinger', ' Boone Jenner', 'Yegor Chinakhov', 'Mathieu Olivier', 'Damon Severson', 'Ivan Provorov', 'Dante Fabbro', 'Jake Christiansen', 'Jordan Harris', 'Sean Kuraly', 'Kevin Labanc', 'James van Riemsdyk'], goalies: ['Elvis Merzlikins', 'Daniil Tarasov'] },
+            { code: 'DAL', name: 'Dallas Stars', city: 'Dallas', skaters: ['Jason Robertson', 'Roope Hintz', 'Wyatt Johnston', 'Tyler Seguin', 'Mason Marchment', 'Matt Duchene', 'Jamie Benn', 'Evgenii Dadonov', 'Mavrik Bourque', 'Miro Heiskanen', 'Thomas Harley', 'Esa Lindell', 'Ilya Lyubushkin', 'Brendan Smith', 'Nils Lundkvist', 'Sam Steel', 'Colin Blackwell', 'Oskar Back'], goalies: ['Jake Oettinger', 'Casey DeSmith'] },
+            { code: 'DET', name: 'Detroit Red Wings', city: 'Detroit', skaters: ['Dylan Larkin', 'Lucas Raymond', 'Alex DeBrincat', 'Moritz Seider', 'Simon Edvinsson', 'Marco Kasper', 'Andrew Copp', 'JT Compher', 'Vladimir Tarasenko', 'Joe Veleno', 'Michael Rasmussen', 'Ben Chiarot', 'Jeff Petry', 'Albert Johansson', 'Erik Gustafsson', 'Tyler Motte', 'Jonatan Berggren', 'Elmer Soderblom'], goalies: ['Cam Talbot', 'Alex Lyon'] },
+            { code: 'EDM', name: 'Edmonton Oilers', city: 'Edmonton', skaters: ['Connor McDavid', 'Leon Draisaitl', 'Zach Hyman', 'Ryan Nugent-Hopkins', 'Evan Bouchard', 'Mattias Ekholm', 'Vasily Podkolzin', 'Viktor Arvidsson', 'Jeff Skinner', 'Adam Henrique', 'Connor Brown', 'Mattias Janmark', 'Brett Kulak', 'Darnell Nurse', 'Ty Emberson', 'Troy Stecher', 'Derek Ryan', 'Noah Philp'], goalies: ['Stuart Skinner', 'Calvin Pickard'] },
+            { code: 'FLA', name: 'Florida Panthers', city: 'Sunrise', skaters: ['Aleksander Barkov', 'Sam Reinhart', 'Matthew Tkachuk', 'Carter Verhaeghe', 'Sam Bennett', 'Anton Lundell', 'Eetu Luostarinen', 'Evan Rodrigues', 'Mackie Samoskevich', 'Aaron Ekblad', 'Gustav Forsling', 'Brandon Montour', 'Nate Schmidt', 'Dmitry Kulikov', 'Niko Mikkola', 'Jesper Boqvist', 'Jonah Gadjovich', 'AJ Greer'], goalies: ['Sergei Bobrovsky', 'Spencer Knight'] },
+            { code: 'LAK', name: 'Los Angeles Kings', city: 'Los Angeles', skaters: ['Anze Kopitar', 'Adrian Kempe', 'Quinton Byfield', 'Kevin Fiala', 'Alex Laferriere', 'Warren Foegele', 'Phillip Danault', 'Trevor Moore', 'Tanner Jeannot', 'Drew Doughty', 'Mikey Anderson', 'Brandt Clarke', 'Joel Edmundson', 'Vladislav Gavrikov', 'Jordan Spence', 'Andreas Englund', 'Trevor Lewis', 'Akil Thomas'], goalies: ['Darcy Kuemper', 'David Rittich'] },
+            { code: 'MIN', name: 'Minnesota Wild', city: 'St. Paul', skaters: ['Kirill Kaprizov', 'Matt Boldy', 'Joel Eriksson Ek', 'Mats Zuccarello', 'Marco Rossi', 'Marcus Foligno', 'Ryan Hartman', 'Marcus Johansson', 'Frederick Gaudreau', 'Brock Faber', 'Jonas Brodin', 'Jared Spurgeon', 'Zach Bogosian', 'Declan Chisholm', 'Jon Merrill', 'Yakov Trenin', 'Liam Ohgren', 'Marat Khusnutdinov'], goalies: ['Filip Gustavsson', 'Marc-Andre Fleury'] },
+            { code: 'MTL', name: 'Montreal Canadiens', city: 'Montreal', skaters: ['Nick Suzuki', 'Cole Caufield', 'Juraj Slafkovsky', 'Lane Hutson', 'Kirby Dach', 'Alex Newhook', 'Christian Dvorak', 'Jake Evans', 'Joel Armia', 'Brendan Gallagher', 'Josh Anderson', 'Kaiden Guhle', 'Mike Matheson', 'David Savard', 'Arber Xhekaj', 'Jayden Struble', 'Logan Mailloux', 'Owen Beck'], goalies: ['Samuel Montembeault', 'Cayden Primeau'] },
+            { code: 'NSH', name: 'Nashville Predators', city: 'Nashville', skaters: ['Filip Forsberg', 'Roman Josi', 'Steven Stamkos', 'Jonathan Marchessault', 'Ryan OReilly', 'Gustav Nyquist', 'Tommy Novak', 'Luke Evangelista', 'Colton Sissons', 'Michael McCarron', 'Brady Skjei', 'Alexandre Carrier', 'Dante Fabbro', 'Luke Schenn', 'Jeremy Lauzon', 'Cole Smith', 'Zachary LHBB', 'Juuso Parssinen'], goalies: ['Juuse Saros', 'Scott Wedgewood'] },
+            { code: 'NJD', name: 'New Jersey Devils', city: 'Newark', skaters: ['Jack Hughes', 'Jesper Bratt', 'Nico Hischier', 'Timo Meier', 'Dougie Hamilton', 'Simon Nemec', 'Dawson Mercer', 'Ondrej Palat', 'Stefan Noesen', 'Paul Cotter', 'Erik Haula', 'Tomas Tatar', 'Jonas Siegenthaler', 'Johnathan Kovacevic', 'Brett Pesce', 'Seamus Casey', 'Nathan Bastian', 'Cody Glass'], goalies: ['Jacob Markstrom', 'Jake Allen'] },
+            { code: 'NYI', name: 'New York Islanders', city: 'Elmont', skaters: ['Mathew Barzal', 'Bo Horvat', 'Brock Nelson', 'Noah Dobson', 'Anthony Duclair', 'Kyle Palmieri', 'Anders Lee', 'Jean-Gabriel Pageau', 'Simon Holmstrom', 'Maxim Tsyplakov', 'Alexander Romanov', 'Ryan Pulock', 'Adam Pelech', 'Scott Mayfield', 'Isaiah George', 'Pierre Engvall', 'Casey Cizikas', 'Hudson Fasching'], goalies: ['Ilya Sorokin', 'Semyon Varlamov'] },
+            { code: 'NYR', name: 'New York Rangers', city: 'New York', skaters: ['Artemi Panarin', 'Adam Fox', 'Mika Zibanejad', 'Vincent Trocheck', 'Alexis Lafreniere', 'Chris Kreider', 'Filip Chytil', 'Will Cuylle', 'Kaapo Kakko', 'Reilly Smith', 'KAndre Miller', 'Braden Schneider', 'Jacob Trouba', 'Zac Jones', 'Chad Ruhwedel', 'Sam Carrick', 'Jimmy Vesey', 'Adam Edstrom'], goalies: ['Igor Shesterkin', 'Jonathan Quick'] },
+            { code: 'OTT', name: 'Ottawa Senators', city: 'Ottawa', skaters: ['Brady Tkachuk', 'Tim Stutzle', 'Jake Sanderson', 'Drake Batherson', 'Josh Norris', 'Claude Giroux', 'Shane Pinto', 'Ridly Greig', 'Nick Cousins', 'Michael Amadio', 'Thomas Chabot', 'Artem Zub', 'Nikolas Matinpalo', 'Jacob Bernard-Docker', 'Travis Hamonic', 'Noah Gregor', 'Adam Gaudette', 'Cole Reinhardt'], goalies: ['Linus Ullmark', 'Anton Forsberg'] },
+            { code: 'PHI', name: 'Philadelphia Flyers', city: 'Philadelphia', skaters: ['Matvei Michkov', 'Travis Konecny', 'Owen Tippett', 'Sean Couturier', 'Morgan Frost', 'Tyson Foerster', 'Scott Laughton', 'Noah Cates', 'Bobby Brink', 'Garnet Hathaway', 'Travis Sanheim', 'Jamie Drysdale', 'Rasmus Ristolainen', 'Cam York', 'Nick Seeler', 'Egor Zamula', 'Ryan Poehling', 'Anthony Richard'], goalies: ['Ivan Fedotov', 'Samuel Ersson'] },
+            { code: 'PIT', name: 'Pittsburgh Penguins', city: 'Pittsburgh', skaters: ['Sidney Crosby', 'Evgeni Malkin', 'Bryan Rust', 'Rickard Rakell', 'Erik Karlsson', 'Kris Letang', 'Owen Pickering', 'Michael Bunting', 'Philip Tomasino', 'Cody Glass', 'Drew OConnor', 'Kevin Hayes', 'Matt Grzelcyk', 'Marcus Pettersson', 'Ryan Graves', 'Jack St. Ivany', 'Blake Lizotte', 'Noel Acciari'], goalies: ['Tristan Jarry', 'Alex Nedeljkovic'] },
+            { code: 'SJS', name: 'San Jose Sharks', city: 'San Jose', skaters: ['Macklin Celebrini', 'Will Smith', 'William Eklund', 'Tyler Toffoli', 'Mikael Granlund', 'Fabian Zetterlund', 'Alexander Wennberg', 'Barclay Goodrow', 'Luke Kunin', 'Jake Walman', 'Mario Ferraro', 'Timothy Liljegren', 'Henry Thrun', 'Jan Rutta', 'Marc-Edouard Vlasic', 'Klim Kostin', 'Nico Sturm', 'Givani Smith'], goalies: ['Yaroslav Askarov', 'Mackenzie Blackwood'] },
+            { code: 'SEA', name: 'Seattle Kraken', city: 'Seattle', skaters: ['Matty Beniers', 'Shane Wright', 'Jared McCann', 'Jordan Eberle', 'Chandler Stephenson', 'Jaden Schwartz', 'Eeli Tolvanen', 'Oliver Bjorkstrand', 'Brandon Tanev', 'Vince Dunn', 'Brandon Montour', 'Adam Larsson', 'Jamie Oleksiak', 'Ryker Evans', 'Will Borgen', 'Yanni Gourde', 'Kaapo Kakko', 'Tye Kartye'], goalies: ['Joey Daccord', 'Philipp Grubauer'] },
+            { code: 'STL', name: 'St. Louis Blues', city: 'St. Louis', skaters: ['Robert Thomas', 'Jordan Kyrou', 'Dylan Holloway', 'Philip Broberg', 'Brayden Schenn', 'Jake Neighbours', 'Pavel Buchnevich', 'Brandon Saad', 'Cam Fowler', 'Radek Faksa', 'Colton Parayko', 'Justin Faulk', 'Philip Broberg', 'Scott Perunovich', 'Ryan Suter', 'Oskar Sundqvist', 'Nathan Walker', 'Alexandre Texier'], goalies: ['Jordan Binnington', 'Joel Hofer'] },
+            { code: 'TBL', name: 'Tampa Bay Lightning', city: 'Tampa', skaters: ['Nikita Kucherov', 'Brayden Point', 'Jake Guentzel', 'Brandon Hagel', 'Anthony Cirelli', 'Nick Paul', 'Conor Geekie', 'Cam Atkinson', 'Mikey Eyssimont', 'Victor Hedman', 'Ryan McDonagh', 'Erik Cernak', 'JJ Moser', 'Emil Lilleberg', 'Darren Raddysh', 'Zemgus Girgensons', 'Luke Glendening', 'Mitchell Chaffee'], goalies: ['Andrei Vasilevskiy', 'Jonas Johansson'] },
+            { code: 'TOR', name: 'Toronto Maple Leafs', city: 'Toronto', skaters: ['Auston Matthews', 'Mitch Marner', 'William Nylander', 'John Tavares', 'Matthew Knies', 'Max Domi', 'Bobby McMann', 'Nicholas Robertson', 'Pontus Holmberg', 'David Kampf', 'Morgan Rielly', 'Chris Tanev', 'Jake McCabe', 'Oliver Ekman-Larsson', 'Simon Benoit', 'Conor Timmins', 'Steven Lorentz', 'Ryan Reaves'], goalies: ['Joseph Woll', 'Anthony Stolarz'] },
+            { code: 'UTA', name: 'Utah Hockey Club', city: 'Salt Lake City', skaters: ['Clayton Keller', 'Dylan Guenther', 'Logan Cooley', 'Nick Schmaltz', 'Barrett Hayton', 'Lawson Crouse', 'Matias Maccelli', 'Alex Kerfoot', 'Jack McBain', 'Mikhail Sergachev', 'Sean Durzi', 'Olli Maatta', 'Michael Kesselring', 'Ian Cole', 'Juuso Valimaki', 'Liam OBrien', 'Kevin Stenlund', 'Josh Doan'], goalies: ['Karel Vejmelka', 'Connor Ingram'] },
+            { code: 'VAN', name: 'Vancouver Canucks', city: 'Vancouver', skaters: ['Quinn Hughes', 'Elias Pettersson', 'JT Miller', 'Brock Boeser', 'Jake DeBrusk', 'Conor Garland', 'Filip Hronek', 'Pius Suter', 'Danton Heinen', 'Teddy Blueger', 'Dakota Joshua', 'Carson Soucy', 'Tyler Myers', 'Vincent Desharnais', 'Derek Forbort', 'Noah Juulsen', 'Kiefer Sherwood', 'Arshdeep Bains'], goalies: ['Thatcher Demko', 'Kevin Lankinen'] },
+            { code: 'VGK', name: 'Vegas Golden Knights', city: 'Las Vegas', skaters: ['Jack Eichel', 'Mark Stone', 'Tomas Hertl', 'Ivan Barbashev', 'Pavel Dorofeyev', 'William Karlsson', 'Brett Howden', 'Keegan Kolesar', 'Alexander Holtz', 'Alex Pietrangelo', 'Shea Theodore', 'Noah Hanifin', 'Brayden McNabb', 'Nicolas Hague', 'Zach Whitecloud', 'Cole Schwindt', ' Tanner Pearson', 'Victor Olofsson'], goalies: ['Adin Hill', 'Ilya Samsonov'] },
+            { code: 'WSH', name: 'Washington Capitals', city: 'Washington', skaters: ['Alex Ovechkin', 'Dylan Strome', 'Pierre-Luc Dubois', 'Connor McMichael', 'Aliaksei Protas', 'Tom Wilson', 'Andrew Mangiapane', 'Taylor Raddysh', 'Lars Eller', 'Nic Dowd', 'John Carlson', 'Jakob Chychrun', 'Rasmus Sandin', 'Matt Roy', 'Trevor van Riemsdyk', 'Martin Fehervary', 'Brandon Duhaime', 'Sonny Milano'], goalies: ['Logan Thompson', 'Charlie Lindgren'] },
+            { code: 'WPG', name: 'Winnipeg Jets', city: 'Winnipeg', skaters: ['Kyle Connor', 'Mark Scheifele', 'Gabriel Vilardi', 'Cole Perfetti', 'Nikolaj Ehlers', 'Nino Niederreiter', 'Mason Appleton', 'Vladislav Namestnikov', 'Adam Lowry', 'Morgan Barron', 'Josh Morrissey', 'Dylan Samberg', 'Neal Pionk', 'Colin Miller', 'Dylan DeMelo', 'Logan Stanley', 'Rasmus Kupari', 'Alex Iafallo'], goalies: ['Connor Hellebuyck', 'Eric Comrie'] }
         ];
+
+        function buildFullCardCatalog() {
+            const baseCards = [
+                // BASKETBALL (12 cards)
+                { id: 'bask_1', theme: 'BASKETBALL', emoji: '🏀', name: 'Vic Wemby-Tower', baseVal: 1.40 },
+                { id: 'bask_2', theme: 'BASKETBALL', emoji: '👌', name: 'Steph Splash-30', baseVal: 2.30 },
+                { id: 'bask_3', theme: 'BASKETBALL', emoji: '🪄', name: 'Luka Magic-77', baseVal: 3.10 },
+                { id: 'bask_4', theme: 'BASKETBALL', emoji: '🃏', name: 'Nikola Joker-15', baseVal: 4.50 },
+                { id: 'bask_5', theme: 'BASKETBALL', emoji: '👑', name: 'LeBron King-23', baseVal: 8.00 },
+                { id: 'bask_6', theme: 'BASKETBALL', emoji: '🐐', name: 'Air Jordan-23', baseVal: 16.00 },
+                { id: 'bask_7', theme: 'BASKETBALL', emoji: '🐜', name: 'Ant-Man Edwards', baseVal: 2.10 },
+                { id: 'bask_8', theme: 'BASKETBALL', emoji: '⚡', name: 'Shai SGA-2', baseVal: 2.75 },
+                { id: 'bask_9', theme: 'BASKETBALL', emoji: '🦌', name: 'Giannis Freak-34', baseVal: 3.80 },
+                { id: 'bask_10', theme: 'BASKETBALL', emoji: '🐍', name: 'Kobe Mamba-24', baseVal: 12.50 },
+                { id: 'bask_11', theme: 'BASKETBALL', emoji: '☘️', name: 'Jayson Tatum-0', baseVal: 2.90 },
+                { id: 'bask_12', theme: 'BASKETBALL', emoji: '🎯', name: 'KD Slim-Reaper', baseVal: 5.40 },
+
+                // FOOTBALL (12 cards)
+                { id: 'foot_1', theme: 'FOOTBALL', emoji: '🏈', name: 'Caleb Ice-QB1', baseVal: 1.35 },
+                { id: 'foot_2', theme: 'FOOTBALL', emoji: '✈️', name: 'Justin Griddy-18', baseVal: 2.20 },
+                { id: 'foot_3', theme: 'FOOTBALL', emoji: '⚡', name: 'Lamar MVP-8', baseVal: 3.25 },
+                { id: 'foot_4', theme: 'FOOTBALL', emoji: '🏃', name: 'Christian CMC-23', baseVal: 4.60 },
+                { id: 'foot_5', theme: 'FOOTBALL', emoji: '⏰', name: 'Patrick Showtime', baseVal: 8.50 },
+                { id: 'foot_6', theme: 'FOOTBALL', emoji: '💍', name: 'Tom Terrific-12', baseVal: 15.50 },
+                { id: 'foot_7', theme: 'FOOTBALL', emoji: '🐆', name: 'Tyreek Cheetah-10', baseVal: 2.60 },
+                { id: 'foot_8', theme: 'FOOTBALL', emoji: '🦬', name: 'Josh Allen-17', baseVal: 3.60 },
+                { id: 'foot_9', theme: 'FOOTBALL', emoji: '🐅', name: 'Joe Cool-9', baseVal: 3.40 },
+                { id: 'foot_10', theme: 'FOOTBALL', emoji: '🦁', name: 'Barry Sanders-20', baseVal: 11.50 },
+                { id: 'foot_11', theme: 'FOOTBALL', emoji: '🛡️', name: 'Micah Lion-11', baseVal: 2.45 },
+                { id: 'foot_12', theme: 'FOOTBALL', emoji: '🚀', name: 'Jerry Rice-80', baseVal: 13.00 },
+
+                // SOCCER (12 cards)
+                { id: 'socc_1', theme: 'SOCCER', emoji: '⚽', name: 'Lamine Wonderkid', baseVal: 1.45 },
+                { id: 'socc_2', theme: 'SOCCER', emoji: '💎', name: 'Jude Hey-Belling', baseVal: 2.40 },
+                { id: 'socc_3', theme: 'SOCCER', emoji: '🤖', name: 'Erling Cyborg-9', baseVal: 3.40 },
+                { id: 'socc_4', theme: 'SOCCER', emoji: '🚀', name: 'Kylian Jet-Mbappe', baseVal: 5.00 },
+                { id: 'socc_5', theme: 'SOCCER', emoji: '🇵🇹', name: 'Cristiano CR7', baseVal: 9.00 },
+                { id: 'socc_6', theme: 'SOCCER', emoji: '🇦🇷', name: 'Lionel La-Pulga', baseVal: 16.50 },
+                { id: 'socc_7', theme: 'SOCCER', emoji: '🇧🇷', name: 'Vini Jr Samba-7', baseVal: 3.10 },
+                { id: 'socc_8', theme: 'SOCCER', emoji: '🎯', name: 'Kevin De-Bruyne', baseVal: 3.70 },
+                { id: 'socc_9', theme: 'SOCCER', emoji: '🇪🇬', name: 'Mo Salah-King', baseVal: 3.90 },
+                { id: 'socc_10', theme: 'SOCCER', emoji: '🇧🇷', name: 'Pele O-Rei-10', baseVal: 14.50 },
+                { id: 'socc_11', theme: 'SOCCER', emoji: '🪄', name: 'Zinedine Zizou-5', baseVal: 10.50 },
+                { id: 'socc_12', theme: 'SOCCER', emoji: '🧤', name: 'Endrick Prodigy', baseVal: 1.85 },
+
+                // F1 RACING (10 cards + 4 inserts)
+                { id: 'f1_3', theme: 'F1', emoji: '🧡', name: 'Lando Papaya', baseVal: 3.30 },
+                { id: 'f1_4', theme: 'F1', emoji: '🐎', name: 'Charles Tifosi', baseVal: 4.90 },
+                { id: 'f1_5', theme: 'F1', emoji: '🦁', name: 'Max Mad-Dutch', baseVal: 8.20 },
+                { id: 'f1_6', theme: 'F1', emoji: '🏆', name: 'Sir Lewis 44', baseVal: 14.50 },
+                { id: 'f1_7', theme: 'F1', emoji: '🇦🇺', name: 'Oscar Piastri-81', baseVal: 2.85 },
+                { id: 'f1_8', theme: 'F1', emoji: '🇪🇸', name: 'Fernando El-Plan', baseVal: 5.80 },
+                { id: 'f1_9', theme: 'F1', emoji: '🇬🇧', name: 'George Russell-63', baseVal: 2.65 },
+                { id: 'f1_10', theme: 'F1', emoji: '🇧🇷', name: 'Ayrton Senna-12', baseVal: 16.00 },
+                { id: 'f1_11', theme: 'F1', emoji: '🇩🇪', name: 'Michael Schumi-7', baseVal: 13.50 },
+                { id: 'f1_12', theme: 'F1', emoji: '🇮🇹', name: 'Kimi Antonelli', baseVal: 1.90 },
+                { id: 'f1_ins_helmet_1', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Visor Carbon Helmet', baseVal: 6.40 },
+                { id: 'f1_ins_helmet_2', theme: 'F1', emoji: '🪖', insertType: 'HELMET', name: 'Aero Lid Insert', baseVal: 11.20 },
+                { id: 'f1_ins_car_1', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'Ground-Effect Chassis', baseVal: 7.50 },
+                { id: 'f1_ins_car_2', theme: 'F1', emoji: '🏎️', insertType: 'CAR', name: 'DRS Wind-Tunnel Car', baseVal: 13.80 },
+
+                // GOLF (12 cards)
+                { id: 'golf_1', theme: 'GOLF', emoji: '⛳', name: 'Tour Caddie', baseVal: 1.20 },
+                { id: 'golf_2', theme: 'GOLF', emoji: '🏌️', name: '350-Yd Bomber', baseVal: 2.10 },
+                { id: 'golf_3', theme: 'GOLF', emoji: '🍀', name: 'Rory Emerald', baseVal: 3.15 },
+                { id: 'golf_4', theme: 'GOLF', emoji: '🧥', name: 'Scottie #1', baseVal: 4.70 },
+                { id: 'golf_5', theme: 'GOLF', emoji: '🐻', name: 'Golden Bear 18', baseVal: 7.90 },
+                { id: 'golf_6', theme: 'GOLF', emoji: '🐅', name: 'Sunday Red Tiger', baseVal: 15.20 },
+                { id: 'golf_7', theme: 'GOLF', emoji: '🧪', name: 'Bryson Scientist', baseVal: 3.45 },
+                { id: 'golf_8', theme: 'GOLF', emoji: '🥇', name: 'Xander Gold-Medal', baseVal: 3.25 },
+                { id: 'golf_9', theme: 'GOLF', emoji: '🇪🇸', name: 'Jon Rahmbo', baseVal: 3.60 },
+                { id: 'golf_10', theme: 'GOLF', emoji: '🦁', name: 'Arnie The-King', baseVal: 11.00 },
+                { id: 'golf_11', theme: 'GOLF', emoji: '🇸🇪', name: 'Ludvig Aberg', baseVal: 2.35 },
+                { id: 'golf_12', theme: 'GOLF', emoji: '🏖️', name: 'Bunker Magician', baseVal: 1.65 },
+
+                // MYTHIC TCG (12 cards)
+                { id: 'tcg_1', theme: 'TCG', emoji: '🌿', name: 'Moss Sprite', baseVal: 1.35 },
+                { id: 'tcg_2', theme: 'TCG', emoji: '🔮', name: 'Mana Crystal', baseVal: 2.35 },
+                { id: 'tcg_3', theme: 'TCG', emoji: '⚡', name: 'Volt Mascot', baseVal: 3.45 },
+                { id: 'tcg_4', theme: 'TCG', emoji: '🦊', name: 'Nine-Tail Spirit', baseVal: 5.10 },
+                { id: 'tcg_5', theme: 'TCG', emoji: '🐉', name: 'Shadow Wyvern', baseVal: 8.80 },
+                { id: 'tcg_6', theme: 'TCG', emoji: '🌸', name: 'Alpha Black Lotus', baseVal: 17.50 },
+                { id: 'tcg_7', theme: 'TCG', emoji: '🔥', name: 'Base Set Char-Z', baseVal: 14.00 },
+                { id: 'tcg_8', theme: 'TCG', emoji: '🌊', name: 'Hydro Tortoise', baseVal: 5.60 },
+                { id: 'tcg_9', theme: 'TCG', emoji: '🌙', name: 'Umbreon Moon-Cat', baseVal: 9.20 },
+                { id: 'tcg_10', theme: 'TCG', emoji: '👁️', name: 'Blue-Eyes Wyrm', baseVal: 7.40 },
+                { id: 'tcg_11', theme: 'TCG', emoji: '⏳', name: 'Time Walk Relic', baseVal: 11.80 },
+                { id: 'tcg_12', theme: 'TCG', emoji: '🗡️', name: 'Aether Paladin', baseVal: 2.60 }
+            ];
+
+            const nhlCards = [];
+            NHL_TEAMS_DATA.forEach((team, tIdx) => {
+                team.skaters.slice(0, 18).forEach((playerName, pIdx) => {
+                    const starBoost = pIdx < 3 ? 2.2 : (pIdx < 9 ? 1.45 : 1.0);
+                    nhlCards.push({
+                        id: `nhl_${team.code.toLowerCase()}_p${pIdx + 1}`,
+                        theme: 'HOCKEY',
+                        teamCode: team.code,
+                        teamName: team.name,
+                        role: 'PLAYER',
+                        emoji: '🏒',
+                        name: `${playerName.trim()} (${team.code})`,
+                        baseVal: Number((1.25 * starBoost + (tIdx % 5) * 0.12).toFixed(2))
+                    });
+                });
+                team.goalies.slice(0, 2).forEach((goalieName, gIdx) => {
+                    nhlCards.push({
+                        id: `nhl_${team.code.toLowerCase()}_g${gIdx + 1}`,
+                        theme: 'HOCKEY',
+                        teamCode: team.code,
+                        teamName: team.name,
+                        role: 'GOALIE',
+                        insertType: gIdx === 1 ? 'GOALIE_MASK' : null,
+                        emoji: '🥅',
+                        name: `${goalieName.trim()} G (${team.code})`,
+                        baseVal: Number((gIdx === 0 ? 2.45 : 3.15).toFixed(2))
+                    });
+                });
+            });
+
+            return [...baseCards, ...nhlCards];
+        }
+
+        const CARD_CATALOG = buildFullCardCatalog();
 
         const PACK_TIERS = [
             {
                 id: 'retail',
-                name: 'Retail Cello Pack',
-                desc: '5 cards • Tight margins • Hunt low-end flips',
-                baseCost: 11,
+                name: 'Retail Single Pack',
+                badge: '5 Cards',
+                desc: 'Entry-level rips with base & occasional holo hits.',
+                baseCost: 12,
                 cardCount: 5,
-                gradient: 'from-slate-800 to-slate-900 border-slate-700',
-                badge: 'Starter',
-                weights: [82.0, 15.0, 2.5, 0.45, 0.05]
+                weights: [74, 20, 4.8, 1.0, 0.2],
+                gradient: 'from-slate-900 via-slate-900 to-slate-800/80 border-slate-700/90'
             },
             {
                 id: 'blaster',
-                name: 'Hobby Blaster Box',
-                desc: '5 cards • Guaranteed Holo+ • Chase /25 Autos',
-                baseCost: 55,
-                cardCount: 5,
-                gradient: 'from-sky-950 to-slate-900 border-sky-700/70',
-                badge: 'Popular',
-                weights: [58.0, 32.0, 8.2, 1.6, 0.2]
+                name: 'Collector Blaster Box',
+                badge: '6 Cards',
+                desc: 'Better holo & numbered auto odds for steady flips.',
+                baseCost: 45,
+                cardCount: 6,
+                weights: [54, 30, 11.5, 3.6, 0.9],
+                gradient: 'from-sky-950/90 via-slate-900 to-indigo-950/80 border-sky-500/40'
             },
             {
-                id: 'mega',
-                name: 'Chrome Mega Box',
-                desc: '5 cards • 4x RPA & Auto odds • High variance',
-                baseCost: 290,
-                cardCount: 5,
-                gradient: 'from-purple-950 to-slate-900 border-purple-600/70',
-                badge: 'Hot',
-                weights: [36.0, 42.0, 17.0, 4.3, 0.7]
-            },
-            {
-                id: 'fotl',
-                name: '1st Off The Line Case',
-                desc: '5 cards • Heavy /10 RPA & 1/1 Black Grail odds',
-                baseCost: 1650,
-                cardCount: 5,
-                gradient: 'from-amber-950 via-rose-950 to-slate-900 border-amber-500/80',
-                badge: 'Grail Hunt',
-                weights: [16.0, 44.0, 26.0, 11.5, 2.5]
+                id: 'hobby',
+                name: 'Hobby Box Pack',
+                badge: '7 Cards',
+                desc: 'High-ceiling rips loaded with autos, RPAs & 1/1 chases.',
+                baseCost: 160,
+                cardCount: 7,
+                weights: [34, 34, 20, 9.2, 2.8],
+                gradient: 'from-amber-950/80 via-slate-900 to-purple-950/80 border-amber-500/40'
             }
         ];
 
         const UPGRADES_CONFIG = [
             {
                 id: 'gradingSlots',
-                name: 'Extra Grading Lab Station',
+                name: 'Extra Grading Lab Slot',
                 icon: '🔬',
-                desc: 'Add parallel PSA/BGS grading stations so you can slab more high-end hits at once.',
-                baseCost: 450,
-                costMult: 3.4,
+                desc: 'Grade more Holo+ cards at the same time (starts at 2 slots).',
+                baseCost: 350,
+                costMult: 2.6,
                 maxLevel: 4,
-                statLabel: (lvl) => `${getMaxGradingSlots(lvl)} simultaneous grading slots`
+                statLabel: (lvl) => `${getMaxGradingSlots(lvl)} Active Grading Slots`
             },
             {
                 id: 'extraShops',
@@ -808,8 +874,8 @@
             },
             {
                 id: 'full_set_master',
-                title: 'Set Completer',
-                desc: 'Complete any full 12-card sport/TCG set in your Binder',
+                title: 'Set / Team Completer',
+                desc: 'Complete any full sport/TCG set or 20-card NHL team roster',
                 icon: '📚',
                 rewardRep: 60,
                 rewardBadges: 1,
@@ -817,12 +883,12 @@
             },
             {
                 id: 'half_binder',
-                title: 'Halfway Archivist',
-                desc: 'Slot at least 42 unique cards into your Master Binder',
+                title: 'Quarter Archivist',
+                desc: 'Slot at least 180 unique cards into your Master Binder',
                 icon: '📖',
                 rewardRep: 100,
                 rewardBadges: 2,
-                check: () => getBinderUniqueCount() >= 42
+                check: () => getBinderUniqueCount() >= 180
             },
             {
                 id: 'career_100k',
@@ -834,9 +900,9 @@
                 check: () => Math.max(state.careerEarnings || 0, state.lifetimeCash || 0) >= 100000
             },
             {
-                id: 'full_binder_84',
+                id: 'full_binder_all',
                 title: 'Grand Master Binder',
-                desc: 'Complete all 84 cards in the Master Binder',
+                desc: `Complete all ${CARD_CATALOG.length} cards in the Master Binder`,
                 icon: '👑',
                 rewardRep: 300,
                 rewardBadges: 4,
@@ -885,14 +951,10 @@
             activeAuction: null,
             themeFilter: 'ALL',
             binderFilter: 'ALL',
+            nhlTeamFilter: 'ALL',
             autoRipEnabled: false,
             muted: false,
-            lastTick: Date.now(),
-            marketSeed: Math.floor(Date.now() / (MARKET_CYCLE_SECONDS * 1000)),
-            inventory: [],
-            listings: [],
-            gradingQueue: [],
-            binder: {},
+            marketSeed: Math.floor(Date.now() / (45 * 1000)),
             upgrades: {
                 gradingSlots: 0,
                 extraShops: 0,
@@ -902,7 +964,12 @@
                 storefront: 0,
                 marketing: 0,
                 vipLounge: 0
-            }
+            },
+            inventory: [],
+            listings: [],
+            gradingQueue: [],
+            binder: {},
+            lastTick: Date.now()
         };
 
         let activeTab = 'rip';
@@ -1068,6 +1135,17 @@
                 }
             }
             return completed;
+        }
+
+        function getCompletedNhlTeamsCount() {
+            let done = 0;
+            for (const team of NHL_TEAMS_DATA) {
+                const teamCards = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === team.code);
+                if (teamCards.length > 0 && teamCards.every(c => Boolean(state.binder && state.binder[c.id]))) {
+                    done += 1;
+                }
+            }
+            return done;
         }
 
         function getBinderMultiplier() {
@@ -1250,6 +1328,10 @@
 
         function getFilteredCardPool() {
             if (state.themeFilter === 'ALL') return CARD_CATALOG;
+            if (state.themeFilter === 'HOCKEY' && state.nhlTeamFilter && state.nhlTeamFilter !== 'ALL') {
+                const teamPool = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === state.nhlTeamFilter);
+                return teamPool.length > 0 ? teamPool : CARD_CATALOG.filter(c => c.theme === 'HOCKEY');
+            }
             const pool = CARD_CATALOG.filter(c => c.theme === state.themeFilter);
             return pool.length > 0 ? pool : CARD_CATALOG;
         }
@@ -1797,7 +1879,43 @@
                     ? 'theme-pill shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-500 text-slate-950'
                     : 'theme-pill shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 text-slate-300 border border-slate-800';
             });
+            const ripNhlBar = document.getElementById('rip-nhl-team-bar');
+            if (ripNhlBar) {
+                ripNhlBar.classList.toggle('hidden', theme !== 'HOCKEY');
+            }
             renderPackList();
+        }
+
+        function setNhlTeamFilter(teamCode) {
+            state.nhlTeamFilter = teamCode || 'ALL';
+            SoundFX.click();
+            const ripSel = document.getElementById('rip-nhl-team-select');
+            const binderSel = document.getElementById('binder-nhl-team-select');
+            if (ripSel && ripSel.value !== state.nhlTeamFilter) ripSel.value = state.nhlTeamFilter;
+            if (binderSel && binderSel.value !== state.nhlTeamFilter) binderSel.value = state.nhlTeamFilter;
+            renderPackList();
+            if (activeTab === 'binder') renderBinderTab();
+        }
+
+        function populateNhlTeamSelectors() {
+            const optionsHtmlAll = `<option value="ALL">All 32 NHL Teams (640 cards)</option>` + NHL_TEAMS_DATA.map(t =>
+                `<option value="${t.code}">${t.code} • ${t.name} (18P + 2G)</option>`
+            ).join('');
+            const optionsHtmlBinder = `<option value="ALL">All 32 Teams (20 cards/team)</option>` + NHL_TEAMS_DATA.map(t => {
+                const owned = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === t.code && state.binder[c.id]).length;
+                return `<option value="${t.code}">${t.code} • ${t.name} (${owned}/20)</option>`;
+            }).join('');
+
+            const ripSel = document.getElementById('rip-nhl-team-select');
+            if (ripSel) {
+                ripSel.innerHTML = optionsHtmlAll;
+                ripSel.value = state.nhlTeamFilter || 'ALL';
+            }
+            const binderSel = document.getElementById('binder-nhl-team-select');
+            if (binderSel) {
+                binderSel.innerHTML = optionsHtmlBinder;
+                binderSel.value = state.nhlTeamFilter || 'ALL';
+            }
         }
 
         function setBinderFilter(bFilter) {
@@ -2267,20 +2385,50 @@
             const uniqueCount = getBinderUniqueCount();
             document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${CARD_CATALOG.length}`;
 
-            const filteredCards = state.binderFilter === 'ALL'
+            const nhlControls = document.getElementById('binder-nhl-controls');
+            const showNhlTeamControls = state.binderFilter === 'HOCKEY';
+            if (nhlControls) {
+                nhlControls.classList.toggle('hidden', !showNhlTeamControls);
+                if (showNhlTeamControls) {
+                    populateNhlTeamSelectors();
+                    const doneTeamsEl = document.getElementById('nhl-completed-teams-badge');
+                    if (doneTeamsEl) doneTeamsEl.textContent = `${getCompletedNhlTeamsCount()} / ${NHL_TEAMS_DATA.length} Teams Done`;
+
+                    const stripEl = document.getElementById('nhl-team-summary-strip');
+                    if (stripEl) {
+                        stripEl.innerHTML = NHL_TEAMS_DATA.map(t => {
+                            const totalT = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === t.code).length;
+                            const ownedT = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === t.code && state.binder[c.id]).length;
+                            const isSelected = state.nhlTeamFilter === t.code;
+                            const isComplete = ownedT >= totalT;
+                            return `
+                            <button onclick="setNhlTeamFilter('${isSelected ? 'ALL' : t.code}')" class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-bold border ${isSelected ? 'bg-sky-500 text-slate-950 border-sky-400' : (isComplete ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50' : 'bg-slate-950 text-slate-300 border-slate-800')}">
+                                ${t.code} ${ownedT}/${totalT}
+                            </button>`;
+                        }).join('');
+                    }
+                }
+            }
+
+            let filteredCards = state.binderFilter === 'ALL'
                 ? CARD_CATALOG
                 : CARD_CATALOG.filter(c => c.theme === state.binderFilter);
+
+            if (state.binderFilter === 'HOCKEY' && state.nhlTeamFilter && state.nhlTeamFilter !== 'ALL') {
+                filteredCards = filteredCards.filter(c => c.teamCode === state.nhlTeamFilter);
+            }
 
             const renderBinderCardTile = (card) => {
                 const ownedRarityId = state.binder[card.id];
                 const rarity = ownedRarityId ? (RARITIES.find(r => r.id === ownedRarityId) || RARITIES[0]) : null;
+                const subTag = card.teamCode ? `${card.teamCode} • ${card.role === 'GOALIE' ? 'Goalie' : 'Skater'}` : SPORT_LABELS[card.theme];
 
                 if (!rarity) {
                     return `
                     <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2 flex flex-col items-center justify-center text-center opacity-50 h-[96px]">
                         <span class="text-lg grayscale">❓</span>
                         <span class="text-[10px] font-semibold text-slate-500 mt-1 line-clamp-1">${card.name}</span>
-                        <span class="text-[8px] text-slate-600 uppercase mt-0.5">${SPORT_LABELS[card.theme]}</span>
+                        <span class="text-[8px] text-slate-600 uppercase mt-0.5 truncate w-full">${subTag}</span>
                     </div>`;
                 }
 
@@ -2290,7 +2438,7 @@
                     <div class="flex items-center justify-center">${renderCardArtwork(card, 'text-xl')}</div>
                     <div class="w-full">
                         <div class="text-[10px] font-bold text-white truncate">${card.name}</div>
-                        <div class="text-[8px] text-slate-400">${SPORT_LABELS[card.theme]}</div>
+                        <div class="text-[8px] text-slate-400 truncate">${subTag}</div>
                     </div>
                 </div>`;
             };
@@ -2299,7 +2447,28 @@
             const mainBinderCards = filteredCards.filter(c => !(c.theme === 'F1' && c.insertType));
 
             const grid = document.getElementById('binder-grid');
-            let binderHtml = mainBinderCards.map(renderBinderCardTile).join('');
+            let binderHtml = '';
+
+            if (state.binderFilter === 'HOCKEY' && (!state.nhlTeamFilter || state.nhlTeamFilter === 'ALL')) {
+                binderHtml += NHL_TEAMS_DATA.map(team => {
+                    const teamCards = CARD_CATALOG.filter(c => c.theme === 'HOCKEY' && c.teamCode === team.code);
+                    const ownedCount = teamCards.filter(c => Boolean(state.binder[c.id])).length;
+                    const complete = ownedCount >= teamCards.length;
+                    return `
+                    <button onclick="setNhlTeamFilter('${team.code}')" class="text-left bg-slate-900 hover:bg-slate-800/90 border ${complete ? 'border-emerald-500/70' : 'border-slate-800'} rounded-xl p-2.5 flex flex-col justify-between h-[96px] transition">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded ${complete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-sky-500/15 text-sky-300'}">${team.code}</span>
+                            <span class="text-[10px] font-display font-bold ${complete ? 'text-emerald-400' : 'text-slate-300'}">${ownedCount}/${teamCards.length}</span>
+                        </div>
+                        <div class="text-[11px] font-extrabold text-white leading-tight line-clamp-2">${team.name}</div>
+                        <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div class="h-full ${complete ? 'bg-emerald-400' : 'bg-sky-400'}" style="width: ${Math.round((ownedCount / Math.max(1, teamCards.length)) * 100)}%"></div>
+                        </div>
+                    </button>`;
+                }).join('');
+            } else {
+                binderHtml += mainBinderCards.map(renderBinderCardTile).join('');
+            }
 
             if (f1Inserts.length > 0) {
                 binderHtml += `
@@ -2446,6 +2615,7 @@
 
         window.onload = function () {
             loadGame();
+            populateNhlTeamSelectors();
             document.getElementById('mute-toggle-btn').textContent = state.muted ? '🔇' : '🔊';
             updateAllUI();
             setInterval(gameTick, 100);
