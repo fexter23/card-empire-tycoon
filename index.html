@@ -333,8 +333,12 @@
                         <span>🏷️ List All</span>
                         <span class="text-[10px] text-slate-400">Queue All Singles</span>
                     </button>
-                    <button id="btn-list-slabs" onclick="listAllSlabs()" class="col-span-2 btn-press bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 font-bold text-[11px] py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 leading-tight">
-                        <span>🏆 List All Slabs (<span id="slab-count-badge">0</span>)</span>
+                    <button id="btn-list-base" onclick="listAllBaseCards()" class="btn-press bg-slate-800/90 hover:bg-slate-700 border border-slate-600/80 text-slate-200 font-bold text-[11px] py-2 px-2 rounded-xl flex flex-col items-center justify-center leading-tight">
+                        <span>📄 List Base (<span id="base-count-badge">0</span>)</span>
+                        <span id="base-list-val" class="text-[10px] text-slate-400">$0.00 net</span>
+                    </button>
+                    <button id="btn-list-slabs" onclick="listAllSlabs()" class="btn-press bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-200 font-bold text-[11px] py-2 px-2 rounded-xl flex flex-col items-center justify-center leading-tight">
+                        <span>🏆 List Slabs (<span id="slab-count-badge">0</span>)</span>
                         <span id="slab-list-val" class="text-[10px] text-amber-300 font-semibold">$0.00 net</span>
                     </button>
                 </div>
@@ -1594,6 +1598,36 @@
             updateAllUI();
         }
 
+        function quickListDuplicates() {
+            const dupeUids = getDuplicateUids();
+            if (dupeUids.length === 0) {
+                SoundFX.click();
+                spawnFloatingCash('No duplicate cards to list!', 'text-slate-300', 24);
+                return;
+            }
+            dupeUids.forEach(uid => listCardUid(uid));
+            SoundFX.cash();
+            spawnFloatingCash(`Listed ${dupeUids.length} dupes!`, 'text-emerald-400');
+            updateAllUI();
+            if (currentRevealedPack.length > 0) checkAllFlippedStatus();
+        }
+
+        function listAllBaseCards() {
+            if (!Array.isArray(state.inventory)) return;
+            const baseUids = state.inventory
+                .filter(i => i && !i.graded && i.rarityId === 'COMMON')
+                .map(i => i.uid);
+            if (baseUids.length === 0) {
+                SoundFX.click();
+                spawnFloatingCash('No ungraded Base cards to list!', 'text-slate-300', 28);
+                return;
+            }
+            baseUids.forEach(uid => listCardUid(uid));
+            SoundFX.cash();
+            spawnFloatingCash(`Listed ${baseUids.length} Base cards!`, 'text-sky-300');
+            updateAllUI();
+        }
+
         function listAllSlabs() {
             if (!Array.isArray(state.inventory)) return;
             const slabUids = state.inventory.filter(i => i && i.graded).map(i => i.uid);
@@ -2267,10 +2301,17 @@
             document.getElementById('inv-sell-rate').textContent = `${getSellInterval().toFixed(2)}s`;
             document.getElementById('inv-fee-rate').textContent = `${getMarketplaceFeeRate().toFixed(0)}%`;
 
+            const gradingCountEl = document.getElementById('inv-grading-count');
+            if (gradingCountEl) {
+                gradingCountEl.textContent = `${state.gradingQueue.length}/${getMaxGradingSlots()} Used`;
+            }
+
             const dupes = getDuplicateUids();
             let dupeQuickTotal = 0;
             const dupeUidsSet = new Set(dupes);
             let allQuickTotal = 0;
+            let baseCount = 0;
+            let baseNetTotal = 0;
             let slabCount = 0;
             let slabNetTotal = 0;
 
@@ -2281,6 +2322,10 @@
                 const q = calculateQuickSellPayout(gross);
                 allQuickTotal += q;
                 if (dupeUidsSet.has(item.uid)) dupeQuickTotal += q;
+                if (!item.graded && item.rarityId === 'COMMON') {
+                    baseCount++;
+                    baseNetTotal += calculateNetListingPayout(gross);
+                }
                 if (item.graded) {
                     slabCount++;
                     slabNetTotal += calculateNetListingPayout(gross);
@@ -2291,6 +2336,10 @@
             document.getElementById('dupe-quicksell-val').textContent = `${formatMoney(dupeQuickTotal)} instant (70%)`;
             document.getElementById('all-count-badge').textContent = state.inventory.length;
             document.getElementById('all-quicksell-val').textContent = `${formatMoney(allQuickTotal)} instant (70%)`;
+            const baseBadgeEl = document.getElementById('base-count-badge');
+            const baseValEl = document.getElementById('base-list-val');
+            if (baseBadgeEl) baseBadgeEl.textContent = baseCount;
+            if (baseValEl) baseValEl.textContent = `${formatMoney(baseNetTotal)} net`;
             const slabBadgeEl = document.getElementById('slab-count-badge');
             const slabValEl = document.getElementById('slab-list-val');
             if (slabBadgeEl) slabBadgeEl.textContent = slabCount;
