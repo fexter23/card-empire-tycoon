@@ -566,7 +566,6 @@
             HOCKEY:     { id: 'HOCKEY',     label: 'NHL Rink', icon: '🏒', accent: 'text-cyan-400' },
             F1:         { id: 'F1',         label: 'Apex F1', icon: '🏎️', accent: 'text-rose-400' },
             GOLF:       { id: 'GOLF',       label: 'Tour Links', icon: '⛳', accent: 'text-lime-400' },
-            TCG:        { id: 'TCG',        label: 'Mythic TCG', icon: '🔮', accent: 'text-purple-400' },
             POKEMON:    { id: 'POKEMON',    label: 'Pokémon TCG', icon: '⚡', accent: 'text-yellow-400' }
         };
 
@@ -577,7 +576,6 @@
             HOCKEY:     { label: 'NHL Rink Bonus', desc: '+25% NHL card sales & -15% NHL pack cost', salesMult: 0.25, packDiscount: 0.15 },
             F1:         { label: 'Paddock Telemetry', desc: '+20% Slab values & -10% grading wait time', slabBoost: 0.20, gradeSpeedBoost: 0.10 },
             GOLF:       { label: 'Clubhouse Precision', desc: '+25% Golf card sales & +2% base luck', salesMult: 0.25, luckBoost: 0.02 },
-            TCG:        { label: 'Arcane Resonance', desc: '+25% Mythic TCG sales & +8% passive LCS cash', salesMult: 0.25, passiveBoost: 0.08 },
             POKEMON:    { label: 'Pokédex Master', desc: '+25% Pokémon TCG sales & +2% base luck', salesMult: 0.25, luckBoost: 0.02 }
         };
 
@@ -899,17 +897,65 @@
             },
             obj_card_monthly_grail: {
                 id: 'promo_monthly_mythic_sovereign',
-                theme: 'TCG',
-                name: 'Arcane Sovereign 1/1',
+                theme: 'POKEMON',
+                name: 'Guzzlord-GX Promo (Crimson Invasion)',
                 baseVal: 220.00,
                 objectivePromo: true,
-                promoTag: 'MONTHLY EXCLUSIVE'
+                promoTag: 'MONTHLY EXCLUSIVE',
+                artUrl: 'https://assets.tcgdex.net/en/sm/sm4/063/high.webp'
             }
         };
 
+        const CRIMSON_INVASION_NAMES = {
+            1: 'Weedle', 2: 'Kakuna', 3: 'Beedrill', 4: 'Exeggcute', 5: 'Cacnea', 6: 'Cacturne', 7: 'Karrablast', 8: 'Shelmet', 9: 'Accelgor', 10: 'Phantump',
+            11: 'Trevenant', 12: 'Alolan Marowak', 13: 'Slugma', 14: 'Camerupt', 15: 'Litten', 16: 'Torracat', 17: 'Magikarp', 18: 'Gyarados-GX', 19: 'Swinub', 20: 'Piloswine',
+            21: 'Mamoswine', 22: 'Remoraid', 23: 'Octillery', 24: 'Corphish', 25: 'Crawdaunt', 26: 'Feebas', 27: 'Milotic', 28: 'Buizel', 29: 'Floatzel', 30: 'Pikachu',
+            31: 'Alolan Raichu', 32: 'Alolan Geodude', 33: 'Alolan Graveler', 34: 'Alolan Golem-GX', 35: 'Emolga', 36: 'Salandit', 37: 'Salazzle', 38: 'Gengar', 39: 'Misdreavus', 40: 'Mismagius',
+            41: 'Spoink', 42: 'Grumpig', 43: 'Beldum', 44: 'Pumpkaboo', 45: 'Gourgeist', 46: 'Salandit', 47: 'Salazzle', 48: 'Oranguru', 49: 'Nihilego-GX', 50: 'Mankey',
+            51: 'Primeape', 52: 'Cubone', 53: 'Regirock', 54: 'Baltoy', 55: 'Claydol', 56: 'Stunky', 57: 'Buzzwole-GX', 58: 'Murkrow', 59: 'Houndour', 60: 'Houndoom',
+            61: 'Zweilous', 62: 'Hydreigon', 63: 'Guzzlord-GX', 64: 'Mawile', 65: 'Skarmory', 66: 'Aron', 67: 'Aggron', 68: 'Registeel', 69: 'Escavalier', 70: 'Kartana-GX',
+            71: 'Jigglypuff', 72: 'Wigglytuff', 73: 'Xerneas', 74: 'Alolan Exeggutor-GX', 75: 'Jangmo-o', 76: 'Hakamo-o', 77: 'Kommo-o', 78: 'Bagon', 79: 'Swablu', 80: 'Altaria',
+            81: 'Noibat', 82: 'Noivern', 83: 'Staraptor', 84: 'Regigigas', 85: 'Minccino', 86: 'Cinccino', 87: 'Furfrou', 88: 'Stufful', 89: 'Bewear', 90: 'Silvally-GX',
+            91: 'Counter Catcher', 92: 'Desert Altar', 93: 'Devoured Field', 94: 'Faba', 95: 'Gladion', 96: 'Lusamine', 97: 'Mt. Lanakila', 98: 'Olivia', 99: 'Peeking Red Card', 100: 'Sea of Nothingness',
+            101: 'Gyarados-GX (Full Art)', 102: 'Alolan Golem-GX (Full Art)', 103: 'Nihilego-GX (Full Art)', 104: 'Buzzwole-GX (Full Art)', 105: 'Guzzlord-GX (Full Art)', 106: 'Kartana-GX (Full Art)', 107: 'Alolan Exeggutor-GX (Full Art)', 108: 'Silvally-GX (Full Art)', 109: 'Gladion (Full Art)', 110: 'Lusamine (Full Art)',
+            111: 'Olivia (Full Art)', 112: 'Gyarados-GX (Rainbow)', 113: 'Alolan Golem-GX (Rainbow)', 114: 'Nihilego-GX (Rainbow)', 115: 'Buzzwole-GX (Rainbow)', 116: 'Guzzlord-GX (Rainbow)', 117: 'Kartana-GX (Rainbow)', 118: 'Alolan Exeggutor-GX (Rainbow)', 119: 'Silvally-GX (Rainbow)', 120: 'Counter Catcher (Secret)',
+            121: 'Wishful Baton (Secret)', 122: 'Counter Energy (Secret)', 123: 'Warp Energy (Secret)', 124: 'Water Energy (Secret)'
+        };
+
+        function buildCrimsonInvasionSet() {
+            const setCards = [];
+            for (let num = 1; num <= 124; num++) {
+                const padded = String(num).padStart(3, '0');
+                const cardName = CRIMSON_INVASION_NAMES[num] || `Crimson Invasion #${padded}`;
+                const isSecret = num >= 112;
+                const isFullArt = num >= 101 && num <= 111;
+                const isGx = cardName.includes('-GX') && !isFullArt && !isSecret;
+                const baseVal = isSecret
+                    ? Number((22.0 + (num - 112) * 1.4).toFixed(2))
+                    : isFullArt
+                        ? Number((15.0 + (num - 101) * 0.9).toFixed(2))
+                        : isGx
+                            ? 12.50
+                            : Number((5.5 + ((num % 17) * 0.45)).toFixed(2));
+
+                setCards.push({
+                    id: `pkm_sm4_${padded}`,
+                    theme: 'POKEMON',
+                    setCode: 'SM4',
+                    name: `${cardName} (${padded}/111)`,
+                    baseVal,
+                    artUrl: `https://assets.tcgdex.net/en/sm/sm4/${padded}/high.webp`
+                });
+            }
+            return setCards;
+        }
+
+        const SUN_AND_MOON_POKEMON_CARDS = buildCrimsonInvasionSet();
+
         const CARD_CATALOG = [
             ...buildRosterCatalog(),
-            ...BASE_CARD_CATALOG,
+            ...BASE_CARD_CATALOG.filter(c => c.theme !== 'TCG'),
+            ...SUN_AND_MOON_POKEMON_CARDS,
             ...Object.values(OBJECTIVE_REWARD_CARDS)
         ];
 
@@ -1125,7 +1171,7 @@
             {
                 id: 'holo_all_themes',
                 title: 'Prismatic Spectrum',
-                desc: 'Slot a Holo (or higher) in all 7 sports/themes',
+                desc: 'Slot a Holo (or higher) in all active sports/themes',
                 icon: '🌈',
                 cashBonus: 0.08,
                 luckBonus: 0.015,
@@ -1134,7 +1180,7 @@
             {
                 id: 'auto_all_themes',
                 title: 'Signed Across the Board',
-                desc: 'Slot an Auto /25 (or higher) in all 7 sports/themes',
+                desc: 'Slot an Auto /25 (or higher) in all active sports/themes',
                 icon: '✍️',
                 cashBonus: 0.14,
                 luckBonus: 0.025,
@@ -1143,7 +1189,7 @@
             {
                 id: 'rpa_all_themes',
                 title: 'Patch Collector Supreme',
-                desc: 'Slot an RPA /10 (or 1/1 Black) in all 7 sports/themes',
+                desc: 'Slot an RPA /10 (or 1/1 Black) in all active sports/themes',
                 icon: '🧵',
                 cashBonus: 0.22,
                 luckBonus: 0.035,
@@ -1284,8 +1330,8 @@
                 const safeName = escapeSvgText(card.name || 'Pokémon Card');
                 const fallbackSvg = escapeSvgText(renderCardArtwork(card, rarity, opts));
                 return `
-                    <div class="relative w-full h-full bg-slate-950 flex items-center justify-center">
-                        <img src="${safeUrl}" alt="${safeName}" loading="lazy" class="w-full h-full object-cover object-top" onerror="this.outerHTML = decodeURIComponent('${encodeURIComponent(renderCardArtwork(card, rarity, opts))}')" data-fallback="${fallbackSvg}"/>
+                    <div class="relative w-full h-full bg-slate-950 flex items-center justify-center p-0.5">
+                        <img src="${safeUrl}" alt="${safeName}" loading="lazy" class="w-full h-full object-contain" onerror="this.outerHTML = decodeURIComponent('${encodeURIComponent(renderCardArtwork(card, rarity, opts))}')" data-fallback="${fallbackSvg}"/>
                     </div>
                 `;
             }
@@ -1665,9 +1711,7 @@
             const baseLcs = lcsLevel * 1.8;
             const completedSets = getCompletedSetsCount();
             const setBonus = 1 + (completedSets * 0.15);
-            const themePassiveBoost =
-                (state.binder['soc_4'] ? 0.05 : 0) +
-                (state.binder['tcg_4'] ? 0.08 : 0);
+            const themePassiveBoost = (state.binder['soc_4'] ? 0.05 : 0);
             const keeperBoost = getKeeperBonusMultiplier();
             return baseLcs * setBonus * (1 + themePassiveBoost) * keeperBoost * getPrestigeMultiplier();
         }
@@ -2725,7 +2769,7 @@
                             </span>
                             ${p.isNew ? '<span class="text-[9px] font-extrabold bg-emerald-400 text-slate-950 px-1.5 py-0.5 rounded">NEW</span>' : `<span class="text-[9px] font-semibold px-1 py-0.2 rounded border ${cond.badgeClass}">${cond.short}</span>`}
                         </div>
-                        <div class="my-1 z-10 rounded-lg overflow-hidden border border-white/10 h-20 bg-slate-950">
+                        <div class="my-1 z-10 rounded-lg overflow-hidden border border-white/10 ${card.artUrl ? 'aspect-[2.5/3.5] h-auto max-h-48 mx-auto' : 'h-20'} bg-slate-950">
                             ${renderCardVisual(card, rarity, { chaseId: p.chaseId, isCoty: p.isCoty })}
                         </div>
                         <div class="z-10 mt-1">
@@ -2857,7 +2901,7 @@
                 return `
                     <div class="bg-empire-card border ${item.isKeeper ? 'border-amber-500/40' : (item.graded ? 'border-amber-500/40' : 'border-empire-border')} rounded-2xl p-2.5 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-16 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-slate-950">
+                            <div class="${card.artUrl ? 'w-12 h-16' : 'w-16 h-12'} rounded-lg overflow-hidden border border-white/10 shrink-0 bg-slate-950">
                                 ${renderCardVisual(card, rarity, { chaseId: item.chaseId, isCoty: item.isCoty })}
                             </div>
                             <div class="min-w-0">
@@ -3073,7 +3117,7 @@
                             </span>
                             <span class="text-[10px]">${THEMES[card.theme]?.icon || ''}</span>
                         </div>
-                        <div class="my-1 rounded overflow-hidden border border-white/10 h-12 bg-slate-950 ${owned ? '' : 'grayscale opacity-40'}">
+                        <div class="my-1 rounded overflow-hidden border border-white/10 ${card.artUrl ? 'aspect-[2.5/3.5] h-auto max-h-36 mx-auto' : 'h-12'} bg-slate-950 ${owned ? '' : 'grayscale opacity-40'}">
                             ${renderCardVisual(card, rarity || RARITIES[0], {})}
                         </div>
                         <div class="text-[10px] font-bold ${owned ? 'text-white' : 'text-slate-500'} leading-tight truncate">${card.name}</div>
