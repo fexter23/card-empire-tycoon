@@ -1401,15 +1401,17 @@
                     if (!prevRarity || rarity.tier > prevRarity.tier) {
                         state.binder[card.id] = rarity.id;
                     }
-                    state.inventory.push({
-                        uid: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-                        cardId: card.id,
-                        rarityId: rarity.id,
-                        graded: false,
-                        gradeLabel: null,
-                        gradeMult: 1.0
-                    });
                 }
+
+                // Always add ripped cards to Singles so newly opened cards appear in the Singles menu
+                state.inventory.push({
+                    uid: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+                    cardId: card.id,
+                    rarityId: rarity.id,
+                    graded: false,
+                    gradeLabel: null,
+                    gradeMult: 1.0
+                });
 
                 recordChasePull(card, rarity);
 
