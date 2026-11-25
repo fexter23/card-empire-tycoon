@@ -209,6 +209,7 @@
                     <div id="post-rip-actions" class="hidden mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
                         <div class="text-xs text-slate-300">
                             Gross Pull: <strong id="pull-total-value" class="text-emerald-400 font-display text-sm">$0.00</strong>
+                            <span id="stream-status-pill" class="hidden ml-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded"></span>
                         </div>
                         <div class="flex items-center gap-1.5">
                             <button id="rip-quicksell-btn" onclick="quickSellDuplicatesInstant()" class="btn-press text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-2.5 py-1.5 rounded-xl">
@@ -219,6 +220,20 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- High-Stakes Live Stream Break Risk/Reward Banner -->
+                <div class="bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/80 border border-rose-500/40 rounded-2xl p-3 flex items-center justify-between gap-2.5">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300">📺 Live Stream Case Break</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-200 border border-rose-500/30">28% Bomb Risk</span>
+                        </div>
+                        <p class="text-[11px] text-slate-300 mt-0.5 leading-snug">8-card high-roller stream with massive Auto/RPA/Chase odds—or stream bombs for Base-only value!</p>
+                    </div>
+                    <button id="btn-stream-break" onclick="runLiveStreamBreak()" class="btn-press shrink-0 disabled:opacity-40 bg-gradient-to-r from-rose-500 to-amber-500 text-slate-950 font-display font-extrabold text-xs px-3 py-2.5 rounded-xl shadow-lg">
+                        Go Live ($650)
+                    </button>
                 </div>
 
                 <!-- Sport & Set Filter Pills -->
@@ -275,10 +290,19 @@
                         <div class="text-[11px] text-slate-400 font-semibold uppercase">Grading Lab</div>
                         <div class="flex items-baseline justify-between mt-1">
                             <span id="inv-grading-count" class="font-display font-bold text-2xl text-amber-400">0/2 Used</span>
-                            <span class="text-[11px] text-amber-300/80 font-semibold">1.5x–3.4x</span>
+                            <span class="text-[11px] text-amber-300/80 font-semibold">1.1x–5.0x</span>
                         </div>
-                        <div class="text-[10px] text-slate-500 mt-1">18s • Sub-grades roll on finish</div>
+                        <div class="text-[10px] text-slate-500 mt-1">18s • Centering affects Black Label odds</div>
                     </div>
+                </div>
+
+                <!-- Personal Collection (PC) Vault Keeper Strip -->
+                <div class="bg-slate-900/90 border border-sky-500/30 rounded-2xl p-2.5 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-400">🔒 PC Vault Keepers (<span id="pc-vault-count">0</span>)</div>
+                        <div class="text-[10px] text-slate-400 truncate">Star cards below to protect from bulk sell/list &amp; earn <strong id="pc-vault-bonus" class="text-sky-300">+0%</strong> passive value</div>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/30 shrink-0">+3%/keeper</span>
                 </div>
 
                 <!-- Live Collector Auction & Mystery Trade-In Crate Bar -->
@@ -405,11 +429,24 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <h3 class="text-sm font-bold text-white">Master Collector Binder</h3>
-                            <p id="binder-bonus-subtitle" class="text-[11px] text-slate-400">+4% cash/card • +30% full set / NHL team</p>
+                            <p id="binder-bonus-subtitle" class="text-[11px] text-slate-400">+5% cash/card • +30% full set / NHL team</p>
                         </div>
                         <div class="text-right">
                             <span id="binder-progress-text" class="font-display font-bold text-sm text-sky-400">0 / 724</span>
+                            <div id="binder-tier-badge" class="text-[10px] font-extrabold text-amber-400">Tier 0 • +0% Luck</div>
                         </div>
+                    </div>
+
+                    <!-- Master Binder Tier Progress Card -->
+                    <div id="master-binder-tier-card" class="bg-slate-900 border border-sky-500/30 rounded-2xl p-2.5 mb-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span id="mb-tier-title" class="font-extrabold text-white">Novice Collector</span>
+                            <span id="mb-tier-next" class="text-slate-400">Next: 25 cards (Unlocks +2% Luck)</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div id="mb-tier-bar" class="h-full bg-gradient-to-r from-sky-400 to-amber-400 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div id="mb-tier-perks" class="text-[10px] text-emerald-300 font-semibold">Collect unique cards to unlock Platinum Packs &amp; permanent luck!</div>
                     </div>
 
                     <!-- Binder Sport Filter -->
@@ -455,14 +492,33 @@
                     </div>
                 </div>
 
+                <!-- Rarity-Specific Collection Challenges -->
+                <div class="pt-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Rarity Collection Challenges</h3>
+                            <p class="text-[11px] text-slate-400">Cross-sport rarity goals for permanent bonuses</p>
+                        </div>
+                        <span id="rarity-challenges-count" class="font-display font-bold text-xs text-purple-400">0 / 4</span>
+                    </div>
+                    <div id="rarity-challenges-list" class="space-y-2"></div>
+                </div>
+
                 <!-- 1-of-1 Grail & Insert Chase Log + Set Master Perks -->
                 <div class="pt-1 space-y-2">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-sm font-bold text-white">1/1 Grail &amp; Insert Chase Log</h3>
-                            <p class="text-[11px] text-slate-400">Career chase pulls &amp; set completion perks</p>
+                            <h3 class="text-sm font-bold text-white">1/1 COTY, Chase &amp; Grail Log</h3>
+                            <p class="text-[11px] text-slate-400">Permanent account-wide bonuses &amp; set perks</p>
                         </div>
                         <span id="chase-log-count" class="font-display font-bold text-xs text-pink-400">0 Found</span>
+                    </div>
+                    <div id="coty-status-banner" class="bg-gradient-to-r from-amber-950/70 via-slate-900 to-pink-950/70 border border-amber-400/40 rounded-xl p-2.5 text-[11px] flex items-center justify-between gap-2">
+                        <div>
+                            <div class="font-extrabold text-amber-300">👑 1/1 Card of the Year Hunt</div>
+                            <div id="coty-status-desc" class="text-slate-300 text-[10px]">Exclusive to Platinum Master Boxes • +25% permanent cash &amp; +3% luck each</div>
+                        </div>
+                        <span id="coty-found-count" class="font-display font-extrabold text-sm text-pink-300 shrink-0">0 Found</span>
                     </div>
                     <div id="set-perks-list" class="grid grid-cols-2 gap-1.5"></div>
                     <div id="chase-log-list" class="space-y-1.5"></div>
@@ -809,6 +865,87 @@
                 cardCount: 8,
                 weights: [18, 30, 27, 17.5, 7.5],
                 gradient: 'from-rose-950/85 via-slate-900 to-amber-950/80 border-rose-500/50'
+            },
+            {
+                id: 'platinum',
+                name: 'Platinum Master Box',
+                badge: '6 Cards • 1/1 COTY',
+                desc: 'Unlocked at Master Tier 2 (75 Binder cards). Exclusive shot at the 1/1 Card of the Year!',
+                baseCost: 1150,
+                cardCount: 6,
+                minBinderCards: 75,
+                hasCotyChance: true,
+                weights: [10, 26, 31, 22, 11],
+                gradient: 'from-cyan-950/90 via-slate-900 to-indigo-950/90 border-cyan-400/60'
+            },
+            {
+                id: 'crownvault',
+                name: 'Crown Grail Vault',
+                badge: '5 Cards • Guaranteed Auto+',
+                desc: 'Unlocked at Master Tier 4 (220 Binder cards). Zero Base cards—pure Autos, RPAs & Chase variants.',
+                baseCost: 3200,
+                cardCount: 5,
+                minBinderCards: 220,
+                hasCotyChance: true,
+                weights: [0, 14, 38, 31, 17],
+                gradient: 'from-amber-950/95 via-slate-950 to-pink-950/90 border-amber-400/70'
+            }
+        ];
+
+        const MASTER_BINDER_TIERS = [
+            { level: 1, minCards: 25, title: 'Tier I: Local Collector', luckBonus: 2.0, perk: '+2% permanent pull luck' },
+            { level: 2, minCards: 75, title: 'Tier II: Platinum Member', luckBonus: 4.5, perk: '+4.5% pull luck & Unlocks Platinum Master Box' },
+            { level: 3, minCards: 140, title: 'Tier III: National Dealer', luckBonus: 7.5, perk: '+7.5% pull luck & +15% global cash' },
+            { level: 4, minCards: 220, title: 'Tier IV: Crown Archivist', luckBonus: 11.0, perk: '+11% pull luck & Unlocks Crown Grail Vault' },
+            { level: 5, minCards: 360, title: 'Tier V: Hobby Legend', luckBonus: 16.0, perk: '+16% pull luck & +35% global cash' }
+        ];
+
+        const RAW_CONDITIONS = [
+            { id: 'GEM50', label: '50/50 Gem', short: '50/50', badge: 'text-emerald-300 bg-emerald-500/15 border-emerald-500/40', valMult: 1.15, blackLabelBonus: 0.14, psa10Bonus: 0.16, lowGradePenalty: -0.10 },
+            { id: 'MINT55', label: '55/45 Mint', short: '55/45', badge: 'text-sky-300 bg-sky-500/15 border-sky-500/40', valMult: 1.05, blackLabelBonus: 0.04, psa10Bonus: 0.06, lowGradePenalty: -0.04 },
+            { id: 'CLEAN60', label: '60/40 Clean', short: '60/40', badge: 'text-slate-300 bg-slate-800 border-slate-700', valMult: 1.00, blackLabelBonus: 0.0, psa10Bonus: 0.0, lowGradePenalty: 0.0 },
+            { id: 'OFF70', label: '70/30 Off-Ctr', short: '70/30', badge: 'text-rose-300 bg-rose-500/15 border-rose-500/40', valMult: 0.88, blackLabelBonus: -0.10, psa10Bonus: -0.14, lowGradePenalty: 0.18 }
+        ];
+
+        const CHASE_VARIANTS = [
+            { id: 'SP_GOLD', name: 'SP Gold Wave', badge: 'bg-amber-400 text-slate-950 font-black', mult: 1.85 },
+            { id: 'SSP_NEBULA', name: 'SSP Nebula', badge: 'holo-foil text-slate-950 font-black', mult: 2.75 }
+        ];
+
+        const RARITY_CHALLENGES = [
+            {
+                id: 'holo_rainbow',
+                title: 'Holo Spectrum',
+                desc: 'Own at least 1 Holo (or better) card in every sport/TCG set',
+                rewardText: '+4% Pull Luck',
+                check: () => Object.keys(SPORT_LABELS).every(theme =>
+                    CARD_CATALOG.some(c => c.theme === theme && getBinderCardTier(c.id) >= 1)
+                )
+            },
+            {
+                id: 'auto_world_tour',
+                title: 'Signature World Tour',
+                desc: 'Own an Auto /25 (or better) in every sport/TCG set',
+                rewardText: '+20% Global Cash',
+                check: () => Object.keys(SPORT_LABELS).every(theme =>
+                    CARD_CATALOG.some(c => c.theme === theme && getBinderCardTier(c.id) >= 2)
+                )
+            },
+            {
+                id: 'rpa_pantheon',
+                title: 'Patch & RPA Pantheon',
+                desc: 'Own an RPA /10 (or 1/1) in every sport/TCG set',
+                rewardText: '+45% Global Cash & +5% Luck',
+                check: () => Object.keys(SPORT_LABELS).every(theme =>
+                    CARD_CATALOG.some(c => c.theme === theme && getBinderCardTier(c.id) >= 3)
+                )
+            },
+            {
+                id: 'slab_curators',
+                title: 'Black Label & Gem Vault',
+                desc: 'Hold 3+ PSA 10 or BGS Black Label slabs in your Singles/PC',
+                rewardText: '+30% All Slab Values',
+                check: () => (state.inventory || []).filter(i => i && i.graded && (i.gradeMult || 0) >= 3.4).length >= 3
             }
         ];
 
@@ -985,13 +1122,13 @@
             { id: 'GRADING_RUSH', label: '🔬 Grading Rush', desc: 'Grading 25% faster, slabs +15% value', packMult: 1.0, valMult: 1.15, gradeTimeMult: 0.75 }
         ];
         const SET_PERKS = [
-            { theme: 'BASKETBALL', perk: 'Hoops Set: -8% pack cost' },
-            { theme: 'FOOTBALL', perk: 'Gridiron Set: +10% shop net flow' },
-            { theme: 'SOCCER', perk: 'Pitch Set: +12% marketplace payouts' },
-            { theme: 'HOCKEY', perk: 'Ice Set: -15% grading turnaround' },
-            { theme: 'F1', perk: 'Apex F1 Set: +15% slab values' },
-            { theme: 'GOLF', perk: 'Links Set: -10% pack cost' },
-            { theme: 'TCG', perk: 'Mythic TCG Set: +18% card values' }
+            { theme: 'BASKETBALL', perk: 'Hoops Set: +25% Hoops sales & -10% Hoops packs' },
+            { theme: 'FOOTBALL', perk: 'Gridiron Set: +25% Gridiron sales & +12% shop flow' },
+            { theme: 'SOCCER', perk: 'Pitch Set: +25% Pitch sales & +12% market payouts' },
+            { theme: 'HOCKEY', perk: 'NHL Set: +25% NHL sales & -15% NHL packs' },
+            { theme: 'F1', perk: 'Apex F1 Set: +25% F1 sales & +18% slab values' },
+            { theme: 'GOLF', perk: 'Links Set: +25% Links sales & -12% Links packs' },
+            { theme: 'TCG', perk: 'Mythic TCG Set: +25% TCG sales & +18% card values' }
         ];
 
         let state = {
@@ -1002,6 +1139,7 @@
             prestigeBadges: 0,
             claimedMilestones: [],
             chaseLog: [],
+            cotyPulls: [],
             activeAuction: null,
             themeFilter: 'ALL',
             binderFilter: 'ALL',
@@ -1038,6 +1176,148 @@
 
         function getAutoListDupesInterval(lvl = state.upgrades.autoListDupes || 0) {
             return Math.max(2.0, 12.5 - lvl * 0.7);
+        }
+
+        function getAutoListBaseInterval(lvl = state.upgrades.autoListBase || 0) {
+            return Math.max(1.5, 10.5 - lvl * 0.6);
+        }
+
+        function getBinderCardTier(cardId) {
+            const rid = state.binder && state.binder[cardId];
+            if (!rid) return -1;
+            const r = RARITIES.find(x => x.id === rid);
+            return r ? r.tier : 0;
+        }
+
+        function getCurrentMasterBinderTier() {
+            const count = getBinderUniqueCount();
+            let current = { level: 0, minCards: 0, title: 'Novice Collector', luckBonus: 0, perk: 'Collect 25 unique cards for Tier I' };
+            for (const tier of MASTER_BINDER_TIERS) {
+                if (count >= tier.minCards) current = tier;
+            }
+            return current;
+        }
+
+        function getNextMasterBinderTier() {
+            const count = getBinderUniqueCount();
+            return MASTER_BINDER_TIERS.find(t => count < t.minCards) || null;
+        }
+
+        function getCompletedRarityChallenges() {
+            return RARITY_CHALLENGES.filter(ch => ch.check());
+        }
+
+        function rollRawCondition() {
+            const r = Math.random();
+            if (r < 0.14) return RAW_CONDITIONS[0]; // 50/50 Gem
+            if (r < 0.42) return RAW_CONDITIONS[1]; // 55/45 Mint
+            if (r < 0.80) return RAW_CONDITIONS[2]; // 60/40 Clean
+            return RAW_CONDITIONS[3]; // 70/30 Off-Center
+        }
+
+        function getConditionById(condId) {
+            return RAW_CONDITIONS.find(c => c.id === condId) || RAW_CONDITIONS[2];
+        }
+
+        function rollChaseVariant(tierBonus = 0) {
+            const roll = Math.random() * 100;
+            const luck = getTotalLuckBonusPercent() * 0.15 + tierBonus;
+            if (roll < 0.9 + luck) return CHASE_VARIANTS[1]; // SSP Nebula
+            if (roll < 3.5 + luck * 2) return CHASE_VARIANTS[0]; // SP Gold Wave
+            return null;
+        }
+
+        function getChaseVariantById(chaseId) {
+            if (!chaseId) return null;
+            return CHASE_VARIANTS.find(c => c.id === chaseId) || null;
+        }
+
+        function getTotalLuckBonusPercent() {
+            const prestigeLuck = Math.min(18, (state.prestigeBadges || 0) * 1.5);
+            const tierLuck = getCurrentMasterBinderTier().luckBonus || 0;
+            const cotyLuck = (Array.isArray(state.cotyPulls) ? state.cotyPulls.length : 0) * 3.0;
+            const completedCh = getCompletedRarityChallenges();
+            const chLuck = (completedCh.some(c => c.id === 'holo_rainbow') ? 4.0 : 0) +
+                           (completedCh.some(c => c.id === 'rpa_pantheon') ? 5.0 : 0);
+            return prestigeLuck + tierLuck + cotyLuck + chLuck;
+        }
+
+        function getPcVaultKeepers() {
+            return (state.inventory || []).filter(i => i && i.isKeeper);
+        }
+
+        function toggleKeeperUid(uid) {
+            const item = (state.inventory || []).find(i => String(i.uid) === String(uid));
+            if (!item) return;
+            item.isKeeper = !item.isKeeper;
+            SoundFX.click();
+            spawnFloatingCash(item.isKeeper ? 'Locked in PC Vault!' : 'Removed from PC Vault', 'text-sky-300', 25);
+            saveGame();
+            updateAllUI();
+        }
+
+        function isSetCompleted(theme) {
+            const setCards = CARD_CATALOG.filter(c => c.theme === theme);
+            return setCards.length > 0 && setCards.every(c => Boolean(state.binder && state.binder[c.id]));
+        }
+
+        function getActiveMarketShock() {
+            const shockIdx = state.marketSeed % MARKET_SHOCKS.length;
+            return MARKET_SHOCKS[shockIdx];
+        }
+
+        function recordChasePull(card, rarity, chaseVariant = null, isCoty = false) {
+            if (!Array.isArray(state.chaseLog)) state.chaseLog = [];
+            if (!Array.isArray(state.cotyPulls)) state.cotyPulls = [];
+
+            if (isCoty) {
+                const cotyKey = `COTY_${card.id}`;
+                if (!state.cotyPulls.includes(cotyKey)) {
+                    state.cotyPulls.push(cotyKey);
+                }
+            }
+
+            const isSpecial = isCoty || Boolean(chaseVariant) || rarity.id === 'GRAIL' || Boolean(card.insertType);
+            if (!isSpecial) return;
+            const entryKey = `${card.id}_${rarity.id}_${chaseVariant ? chaseVariant.id : 'STD'}${isCoty ? '_COTY' : ''}`;
+            if (!state.chaseLog.some(e => e.key === entryKey)) {
+                state.chaseLog.unshift({
+                    key: entryKey,
+                    cardId: card.id,
+                    name: isCoty ? `👑 1/1 COTY: ${card.name}` : (chaseVariant ? `${chaseVariant.name} ${card.name}` : card.name),
+                    theme: card.theme,
+                    rarityName: isCoty ? '1/1 COTY' : (chaseVariant ? chaseVariant.name : rarity.name),
+                    insertType: card.insertType || null,
+                    pulledAt: Date.now()
+                });
+                if (state.chaseLog.length > 35) state.chaseLog.length = 35;
+            }
+        }
+
+        function rollSlabGradeOutcome(conditionId = 'CLEAN60') {
+            const cond = getConditionById(conditionId);
+            const repBonus = Math.min(0.18, (state.reputation || 0) / 2200);
+            const vipBonus = Math.min(0.10, (state.upgrades.vipLounge || 0) * 0.012);
+            const r = Math.random();
+
+            const blackLabelChance = Math.max(0.01, 0.05 + (cond.blackLabelBonus || 0) + vipBonus * 0.5);
+            const psa10Chance = Math.max(0.12, 0.28 + (cond.psa10Bonus || 0) + repBonus + vipBonus);
+            const mint9Chance = 0.44;
+            const lowGradeChance = Math.max(0.05, 0.12 + (cond.lowGradePenalty || 0));
+
+            if (r < blackLabelChance) {
+                return { gradeLabel: 'BLACK 10', gradeMult: 5.0 };
+            }
+            if (r < blackLabelChance + psa10Chance) {
+                return { gradeLabel: 'PSA 10', gradeMult: 3.4 };
+            }
+            if (r < blackLabelChance + psa10Chance + mint9Chance) {
+                return { gradeLabel: 'MINT 9', gradeMult: 2.2 };
+            }
+            if (r < 1 - lowGradeChance) {
+                return { gradeLabel: 'NM-MT 8', gradeMult: 1.45 };
+            }
+            return { gradeLabel: 'PSA 7', gradeMult: 1.1 };
         }
 
         function getAutoListBaseInterval(lvl = state.upgrades.autoListBase || 0) {
@@ -1215,9 +1495,29 @@
         }
 
         function getBinderMultiplier() {
-            const cardBonus = getBinderUniqueCount() * 0.04;
+            const cardBonus = getBinderUniqueCount() * 0.05;
             const setBonus = getCompletedSetsCount() * 0.30;
-            return 1 + cardBonus + setBonus;
+            const tier = getCurrentMasterBinderTier();
+            const tierBonus = tier.level >= 5 ? 0.35 : (tier.level >= 3 ? 0.15 : 0);
+            return 1 + cardBonus + setBonus + tierBonus;
+        }
+
+        function getPrestigeMultiplier() {
+            return 1 + state.prestigeBadges * 0.20;
+        }
+
+        function getGlobalCashMultiplier() {
+            const marketingMult = 1 + (state.upgrades.marketing || 0) * 0.09;
+            const vipMult = 1 + (state.upgrades.vipLounge || 0) * 0.12;
+            const repMult = 1 + Math.min(1.5, state.reputation / 750);
+            const soccerPerk = isSetCompleted('SOCCER') ? 1.12 : 1.0;
+            const tcgPerk = isSetCompleted('TCG') ? 1.18 : 1.0;
+            const cotyMult = 1 + (Array.isArray(state.cotyPulls) ? state.cotyPulls.length : 0) * 0.25;
+            const pcVaultMult = 1 + getPcVaultKeepers().length * 0.03;
+            const completedCh = getCompletedRarityChallenges();
+            const chCashMult = (completedCh.some(c => c.id === 'auto_world_tour') ? 1.20 : 1.0) *
+                               (completedCh.some(c => c.id === 'rpa_pantheon') ? 1.45 : 1.0);
+            return getBinderMultiplier() * getPrestigeMultiplier() * marketingMult * vipMult * repMult * soccerPerk * tcgPerk * cotyMult * pcVaultMult * chCashMult;
         }
 
         function getPrestigeMultiplier() {
@@ -1268,10 +1568,41 @@
 
         function getPackCost(pack) {
             const discount = Math.min(0.45, state.upgrades.distributor * 0.03);
-            const hoopsPerk = (pack.id === 'blaster' && isSetCompleted('BASKETBALL')) ? 0.92 : 1.0;
-            const golfPerk = (pack.id === 'retail' && isSetCompleted('GOLF')) ? 0.90 : 1.0;
+            const hoopsPerk = (pack.id === 'blaster' && isSetCompleted('BASKETBALL')) ? 0.90 : 1.0;
+            const golfPerk = (pack.id === 'retail' && isSetCompleted('GOLF')) ? 0.88 : 1.0;
+            const hockeyPerk = (state.themeFilter === 'HOCKEY' && isSetCompleted('HOCKEY')) ? 0.85 : 1.0;
             const shockMult = getActiveMarketShock().packMult || 1.0;
-            return Math.max(2, pack.baseCost * (1 - discount) * hoopsPerk * golfPerk * shockMult);
+            return Math.max(2, pack.baseCost * (1 - discount) * hoopsPerk * golfPerk * hockeyPerk * shockMult);
+        }
+
+        function getUpgradeCost(upg) {
+            const lvl = state.upgrades[upg.id] || 0;
+            return upg.baseCost * Math.pow(upg.costMult, lvl);
+        }
+
+        function calculateCardValue(card, rarity, gradeOrFlag = false, applyMarketTrend = true, conditionId = 'CLEAN60', chaseId = null, isCoty = false) {
+            let gradeMult = 1.0;
+            if (typeof gradeOrFlag === 'number') {
+                gradeMult = gradeOrFlag > 0 ? gradeOrFlag : 1.0;
+            } else if (gradeOrFlag) {
+                gradeMult = 2.8;
+            }
+            const completedCh = getCompletedRarityChallenges();
+            const slabChallengeMult = (gradeMult > 1.0 && completedCh.some(c => c.id === 'slab_curators')) ? 1.30 : 1.0;
+            const themeCompleteMult = (card && isSetCompleted(card.theme)) ? 1.25 : 1.0;
+            const f1Perk = (card && card.theme === 'F1' && gradeMult > 1.0 && isSetCompleted('F1')) ? 1.18 : 1.0;
+            const condMult = gradeMult > 1.0 ? 1.0 : (getConditionById(conditionId).valMult || 1.0);
+            const chaseObj = getChaseVariantById(chaseId);
+            const chaseMult = chaseObj ? chaseObj.mult : 1.0;
+            const cotyValMult = isCoty ? 4.0 : 1.0;
+
+            const trendMult = applyMarketTrend ? getThemeDemandMultiplier(card.theme) : 1.0;
+            const shock = getActiveMarketShock();
+            let shockValMult = shock.valMult || 1.0;
+            if (shock.id === 'ROOKIE_FEVER' && rarity && rarity.tier <= 1) {
+                shockValMult *= 1.30;
+            }
+            return card.baseVal * rarity.mult * gradeMult * slabChallengeMult * themeCompleteMult * f1Perk * condMult * chaseMult * cotyValMult * trendMult * shockValMult * getGlobalCashMultiplier();
         }
 
         function getUpgradeCost(upg) {
@@ -1376,12 +1707,18 @@
            5. PACK RIPPING & RNG ENGINE
            ========================================================================== */
         function rollRarity(weights) {
-            const prestigeLuckBoost = Math.min(18, state.prestigeBadges * 1.5);
+            const totalLuckBoost = Math.min(28, getTotalLuckBonusPercent());
             const adjusted = [...weights];
-            adjusted[0] = Math.max(8, adjusted[0] - prestigeLuckBoost);
-            adjusted[2] += prestigeLuckBoost * 0.55;
-            adjusted[3] += prestigeLuckBoost * 0.35;
-            adjusted[4] += prestigeLuckBoost * 0.10;
+            if (adjusted[0] > 0) {
+                const shift = Math.min(adjusted[0] * 0.75, totalLuckBoost);
+                adjusted[0] -= shift;
+                adjusted[2] += shift * 0.50;
+                adjusted[3] += shift * 0.35;
+                adjusted[4] += shift * 0.15;
+            } else {
+                adjusted[3] += totalLuckBoost * 0.6;
+                adjusted[4] += totalLuckBoost * 0.4;
+            }
 
             const total = adjusted.reduce((a, b) => a + b, 0);
             let r = Math.random() * total;
@@ -1402,15 +1739,24 @@
             return pool.length > 0 ? pool : CARD_CATALOG;
         }
 
-        function buyAndRipPack(packId, isAuto = false) {
+        function buyAndRipPack(packId, isAuto = false, streamMode = null) {
             const pack = PACK_TIERS.find(p => p.id === packId);
             if (!pack) return false;
 
-            const cost = getPackCost(pack);
+            const minBinder = pack.minBinderCards || 0;
+            if (getBinderUniqueCount() < minBinder) {
+                if (!isAuto) {
+                    SoundFX.click();
+                    spawnFloatingCash(`Requires ${minBinder} Binder cards!`, 'text-amber-300', 24);
+                }
+                return false;
+            }
+
+            const cost = streamMode ? streamMode.cost : getPackCost(pack);
             if (state.cash < cost) return false;
 
             state.cash -= cost;
-            lastSelectedPackId = packId;
+            if (!streamMode) lastSelectedPackId = packId;
 
             if (!isAuto) {
                 SoundFX.rip();
@@ -1423,11 +1769,16 @@
             const pool = getFilteredCardPool();
             const pulled = [];
             let highestTier = 0;
+            const streamBombed = Boolean(streamMode && streamMode.bombed);
 
             for (let i = 0; i < pack.cardCount; i++) {
                 const card = pool[Math.floor(Math.random() * pool.length)];
-                const rarity = rollRarity(pack.weights);
+                const rarity = streamBombed ? RARITIES[0] : rollRarity(streamMode ? streamMode.weights : pack.weights);
                 if (rarity.tier > highestTier) highestTier = rarity.tier;
+
+                const cond = streamBombed ? RAW_CONDITIONS[3] : rollRawCondition();
+                const chaseVariant = streamBombed ? null : rollChaseVariant(pack.hasCotyChance ? 1.5 : 0);
+                const isCoty = Boolean(!streamBombed && pack.hasCotyChance && Math.random() < 0.008);
 
                 const isNewBinderEntry = !state.binder[card.id];
                 if (isNewBinderEntry) {
@@ -1444,20 +1795,40 @@
                     uid: Date.now() + '_' + Math.random().toString(36).slice(2, 8),
                     cardId: card.id,
                     rarityId: rarity.id,
+                    conditionId: cond.id,
+                    chaseId: chaseVariant ? chaseVariant.id : null,
+                    isCoty,
+                    isKeeper: isCoty,
                     graded: false,
                     gradeLabel: null,
                     gradeMult: 1.0
                 });
 
-                recordChasePull(card, rarity);
+                recordChasePull(card, rarity, chaseVariant, isCoty);
 
                 pulled.push({
                     card,
                     rarity,
+                    cond,
+                    chaseVariant,
+                    isCoty,
                     isNewBinderEntry,
                     flipped: isAuto,
-                    value: calculateCardValue(card, rarity, 1.0, true)
+                    value: calculateCardValue(card, rarity, 1.0, true, cond.id, chaseVariant ? chaseVariant.id : null, isCoty)
                 });
+            }
+
+            const streamPill = document.getElementById('stream-status-pill');
+            if (streamPill) {
+                if (streamMode) {
+                    streamPill.classList.remove('hidden');
+                    streamPill.textContent = streamBombed ? '💥 STREAM BOMBED' : '🔥 STREAM POPPED!';
+                    streamPill.className = streamBombed
+                        ? 'ml-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                        : 'ml-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                } else {
+                    streamPill.classList.add('hidden');
+                }
             }
 
             if (isAuto) {
@@ -1474,60 +1845,27 @@
             return true;
         }
 
-        function flipCardAtIndex(idx) {
-            const item = currentRevealedPack[idx];
-            if (!item || item.flipped) return;
-            item.flipped = true;
+        function getLiveStreamBreakCost() {
+            return Math.max(650, Math.round(650 * (1 + getBinderUniqueCount() * 0.015)));
+        }
 
-            if (item.rarity.tier >= 2) {
-                SoundFX.rarePull(item.rarity.tier);
-            } else {
-                SoundFX.flip();
+        function runLiveStreamBreak() {
+            const cost = getLiveStreamBreakCost();
+            if (state.cash < cost) {
+                SoundFX.click();
+                spawnFloatingCash(`Need ${formatMoney(cost)} for Live Stream!`, 'text-rose-300', 24);
+                return;
             }
-
-            const cardInner = document.getElementById(`reveal-card-${idx}`);
-            if (cardInner) cardInner.classList.add('is-flipped');
-
-            checkAllFlippedStatus();
-        }
-
-        function flipAllRevealed() {
-            let maxTier = 0;
-            currentRevealedPack.forEach((item, idx) => {
-                if (!item.flipped) {
-                    item.flipped = true;
-                    if (item.rarity.tier > maxTier) maxTier = item.rarity.tier;
-                    const cardInner = document.getElementById(`reveal-card-${idx}`);
-                    if (cardInner) cardInner.classList.add('is-flipped');
-                }
+            const bombed = Math.random() < 0.28;
+            buyAndRipPack('casebreak', false, {
+                cost,
+                bombed,
+                weights: [6, 20, 34, 26, 14]
             });
-            if (maxTier >= 2) SoundFX.rarePull(maxTier);
-            else SoundFX.flip();
-            checkAllFlippedStatus();
-        }
-
-        function checkAllFlippedStatus() {
-            const unflippedCount = currentRevealedPack.filter(c => !c.flipped).length;
-            const flipBtn = document.getElementById('flip-all-btn');
-            const postActions = document.getElementById('post-rip-actions');
-            const pullTotalEl = document.getElementById('pull-total-value');
-            const quickDupeBtn = document.getElementById('rip-quicksell-btn');
-
-            if (unflippedCount === 0 && currentRevealedPack.length > 0) {
-                flipBtn.classList.add('hidden');
-                postActions.classList.remove('hidden');
-                const sum = currentRevealedPack.reduce((acc, c) => acc + c.value, 0);
-                pullTotalEl.textContent = formatMoney(sum);
-
-                if (quickDupeBtn) {
-                    const dupes = getDuplicateUids();
-                    quickDupeBtn.textContent = dupes.length > 0
-                        ? `Quick Dupes (${dupes.length})`
-                        : `No Dupes Yet`;
-                }
-            } else if (unflippedCount > 0) {
-                flipBtn.classList.remove('hidden');
-                postActions.classList.add('hidden');
+            if (bombed) {
+                spawnFloatingCash('💥 Stream Bombed! Base Cards Only', 'text-rose-400', 22);
+            } else {
+                spawnFloatingCash('🔥 Stream Sold Out! Huge Odds!', 'text-emerald-300', 22);
             }
         }
 
@@ -1538,7 +1876,7 @@
             const seen = new Set();
             const dupes = [];
             for (const item of state.inventory) {
-                if (item.graded) continue;
+                if (item.graded || item.isKeeper) continue;
                 const key = `${item.cardId}_${item.rarityId}`;
                 if (seen.has(key)) {
                     dupes.push(item.uid);
@@ -1555,7 +1893,7 @@
             const [item] = state.inventory.splice(idx, 1);
             const card = CARD_CATALOG.find(c => c.id === item.cardId);
             const rarity = RARITIES.find(r => r.id === item.rarityId);
-            const gross = calculateCardValue(card, rarity, getItemGradeMultiplier(item));
+            const gross = calculateCardValue(card, rarity, getItemGradeMultiplier(item), true, item.conditionId, item.chaseId, item.isCoty);
             const payout = calculateQuickSellPayout(gross);
 
             recordEarnings(payout);
@@ -1580,13 +1918,14 @@
         }
 
         function quickSellAllSingles() {
-            if (state.inventory.length === 0) {
+            const eligible = state.inventory.filter(i => !i.isKeeper);
+            if (eligible.length === 0) {
                 SoundFX.click();
-                spawnFloatingCash('Inventory is empty!', 'text-slate-300', 28);
+                spawnFloatingCash('No unlocked singles to quick sell!', 'text-slate-300', 28);
                 return;
             }
-            const count = state.inventory.length;
-            const allUids = state.inventory.map(i => i.uid);
+            const count = eligible.length;
+            const allUids = eligible.map(i => i.uid);
             let totalPayout = 0;
             allUids.forEach(uid => {
                 totalPayout += quickSellCardUid(uid);
@@ -1602,7 +1941,7 @@
             const [item] = state.inventory.splice(idx, 1);
             const card = CARD_CATALOG.find(c => c.id === item.cardId);
             const rarity = RARITIES.find(r => r.id === item.rarityId);
-            const gross = calculateCardValue(card, rarity, getItemGradeMultiplier(item));
+            const gross = calculateCardValue(card, rarity, getItemGradeMultiplier(item), true, item.conditionId, item.chaseId, item.isCoty);
             const netPayout = calculateNetListingPayout(gross);
 
             state.listings.push({
@@ -1617,13 +1956,14 @@
         }
 
         function listAllSingles() {
-            if (!Array.isArray(state.inventory) || state.inventory.length === 0) {
+            const eligible = Array.isArray(state.inventory) ? state.inventory.filter(i => !i.isKeeper) : [];
+            if (eligible.length === 0) {
                 SoundFX.click();
-                spawnFloatingCash('No singles to list!', 'text-slate-300', 28);
+                spawnFloatingCash('No unlocked singles to list!', 'text-slate-300', 28);
                 return;
             }
-            const count = state.inventory.length;
-            const uids = state.inventory.map(i => i.uid);
+            const count = eligible.length;
+            const uids = eligible.map(i => i.uid);
             uids.forEach(uid => listCardUid(uid));
             SoundFX.click();
             spawnFloatingCash(`Listed ${count} singles!`, 'text-emerald-400');
@@ -1647,11 +1987,11 @@
         function listAllBaseCards() {
             if (!Array.isArray(state.inventory)) return;
             const baseUids = state.inventory
-                .filter(i => i && !i.graded && i.rarityId === 'COMMON')
+                .filter(i => i && !i.graded && !i.isKeeper && i.rarityId === 'COMMON')
                 .map(i => i.uid);
             if (baseUids.length === 0) {
                 SoundFX.click();
-                spawnFloatingCash('No ungraded Base cards to list!', 'text-slate-300', 28);
+                spawnFloatingCash('No unlocked Base cards to list!', 'text-slate-300', 28);
                 return;
             }
             baseUids.forEach(uid => listCardUid(uid));
@@ -1662,10 +2002,10 @@
 
         function listAllSlabs() {
             if (!Array.isArray(state.inventory)) return;
-            const slabUids = state.inventory.filter(i => i && i.graded).map(i => i.uid);
+            const slabUids = state.inventory.filter(i => i && i.graded && !i.isKeeper).map(i => i.uid);
             if (slabUids.length === 0) {
                 SoundFX.click();
-                spawnFloatingCash('No graded slabs to list!', 'text-slate-300', 28);
+                spawnFloatingCash('No unlocked graded slabs to list!', 'text-slate-300', 28);
                 return;
             }
             slabUids.forEach(uid => listCardUid(uid));
@@ -1686,7 +2026,7 @@
             const [item] = state.inventory.splice(idx, 1);
             const card = CARD_CATALOG.find(c => c.id === item.cardId) || CARD_CATALOG[0];
             const rarity = RARITIES.find(r => r.id === item.rarityId) || RARITIES[0];
-            const baseVal = calculateCardValue(card, rarity, getItemGradeMultiplier(item), true);
+            const baseVal = calculateCardValue(card, rarity, getItemGradeMultiplier(item), true, item.conditionId, item.chaseId, item.isCoty);
             const now = Date.now();
             const rivals = ['CardShark99', 'VaultBreaker', 'SlabHunter', 'GrailKing'];
 
@@ -1769,7 +2109,7 @@
             const rarity = RARITIES.find(r => r.id === item.rarityId) || RARITIES[0];
             if (item.graded || rarity.tier < 1) return;
 
-            const grossVal = calculateCardValue(card, rarity, 1.0, true);
+            const grossVal = calculateCardValue(card, rarity, 1.0, true, item.conditionId, item.chaseId, item.isCoty);
             const gradingFee = Math.max(10, grossVal * 0.55);
             if (state.cash < gradingFee) {
                 SoundFX.click();
@@ -1786,12 +2126,45 @@
                 uid: item.uid || (now + '_' + Math.random().toString(36).slice(2, 8)),
                 cardId: item.cardId,
                 rarityId: item.rarityId,
+                conditionId: item.conditionId || 'CLEAN60',
+                chaseId: item.chaseId || null,
+                isCoty: Boolean(item.isCoty),
+                isKeeper: Boolean(item.isKeeper),
                 startTime: now,
                 endTime: now + durationMs
             });
 
             SoundFX.click();
             spawnFloatingCash(`Sent to Grading (-${formatMoney(gradingFee)})`, 'text-amber-300', 24);
+            saveGame();
+            updateAllUI();
+        }
+
+        function collectGradedCard(uid) {
+            if (!Array.isArray(state.gradingQueue)) return;
+            const idx = state.gradingQueue.findIndex(g => String(g.uid) === String(uid));
+            if (idx === -1) return;
+            const item = state.gradingQueue[idx];
+            const endTs = Number(item.endTime || 0);
+            if (!endTs || Date.now() < endTs) return;
+
+            state.gradingQueue.splice(idx, 1);
+            const rolled = rollSlabGradeOutcome(item.conditionId || 'CLEAN60');
+            state.inventory.unshift({
+                uid: item.uid || (Date.now() + '_' + Math.random().toString(36).slice(2, 8)),
+                cardId: item.cardId,
+                rarityId: item.rarityId,
+                conditionId: item.conditionId || 'CLEAN60',
+                chaseId: item.chaseId || null,
+                isCoty: Boolean(item.isCoty),
+                isKeeper: Boolean(item.isKeeper),
+                graded: true,
+                gradeLabel: rolled.gradeLabel,
+                gradeMult: rolled.gradeMult
+            });
+
+            SoundFX.rarePull(rolled.gradeMult >= 4.5 ? 4 : (rolled.gradeMult >= 3.0 ? 3 : 1));
+            spawnFloatingCash(`${rolled.gradeLabel} SLAB (${rolled.gradeMult}x)!`, rolled.gradeMult >= 4.5 ? 'text-pink-300' : 'text-amber-300');
             saveGame();
             updateAllUI();
         }
@@ -2053,23 +2426,29 @@
             }
 
             grid.innerHTML = currentRevealedPack.map((entry, idx) => {
-                const { card, rarity, isNewBinderEntry, flipped, value } = entry;
+                const { card, rarity, cond, chaseVariant, isCoty, isNewBinderEntry, flipped, value } = entry;
+                const condObj = cond || RAW_CONDITIONS[2];
+                const topBadgeText = isCoty ? '👑 1/1 COTY' : (chaseVariant ? chaseVariant.name : rarity.name);
+                const topBadgeClass = isCoty || chaseVariant ? 'holo-foil text-slate-950 font-black' : rarity.badge;
                 return `
-                <div class="card-scene h-[126px]" onclick="flipCardAtIndex(${idx})">
+                <div class="card-scene h-[134px]" onclick="flipCardAtIndex(${idx})">
                     <div id="reveal-card-${idx}" class="card-inner ${flipped ? 'is-flipped' : ''}">
                         <div class="card-face card-face-back flex flex-col items-center justify-center p-2 text-center">
                             <span class="text-2xl">🃏</span>
                             <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">Tap to Flip</span>
                         </div>
-                        <div class="card-face card-face-front bg-slate-900 border-2 ${rarity.border} p-2 flex flex-col items-center justify-between text-center">
+                        <div class="card-face card-face-front bg-slate-900 border-2 ${isCoty || chaseVariant ? 'border-amber-300' : rarity.border} p-1.5 flex flex-col items-center justify-between text-center">
                             <div class="w-full flex items-center justify-between gap-1">
-                                <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${rarity.badge} truncate">${rarity.name}</span>
+                                <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${topBadgeClass} truncate">${topBadgeText}</span>
                                 ${isNewBinderEntry ? '<span class="text-[8px] font-extrabold px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">NEW</span>' : ''}
                             </div>
                             <div class="my-auto flex items-center justify-center">${renderCardArtwork(card, 'text-2xl')}</div>
                             <div class="w-full">
                                 <div class="text-[10px] font-bold text-white truncate">${card.name}</div>
-                                <div class="text-[9px] font-display font-bold text-emerald-400">${formatMoney(value)}</div>
+                                <div class="flex items-center justify-center gap-1 mt-0.5">
+                                    <span class="text-[8px] font-bold px-1 rounded border ${condObj.badge}">${condObj.short}</span>
+                                    <span class="text-[9px] font-display font-bold text-emerald-400">${formatMoney(value)}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2083,25 +2462,35 @@
             const container = document.getElementById('pack-list');
             if (!container) return;
 
+            const streamBtn = document.getElementById('btn-stream-break');
+            if (streamBtn) {
+                const sCost = getLiveStreamBreakCost();
+                streamBtn.textContent = `Go Live (${formatMoney(sCost)})`;
+                streamBtn.disabled = state.cash < sCost;
+            }
+
+            const binderCount = getBinderUniqueCount();
             container.innerHTML = PACK_TIERS.map(pack => {
+                const minBinder = pack.minBinderCards || 0;
+                const isUnlocked = binderCount >= minBinder;
                 const cost = getPackCost(pack);
-                const canAfford = state.cash >= cost;
+                const canAfford = isUnlocked && state.cash >= cost;
                 const estPullAvg = (pack.cardCount * 2.2 * getGlobalCashMultiplier());
 
                 return `
-                <div class="bg-gradient-to-br ${pack.gradient} border rounded-2xl p-3 flex items-center justify-between gap-3 shadow-lg">
+                <div class="bg-gradient-to-br ${pack.gradient} border rounded-2xl p-3 flex items-center justify-between gap-3 shadow-lg ${isUnlocked ? '' : 'opacity-65'}">
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
                             <span class="text-sm font-extrabold text-white truncate">${pack.name}</span>
                             <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-white/10 text-slate-200 shrink-0">${pack.badge}</span>
                         </div>
                         <p class="text-[11px] text-slate-300/90 mt-0.5">${pack.desc}</p>
-                        <div class="text-[10px] text-emerald-300/90 font-semibold mt-1">
-                            Est. Value: ~${formatMoney(estPullAvg)}/pack
+                        <div class="text-[10px] ${isUnlocked ? 'text-emerald-300/90' : 'text-amber-300'} font-semibold mt-1">
+                            ${isUnlocked ? `Est. Value: ~${formatMoney(estPullAvg)}/pack` : `🔒 Unlocks at ${minBinder} Binder Cards (${binderCount}/${minBinder})`}
                         </div>
                     </div>
                     <button onclick="buyAndRipPack('${pack.id}')" ${canAfford ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-40 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-display font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow">
-                        ${formatMoney(cost)}
+                        ${isUnlocked ? formatMoney(cost) : 'Locked'}
                     </button>
                 </div>`;
             }).join('');
@@ -2267,7 +2656,7 @@
                 if (autoListBaseAccumulator >= baseInterval) {
                     autoListBaseAccumulator = 0;
                     const baseUids = Array.isArray(state.inventory)
-                        ? state.inventory.filter(i => i && !i.graded && i.rarityId === 'COMMON').map(i => i.uid)
+                        ? state.inventory.filter(i => i && !i.graded && !i.isKeeper && i.rarityId === 'COMMON').map(i => i.uid)
                         : [];
                     if (baseUids.length > 0) {
                         baseUids.forEach(uid => listCardUid(uid));
@@ -2376,6 +2765,7 @@
             let dupeQuickTotal = 0;
             const dupeUidsSet = new Set(dupes);
             let allQuickTotal = 0;
+            let unlockedAllCount = 0;
             let baseCount = 0;
             let baseNetTotal = 0;
             let slabCount = 0;
@@ -2384,23 +2774,32 @@
             state.inventory.forEach(item => {
                 const c = CARD_CATALOG.find(x => x.id === item.cardId) || CARD_CATALOG[0];
                 const r = RARITIES.find(x => x.id === item.rarityId) || RARITIES[0];
-                const gross = calculateCardValue(c, r, getItemGradeMultiplier(item), true);
+                const gross = calculateCardValue(c, r, getItemGradeMultiplier(item), true, item.conditionId, item.chaseId, item.isCoty);
                 const q = calculateQuickSellPayout(gross);
-                allQuickTotal += q;
+                if (!item.isKeeper) {
+                    unlockedAllCount++;
+                    allQuickTotal += q;
+                }
                 if (dupeUidsSet.has(item.uid)) dupeQuickTotal += q;
-                if (!item.graded && item.rarityId === 'COMMON') {
+                if (!item.graded && !item.isKeeper && item.rarityId === 'COMMON') {
                     baseCount++;
                     baseNetTotal += calculateNetListingPayout(gross);
                 }
-                if (item.graded) {
+                if (item.graded && !item.isKeeper) {
                     slabCount++;
                     slabNetTotal += calculateNetListingPayout(gross);
                 }
             });
 
+            const keepers = getPcVaultKeepers();
+            const pcCountEl = document.getElementById('pc-vault-count');
+            const pcBonusEl = document.getElementById('pc-vault-bonus');
+            if (pcCountEl) pcCountEl.textContent = keepers.length;
+            if (pcBonusEl) pcBonusEl.textContent = `+${keepers.length * 3}%`;
+
             document.getElementById('dupe-count-badge').textContent = dupes.length;
             document.getElementById('dupe-quicksell-val').textContent = `${formatMoney(dupeQuickTotal)} instant (70%)`;
-            document.getElementById('all-count-badge').textContent = state.inventory.length;
+            document.getElementById('all-count-badge').textContent = unlockedAllCount;
             document.getElementById('all-quicksell-val').textContent = `${formatMoney(allQuickTotal)} instant (70%)`;
             const baseBadgeEl = document.getElementById('base-count-badge');
             const baseValEl = document.getElementById('base-list-val');
@@ -2426,43 +2825,53 @@
             }
 
             const sorted = [...state.inventory].sort((a, b) => {
+                if (Boolean(a.isKeeper) !== Boolean(b.isKeeper)) return a.isKeeper ? -1 : 1;
                 const ca = CARD_CATALOG.find(c => c.id === a.cardId) || CARD_CATALOG[0];
                 const ra = RARITIES.find(r => r.id === a.rarityId) || RARITIES[0];
                 const cb = CARD_CATALOG.find(c => c.id === b.cardId) || CARD_CATALOG[0];
                 const rb = RARITIES.find(r => r.id === b.rarityId) || RARITIES[0];
-                return calculateCardValue(cb, rb, getItemGradeMultiplier(b)) - calculateCardValue(ca, ra, getItemGradeMultiplier(a));
+                return calculateCardValue(cb, rb, getItemGradeMultiplier(b), true, b.conditionId, b.chaseId, b.isCoty) -
+                       calculateCardValue(ca, ra, getItemGradeMultiplier(a), true, a.conditionId, a.chaseId, a.isCoty);
             });
 
             const maxSlots = getMaxGradingSlots();
-            listEl.innerHTML = sorted.slice(0, 40).map(item => {
+            listEl.innerHTML = sorted.slice(0, 45).map(item => {
                 const card = CARD_CATALOG.find(c => c.id === item.cardId) || CARD_CATALOG[0];
                 const rarity = RARITIES.find(r => r.id === item.rarityId) || RARITIES[0];
+                const condObj = getConditionById(item.conditionId);
+                const chaseObj = getChaseVariantById(item.chaseId);
                 const gradeMult = getItemGradeMultiplier(item);
                 const gradeBadge = getItemGradeBadge(item);
-                const grossVal = calculateCardValue(card, rarity, gradeMult, true);
+                const grossVal = calculateCardValue(card, rarity, gradeMult, true, item.conditionId, item.chaseId, item.isCoty);
                 const netListVal = calculateNetListingPayout(grossVal);
                 const quickVal = calculateQuickSellPayout(grossVal);
-                const gradingFee = Math.max(10, calculateCardValue(card, rarity, 1.0, true) * 0.55);
+                const gradingFee = Math.max(10, calculateCardValue(card, rarity, 1.0, true, item.conditionId, item.chaseId, item.isCoty) * 0.55);
                 const canGrade = !item.graded && rarity.tier >= 1 && state.gradingQueue.length < maxSlots && state.cash >= gradingFee;
 
                 return `
-                <div class="bg-slate-900 border ${item.graded ? 'border-amber-500/60' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2.5 min-w-0">
+                <div class="bg-slate-900 border ${item.isKeeper ? 'border-sky-400/70' : (item.graded ? 'border-amber-500/60' : 'border-slate-800')} rounded-2xl p-2.5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
                         <div class="w-10 h-10 rounded-xl bg-slate-950 border ${rarity.border} flex items-center justify-center shrink-0 relative">
                             ${renderCardArtwork(card, 'text-xl')}
-                            ${item.graded ? `<span class="absolute -top-1.5 -right-1.5 bg-amber-400 text-slate-950 text-[8px] font-black px-1 rounded">${gradeBadge}</span>` : ''}
+                            ${item.graded ? `<span class="absolute -top-1.5 -right-1.5 ${gradeMult >= 4.5 ? 'holo-foil text-slate-950' : 'bg-amber-400 text-slate-950'} text-[8px] font-black px-1 rounded">${gradeBadge}</span>` : ''}
                         </div>
                         <div class="min-w-0">
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex items-center gap-1 flex-wrap">
                                 <span class="text-xs font-bold text-white truncate">${card.name}</span>
                                 <span class="text-[8px] font-bold px-1.5 py-0.2 rounded ${rarity.badge} shrink-0">${rarity.name}</span>
+                                ${chaseObj ? `<span class="text-[8px] px-1 rounded ${chaseObj.badge}">${chaseObj.name}</span>` : ''}
+                                ${item.isCoty ? `<span class="text-[8px] px-1 rounded holo-foil text-slate-950 font-black">1/1 COTY</span>` : ''}
                             </div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">
-                                ${SPORT_LABELS[card.theme]} • Market Net: <strong class="text-emerald-400">${formatMoney(netListVal)}</strong>
+                            <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+                                <span class="text-[9px] font-bold px-1 rounded border ${condObj.badge}">${condObj.short}</span>
+                                <span>Net: <strong class="text-emerald-400">${formatMoney(netListVal)}</strong></span>
                             </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="toggleKeeperUid('${item.uid}')" title="${item.isKeeper ? 'Unlock from PC Vault' : 'Keep in PC Vault (+3% bonus)'}" class="btn-press ${item.isKeeper ? 'bg-sky-500 text-slate-950' : 'bg-slate-800 text-slate-300 border border-slate-700'} text-[10px] font-extrabold px-1.5 py-1.5 rounded-xl">
+                            ${item.isKeeper ? '🔒' : '☆'}
+                        </button>
                         <button onclick="startCardAuction('${item.uid}')" ${state.activeAuction ? 'disabled' : ''} title="Live Bid War" class="btn-press disabled:opacity-35 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 border border-fuchsia-400/40 text-fuchsia-200 text-[10px] font-bold px-1.5 py-1.5 rounded-xl">
                             🔨
                         </button>
@@ -2531,6 +2940,24 @@
 
             const uniqueCount = getBinderUniqueCount();
             document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${CARD_CATALOG.length}`;
+
+            const curTier = getCurrentMasterBinderTier();
+            const nextTier = getNextMasterBinderTier();
+            const tierBadgeEl = document.getElementById('binder-tier-badge');
+            const tierTitleEl = document.getElementById('mb-tier-title');
+            const tierNextEl = document.getElementById('mb-tier-next');
+            const tierBarEl = document.getElementById('mb-tier-bar');
+            const tierPerksEl = document.getElementById('mb-tier-perks');
+            if (tierBadgeEl) tierBadgeEl.textContent = `Tier ${curTier.level} • +${getTotalLuckBonusPercent().toFixed(1)}% Luck`;
+            if (tierTitleEl) tierTitleEl.textContent = curTier.title;
+            if (tierNextEl) tierNextEl.textContent = nextTier ? `Next: ${nextTier.minCards} cards (${uniqueCount}/${nextTier.minCards})` : 'MAX TIER UNLOCKED';
+            if (tierBarEl) {
+                const prevMin = curTier.minCards || 0;
+                const targetMin = nextTier ? nextTier.minCards : Math.max(1, prevMin);
+                const pct = nextTier ? Math.min(100, Math.round(((uniqueCount - prevMin) / Math.max(1, targetMin - prevMin)) * 100)) : 100;
+                tierBarEl.style.width = `${pct}%`;
+            }
+            if (tierPerksEl) tierPerksEl.textContent = `Active Perk: ${curTier.perk}`;
 
             const nhlControls = document.getElementById('binder-nhl-controls');
             const showNhlTeamControls = state.binderFilter === 'HOCKEY';
@@ -2631,32 +3058,32 @@
             }
 
             grid.innerHTML = binderHtml;
-
-            // Render Empire Milestones below the binder grid
-            const claimed = Array.isArray(state.claimedMilestones) ? state.claimedMilestones : [];
-            const msCountEl = document.getElementById('milestones-progress-text');
-            if (msCountEl) msCountEl.textContent = `${claimed.length} / ${EMPIRE_MILESTONES.length}`;
-
-            const msListEl = document.getElementById('milestones-list');
-            if (msListEl) {
-                msListEl.innerHTML = EMPIRE_MILESTONES.map(ms => {
-                    const isClaimed = claimed.includes(ms.id);
-                    const isReady = !isClaimed && ms.check();
+            // Render Rarity-Specific Collection Challenges
+            const rChallengesEl = document.getElementById('rarity-challenges-list');
+            const rChallengesCountEl = document.getElementById('rarity-challenges-count');
+            const completedCh = getCompletedRarityChallenges();
+            if (rChallengesCountEl) rChallengesCountEl.textContent = `${completedCh.length} / ${RARITY_CHALLENGES.length}`;
+            if (rChallengesEl) {
+                rChallengesEl.innerHTML = RARITY_CHALLENGES.map(ch => {
+                    const done = ch.check();
                     return `
-                    <div class="bg-slate-900 border ${isReady ? 'border-amber-400/70' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2.5">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-lg shrink-0">${ms.icon}</div>
-                            <div class="min-w-0">
-                                <div class="text-xs font-bold text-white truncate">${ms.title}</div>
-                                <div class="text-[10px] text-slate-400 truncate">${ms.desc}</div>
-                                <div class="text-[10px] font-semibold text-amber-400 mt-0.5">+${ms.rewardBadges} Badge • +${ms.rewardRep} Rep</div>
-                            </div>
+                    <div class="bg-slate-900 border ${done ? 'border-purple-400/70' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-white truncate">${ch.title}</div>
+                            <div class="text-[10px] text-slate-400 leading-tight">${ch.desc}</div>
+                            <div class="text-[10px] font-semibold text-purple-300 mt-0.5">${ch.rewardText}</div>
                         </div>
-                        <button onclick="claimMilestone('${ms.id}')" ${isReady ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-45 ${isClaimed ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-amber-400 hover:bg-amber-300 text-slate-950'} font-extrabold text-[10px] px-3 py-2 rounded-xl">
-                            ${isClaimed ? 'Claimed' : (isReady ? 'Claim' : 'Locked')}
-                        </button>
+                        <span class="shrink-0 text-[10px] font-extrabold px-2.5 py-1 rounded-xl ${done ? 'bg-purple-500/25 text-purple-200 border border-purple-400/40' : 'bg-slate-800 text-slate-400'}">
+                            ${done ? '✓ ACTIVE' : 'IN PROGRESS'}
+                        </span>
                     </div>`;
                 }).join('');
+            }
+
+            const cotyCountEl = document.getElementById('coty-found-count');
+            if (cotyCountEl) {
+                const cCount = Array.isArray(state.cotyPulls) ? state.cotyPulls.length : 0;
+                cotyCountEl.textContent = `${cCount} Found`;
             }
 
             // Render Set Master Perks & 1/1 Grail / Insert Chase Log
@@ -2733,6 +3160,7 @@
                         upgrades: { ...state.upgrades, ...(parsed.upgrades || {}) },
                         claimedMilestones: Array.isArray(parsed.claimedMilestones) ? parsed.claimedMilestones : [],
                         chaseLog: Array.isArray(parsed.chaseLog) ? parsed.chaseLog : [],
+                        cotyPulls: Array.isArray(parsed.cotyPulls) ? parsed.cotyPulls : [],
                         activeAuction: parsed.activeAuction && typeof parsed.activeAuction === 'object' ? parsed.activeAuction : null,
                         inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
                         listings: Array.isArray(parsed.listings) ? parsed.listings : [],
