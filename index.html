@@ -854,6 +854,26 @@
                 statLabel: (lvl) => lvl === 0 ? 'Locked' : `1 pack every ${Math.max(1.2, 6.5 - lvl * 0.35).toFixed(1)}s`
             },
             {
+                id: 'autoListDupes',
+                name: 'Auto-List Dupes Bot',
+                icon: '♻️',
+                desc: 'Automatically lists all duplicate ungraded singles onto the marketplace.',
+                baseCost: 300,
+                costMult: 2.15,
+                maxLevel: 15,
+                statLabel: (lvl) => lvl === 0 ? 'Locked' : `Lists dupes every ${getAutoListDupesInterval(lvl).toFixed(1)}s`
+            },
+            {
+                id: 'autoListBase',
+                name: 'Auto-List Base Bot',
+                icon: '🗂️',
+                desc: 'Automatically lists all ungraded Base (Common) cards onto the marketplace.',
+                baseCost: 260,
+                costMult: 2.1,
+                maxLevel: 15,
+                statLabel: (lvl) => lvl === 0 ? 'Locked' : `Lists Base every ${getAutoListBaseInterval(lvl).toFixed(1)}s`
+            },
+            {
                 id: 'shippingClerk',
                 name: 'Shipping & Listing Clerk',
                 icon: '🚚',
@@ -993,6 +1013,8 @@
                 gradingSlots: 0,
                 extraShops: 0,
                 autoRipper: 0,
+                autoListDupes: 0,
+                autoListBase: 0,
                 shippingClerk: 0,
                 distributor: 0,
                 storefront: 0,
@@ -1010,7 +1032,17 @@
         let currentRevealedPack = [];
         let marketSellAccumulator = 0;
         let autoRipAccumulator = 0;
+        let autoListDupesAccumulator = 0;
+        let autoListBaseAccumulator = 0;
         let lastSelectedPackId = 'retail';
+
+        function getAutoListDupesInterval(lvl = state.upgrades.autoListDupes || 0) {
+            return Math.max(2.0, 12.5 - lvl * 0.7);
+        }
+
+        function getAutoListBaseInterval(lvl = state.upgrades.autoListBase || 0) {
+            return Math.max(1.5, 10.5 - lvl * 0.6);
+        }
 
         function isSetCompleted(theme) {
             const setCards = CARD_CATALOG.filter(c => c.theme === theme);
@@ -1887,6 +1919,8 @@
                 gradingSlots: 0,
                 extraShops: 0,
                 autoRipper: 0,
+                autoListDupes: 0,
+                autoListBase: 0,
                 shippingClerk: 0,
                 distributor: 0,
                 storefront: 0,
@@ -2209,6 +2243,38 @@
                 }
             } else {
                 autoRipAccumulator = 0;
+            }
+
+            // Auto-List Dupes Bot
+            if ((state.upgrades.autoListDupes || 0) > 0) {
+                const dupesInterval = getAutoListDupesInterval(state.upgrades.autoListDupes);
+                autoListDupesAccumulator += dt;
+                if (autoListDupesAccumulator >= dupesInterval) {
+                    autoListDupesAccumulator = 0;
+                    const dupeUids = getDuplicateUids();
+                    if (dupeUids.length > 0) {
+                        dupeUids.forEach(uid => listCardUid(uid));
+                    }
+                }
+            } else {
+                autoListDupesAccumulator = 0;
+            }
+
+            // Auto-List Base Bot
+            if ((state.upgrades.autoListBase || 0) > 0) {
+                const baseInterval = getAutoListBaseInterval(state.upgrades.autoListBase);
+                autoListBaseAccumulator += dt;
+                if (autoListBaseAccumulator >= baseInterval) {
+                    autoListBaseAccumulator = 0;
+                    const baseUids = Array.isArray(state.inventory)
+                        ? state.inventory.filter(i => i && !i.graded && i.rarityId === 'COMMON').map(i => i.uid)
+                        : [];
+                    if (baseUids.length > 0) {
+                        baseUids.forEach(uid => listCardUid(uid));
+                    }
+                }
+            } else {
+                autoListBaseAccumulator = 0;
             }
 
             updateTopBarUI();
