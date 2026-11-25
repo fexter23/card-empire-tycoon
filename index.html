@@ -381,6 +381,20 @@
                         <!-- Injected via JS -->
                     </div>
                 </div>
+
+                <!-- Empire Milestones / Trophies -->
+                <div class="pt-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <h3 class="text-sm font-bold text-white">Empire Milestones</h3>
+                            <p class="text-[11px] text-slate-400">Hit goals for bonus Rep &amp; Prestige Badges</p>
+                        </div>
+                        <span id="milestones-progress-text" class="font-display font-bold text-xs text-amber-400">0 / 6</span>
+                    </div>
+                    <div id="milestones-list" class="space-y-2">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -729,6 +743,64 @@
             }
         ];
 
+        // Concrete endgame & run milestones that grant permanent Rep & Prestige Badges
+        const EMPIRE_MILESTONES = [
+            {
+                id: 'first_franchise',
+                title: 'Multi-City Operator',
+                desc: 'Own 2+ LCS storefront locations in a run',
+                icon: '🏙️',
+                rewardRep: 35,
+                rewardBadges: 1,
+                check: () => (1 + (state.upgrades.extraShops || 0)) >= 2
+            },
+            {
+                id: 'full_set_master',
+                title: 'Set Completer',
+                desc: 'Complete any full 12-card sport/TCG set in your Binder',
+                icon: '📚',
+                rewardRep: 60,
+                rewardBadges: 1,
+                check: () => getCompletedSetsCount() >= 1
+            },
+            {
+                id: 'half_binder',
+                title: 'Halfway Archivist',
+                desc: 'Slot at least 42 unique cards into your Master Binder',
+                icon: '📖',
+                rewardRep: 100,
+                rewardBadges: 2,
+                check: () => getBinderUniqueCount() >= 42
+            },
+            {
+                id: 'career_100k',
+                title: 'Six-Figure Mogul',
+                desc: 'Reach $100.0K in all-time Career Earnings',
+                icon: '💼',
+                rewardRep: 150,
+                rewardBadges: 2,
+                check: () => Math.max(state.careerEarnings || 0, state.lifetimeCash || 0) >= 100000
+            },
+            {
+                id: 'full_binder_84',
+                title: 'Grand Master Binder',
+                desc: 'Complete all 84 cards in the Master Binder',
+                icon: '👑',
+                rewardRep: 300,
+                rewardBadges: 4,
+                check: () => getBinderUniqueCount() >= CARD_CATALOG.length
+            },
+            {
+                id: 'career_10m',
+                title: 'Hobby Titan ($10M)',
+                desc: 'Reach $10.00M in all-time Career Earnings',
+                icon: '🏆',
+                rewardRep: 500,
+                rewardBadges: 6,
+                check: () => Math.max(state.careerEarnings || 0, state.lifetimeCash || 0) >= 10000000
+            }
+        ];
+
         /* ==========================================================================
            3. GAME STATE & MARKET ROTATION STATE
            ========================================================================== */
@@ -741,6 +813,7 @@
             careerEarnings: 25.00,
             reputation: 10,
             prestigeBadges: 0,
+            claimedMilestones: [],
             themeFilter: 'ALL',
             binderFilter: 'ALL',
             autoRipEnabled: false,
@@ -1243,6 +1316,24 @@
             state.autoRipEnabled = !state.autoRipEnabled;
             SoundFX.click();
             updateTopBarUI();
+        }
+
+        // Claims a completed milestone and grants its permanent Rep & Prestige Badges
+        function claimMilestone(milestoneId) {
+            if (!Array.isArray(state.claimedMilestones)) state.claimedMilestones = [];
+            if (state.claimedMilestones.includes(milestoneId)) return;
+
+            const ms = EMPIRE_MILESTONES.find(m => m.id === milestoneId);
+            if (!ms || !ms.check()) return;
+
+            state.claimedMilestones.push(milestoneId);
+            state.reputation += ms.rewardRep || 0;
+            state.prestigeBadges += ms.rewardBadges || 0;
+
+            SoundFX.rarePull(3);
+            spawnFloatingCash(`+${ms.rewardBadges} Badge • +${ms.rewardRep} Rep!`, 'text-amber-300', 22);
+            saveGame();
+            updateAllUI();
         }
 
         function openPrestigeConfirm() {
@@ -1766,6 +1857,33 @@
                     </div>
                 </div>`;
             }).join('');
+
+            // Render Empire Milestones below the binder grid
+            const claimed = Array.isArray(state.claimedMilestones) ? state.claimedMilestones : [];
+            const msCountEl = document.getElementById('milestones-progress-text');
+            if (msCountEl) msCountEl.textContent = `${claimed.length} / ${EMPIRE_MILESTONES.length}`;
+
+            const msListEl = document.getElementById('milestones-list');
+            if (msListEl) {
+                msListEl.innerHTML = EMPIRE_MILESTONES.map(ms => {
+                    const isClaimed = claimed.includes(ms.id);
+                    const isReady = !isClaimed && ms.check();
+                    return `
+                    <div class="bg-slate-900 border ${isReady ? 'border-amber-400/70' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-lg shrink-0">${ms.icon}</div>
+                            <div class="min-w-0">
+                                <div class="text-xs font-bold text-white truncate">${ms.title}</div>
+                                <div class="text-[10px] text-slate-400 truncate">${ms.desc}</div>
+                                <div class="text-[10px] font-semibold text-amber-400 mt-0.5">+${ms.rewardBadges} Badge • +${ms.rewardRep} Rep</div>
+                            </div>
+                        </div>
+                        <button onclick="claimMilestone('${ms.id}')" ${isReady ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-45 ${isClaimed ? 'bg-slate-800 text-emerald-400 border border-emerald-500/30' : 'bg-amber-400 hover:bg-amber-300 text-slate-950'} font-extrabold text-[10px] px-3 py-2 rounded-xl">
+                            ${isClaimed ? 'Claimed' : (isReady ? 'Claim' : 'Locked')}
+                        </button>
+                    </div>`;
+                }).join('');
+            }
         }
 
         function updateAllUI() {
@@ -1801,6 +1919,7 @@
                         ...state,
                         ...parsed,
                         upgrades: { ...state.upgrades, ...(parsed.upgrades || {}) },
+                        claimedMilestones: Array.isArray(parsed.claimedMilestones) ? parsed.claimedMilestones : [],
                         inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
                         listings: Array.isArray(parsed.listings) ? parsed.listings : [],
                         gradingQueue: Array.isArray(parsed.gradingQueue) ? parsed.gradingQueue : [],
