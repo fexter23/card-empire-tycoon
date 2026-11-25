@@ -88,31 +88,31 @@
             40% { transform: rotate(4deg) scale(1.03); }
             60% { transform: rotate(-3deg) scale(1.02); }
             80% { transform: rotate(3deg) scale(1.01); }
-        }
-        .animate-pack-shake {
-            animation: packShake 0.42s ease-in-out;
-        }
-        @keyframes floatUpFade {
-            0% { opacity: 0; transform: translateY(8px) scale(0.95); }
-            18% { opacity: 1; transform: translateY(0px) scale(1); }
-            100% { opacity: 0; transform: translateY(-44px) scale(1.04); }
-        }
-        .floating-cash {
-            animation: floatUpFade 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-    </style>
-</head>
-<body class="bg-[#090d16] text-slate-100 antialiased selection:bg-sky-500/30">
-    <div id="app-shell" class="max-w-md mx-auto h-dvh flex flex-col bg-[#0b101d] border-x border-slate-800/80 shadow-2xl relative overflow-hidden">
+                    <!-- Binder Set Completion Progress -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400">Master Collector Binder</h3>
+                            <span id="binder-progress-text" class="text-xs font-bold text-white">0 / 84 (0%)</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                            <div id="binder-progress-bar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
 
-        <!-- TOP STICKY ECONOMY HEADER -->
-        <header class="shrink-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3.5 pt-2.5 pb-2 z-30">
-            <div class="flex items-center justify-between gap-2">
-                <!-- Cash Balance -->
-                <div class="min-w-0">
-                    <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                        <span>Bankroll</span>
-                        <span id="passive-income-badge" class="text-emerald-400 font-display font-bold text-xs">+$0.00/s</span>
+                        <!-- Binder Category Filter Pills -->
+                        <div id="binder-theme-selector" class="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
+                            <button onclick="setBinderFilter('ALL')" data-btheme="ALL" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-sky-500 text-slate-950 shrink-0">All (84)</button>
+                            <button onclick="setBinderFilter('Basketball')" data-btheme="Basketball" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏀 Hoops</button>
+                            <button onclick="setBinderFilter('Football')" data-btheme="Football" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏈 Gridiron</button>
+                            <button onclick="setBinderFilter('Soccer')" data-btheme="Soccer" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">⚽ Pitch</button>
+                            <button onclick="setBinderFilter('Hockey')" data-btheme="Hockey" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏒 Hockey</button>
+                            <button onclick="setBinderFilter('F1')" data-btheme="F1" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏎️ F1</button>
+                            <button onclick="setBinderFilter('Golf')" data-btheme="Golf" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">⛳ Golf</button>
+                            <button onclick="setBinderFilter('TCG')" data-btheme="TCG" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🐉 TCG</button>
+                        </div>
+
+                        <p class="text-[11px] text-slate-400 leading-snug">
+                            <strong class="text-sky-400">+5%</strong> cash per unique card &amp; <strong class="text-emerald-400">+40%</strong> per completed <span id="set-card-count-label" class="text-white font-bold">12</span>-card set (<span id="completed-sets-count" class="text-white font-bold">0/7</span> sets done).
+                        </p>
                     </div>
                     <div id="ui-cash" class="font-display font-bold text-xl text-white tracking-tight truncate">$25.00</div>
                 </div>
@@ -519,57 +519,99 @@
 
             const THEMES = ['Basketball', 'Football', 'Soccer', 'Hockey', 'F1', 'Golf', 'TCG'];
 
-            // 42 Unique Cards across 7 categories (6 cards per category)
+            // 84 Unique Cards across 7 categories (12 cards per category)
             const CARD_CATALOG = [
-                // Basketball (6)
+                // Basketball (12)
                 { id: 'bb_1', theme: 'Basketball', icon: '🏀', name: 'Vic Wemby-Tower',   title: 'Alien Block',      baseVal: 4 },
                 { id: 'bb_2', theme: 'Basketball', icon: '🎯', name: 'Steph Splash-30',   title: 'Logo Deep-3',      baseVal: 7 },
                 { id: 'bb_3', theme: 'Basketball', icon: '🪄', name: 'Luka Magic-77',     title: 'Stepback Fade',    baseVal: 10 },
                 { id: 'bb_4', theme: 'Basketball', icon: '🃏', name: 'Nikola Joker-15',   title: 'Sombor Shuffle',   baseVal: 15 },
                 { id: 'bb_5', theme: 'Basketball', icon: '👑', name: 'LeBron King-23',    title: 'Chosen One',       baseVal: 24 },
                 { id: 'bb_6', theme: 'Basketball', icon: '🔥', name: 'Air Jordan-23',     title: 'Flu Game 97',      baseVal: 42 },
-                // Football (6)
+                { id: 'bb_7', theme: 'Basketball', icon: '🐜', name: 'Ant-Man Fly-5',     title: 'Baseline Poster',  baseVal: 9 },
+                { id: 'bb_8', theme: 'Basketball', icon: '⚡', name: 'Shai Smooth-2',     title: 'Midrange Dagger',  baseVal: 13 },
+                { id: 'bb_9', theme: 'Basketball', icon: '🔱', name: 'Greek Freak-34',    title: 'Euro-Step Dunk',   baseVal: 22 },
+                { id: 'bb_10', theme: 'Basketball', icon: '🍀', name: 'Jayson C-Tatum',   title: 'Finals Sidestep',  baseVal: 18 },
+                { id: 'bb_11', theme: 'Basketball', icon: '🦅', name: 'Kobe Mamba-24',    title: '81-Point Night',   baseVal: 38 },
+                { id: 'bb_12', theme: 'Basketball', icon: '🐻', name: 'Ja Morant-12',     title: 'Skyward Bounce',   baseVal: 14 },
+                // Football (12)
                 { id: 'fb_1', theme: 'Football',   icon: '🏈', name: 'Caleb Ice-QB1',     title: 'Off-Platform',     baseVal: 4 },
                 { id: 'fb_2', theme: 'Football',   icon: '🕺', name: 'Justin Griddy-18',  title: '100-Yard Route',   baseVal: 7 },
                 { id: 'fb_3', theme: 'Football',   icon: '⚡', name: 'Lamar MVP-8',       title: 'Juke & Spin',      baseVal: 11 },
                 { id: 'fb_4', theme: 'Football',   icon: '🎽', name: 'Christian CMC-23',  title: 'All-Purpose',      baseVal: 16 },
                 { id: 'fb_5', theme: 'Football',   icon: '🔫', name: 'Patrick Showtime',  title: 'No-Look Laser',    baseVal: 25 },
                 { id: 'fb_6', theme: 'Football',   icon: '🐐', name: 'Tom Terrific-12',   title: '7-Ring Comeback',  baseVal: 44 },
-                // Soccer (6)
+                { id: 'fb_7', theme: 'Football',   icon: '🦬', name: 'Josh Cannon-17',    title: 'Hurdle & Bomb',    baseVal: 15 },
+                { id: 'fb_8', theme: 'Football',   icon: '🐯', name: 'Joe Cool-9',        title: 'Burrowhead Ice',   baseVal: 17 },
+                { id: 'fb_9', theme: 'Football',   icon: '🐆', name: 'Cheetah Hill-10',   title: 'Sub-4.3 Jet',      baseVal: 19 },
+                { id: 'fb_10', theme: 'Football',  icon: '🛡️', name: 'Micah Lion-11',     title: 'Edge Blitz',       baseVal: 14 },
+                { id: 'fb_11', theme: 'Football',  icon: '☀️', name: 'Amon-Ra SunGod',    title: 'Slot Chain-Mover', baseVal: 12 },
+                { id: 'fb_12', theme: 'Football',  icon: '🌟', name: 'Barry Sand-20',     title: 'Ankle Breaker',    baseVal: 39 },
+                // Soccer (12)
                 { id: 'sc_1', theme: 'Soccer',     icon: '⚽', name: 'Lamine Wonderkid',  title: 'Curled Top-Bin',   baseVal: 4 },
                 { id: 'sc_2', theme: 'Soccer',     icon: '🙌', name: 'Jude Hey-Belling',  title: 'Stoppage Volley',  baseVal: 7 },
                 { id: 'sc_3', theme: 'Soccer',     icon: '🤖', name: 'Erling Cyborg-9',   title: 'Golden Boot',      baseVal: 11 },
                 { id: 'sc_4', theme: 'Soccer',     icon: '💨', name: 'Kylian Jet-Mbappe', title: 'Hat-Trick Final',  baseVal: 16 },
                 { id: 'sc_5', theme: 'Soccer',     icon: '🇵🇹', name: 'Cristiano CR7',     title: 'Bicycle UCL',      baseVal: 26 },
                 { id: 'sc_6', theme: 'Soccer',     icon: '🇦🇷', name: 'Lionel La-Pulga',   title: 'World Cup Crown',  baseVal: 45 },
-                // Hockey (6)
+                { id: 'sc_7', theme: 'Soccer',     icon: '🇪🇬', name: 'Mo Pharaoh-11',     title: 'Anfield Cutter',   baseVal: 18 },
+                { id: 'sc_8', theme: 'Soccer',     icon: '🇧🇷', name: 'Vini Samba-7',      title: 'Wembley Finish',   baseVal: 21 },
+                { id: 'sc_9', theme: 'Soccer',     icon: '🧙', name: 'Kevin Vision-17',   title: 'Outside-Boot Pass',baseVal: 20 },
+                { id: 'sc_10', theme: 'Soccer',    icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Bukayo Starboy-7', title: 'Emirates Curler',  baseVal: 13 },
+                { id: 'sc_11', theme: 'Soccer',    icon: '🪄', name: 'Rodri Metronome',   title: 'Final Winner',     baseVal: 17 },
+                { id: 'sc_12', theme: 'Soccer',    icon: '🇧🇷', name: 'O Rei Pele-10',     title: '3x Jules Rimet',   baseVal: 43 },
+                // Hockey (12)
                 { id: 'hk_1', theme: 'Hockey',     icon: '🏒', name: 'Connor McJet',      title: 'Rookie Ice',       baseVal: 3 },
                 { id: 'hk_2', theme: 'Hockey',     icon: '🥅', name: 'Patrick Roy-al',    title: 'Glove Save',       baseVal: 5 },
                 { id: 'hk_3', theme: 'Hockey',     icon: '🚨', name: 'Alex Ovech-King',   title: 'One-Timer',        baseVal: 8 },
                 { id: 'hk_4', theme: 'Hockey',     icon: '🏆', name: 'Sidney Frostby',    title: 'Captain Clutch',   baseVal: 12 },
                 { id: 'hk_5', theme: 'Hockey',     icon: '⚡', name: 'Cale Makar-ov',     title: 'Blue Line Jet',    baseVal: 18 },
                 { id: 'hk_6', theme: 'Hockey',     icon: '👑', name: 'Wayne Great-One',   title: '99 Dynasty',       baseVal: 32 },
-                // F1 (6)
+                { id: 'hk_7', theme: 'Hockey',     icon: ' Auston', name: 'Auston Snipe-34', title: '40-Goal Rocket',   baseVal: 14 },
+                { id: 'hk_8', theme: 'Hockey',     icon: '🧸', name: 'Leon Drai-Laser',   title: 'Powerplay Bank',   baseVal: 16 },
+                { id: 'hk_9', theme: 'Hockey',     icon: '🦊', name: 'Igor Wall-31',      title: 'Garden Shutout',   baseVal: 13 },
+                { id: 'hk_10', theme: 'Hockey',    icon: '🔥', name: 'Nathan Mac-29',     title: 'Cup Rush',         baseVal: 19 },
+                { id: 'hk_11', theme: 'Hockey',    icon: '🇨🇦', name: 'Mario Lemieux-66',  title: 'Five-Goal Night',  baseVal: 34 },
+                { id: 'hk_12', theme: 'Hockey',    icon: '🛡️', name: 'Nikita Kucher-86',  title: 'Playoff Maestro',  baseVal: 15 },
+                // F1 (12)
                 { id: 'f1_1', theme: 'F1',         icon: '🏎️', name: 'Max Apex',          title: 'Pole Position',    baseVal: 4 },
                 { id: 'f1_2', theme: 'F1',         icon: '🏁', name: 'Lewis Hammer',      title: '7x Crown',         baseVal: 7 },
                 { id: 'f1_3', theme: 'F1',         icon: '🔥', name: 'Charles Monaco',    title: 'Red Scuderia',     baseVal: 10 },
                 { id: 'f1_4', theme: 'F1',         icon: '⏱️', name: 'Lando Turbo',       title: 'Papaya Flash',     baseVal: 15 },
                 { id: 'f1_5', theme: 'F1',         icon: '🛞', name: 'Fernando ElPlan',   title: 'Street Master',    baseVal: 22 },
                 { id: 'f1_6', theme: 'F1',         icon: '🇧🇷', name: 'Ayrton Rainmaster', title: 'Monaco Legend',    baseVal: 36 },
-                // Golf (6)
+                { id: 'f1_7', theme: 'F1',         icon: '🇦🇺', name: 'Oscar Piastri-81',  title: 'Baku Late-Brake',  baseVal: 12 },
+                { id: 'f1_8', theme: 'F1',         icon: '🇬🇧', name: 'George Russell-63', title: 'Spa Pole',         baseVal: 11 },
+                { id: 'f1_9', theme: 'F1',         icon: '🇪🇸', name: 'Carlos Smooth-55',  title: 'Singapore Win',    baseVal: 13 },
+                { id: 'f1_10', theme: 'F1',        icon: '🇩🇪', name: 'Michael Baron-7',   title: 'Suzuka Rain',      baseVal: 35 },
+                { id: 'f1_11', theme: 'F1',        icon: '🇳🇱', name: 'Max Interlagos',    title: 'P17 to P1',        baseVal: 24 },
+                { id: 'f1_12', theme: 'F1',        icon: '🇦🇹', name: 'Niki Comeback-1',   title: 'Scar & Glory',     baseVal: 27 },
+                // Golf (12)
                 { id: 'gf_1', theme: 'Golf',       icon: '⛳', name: 'Rory Fairway',      title: '340yd Bomb',       baseVal: 3 },
                 { id: 'gf_2', theme: 'Golf',       icon: '🏌️', name: 'Scottie Number1',   title: 'Green Jacket',     baseVal: 6 },
                 { id: 'gf_3', theme: 'Golf',       icon: '🦅', name: 'Viktor Smiles',     title: 'Sunday Eagle',     baseVal: 9 },
                 { id: 'gf_4', theme: 'Golf',       icon: '🌊', name: 'Collin Ironplay',   title: 'Pebble Approach',  baseVal: 14 },
                 { id: 'gf_5', theme: 'Golf',       icon: '🕶️', name: 'Brooks Major',      title: 'Sunday Pressure',  baseVal: 20 },
                 { id: 'gf_6', theme: 'Golf',       icon: '🐅', name: 'Tiger Sunday-Red',  title: 'Roar at Augusta',  baseVal: 35 },
-                // TCG (6)
+                { id: 'gf_7', theme: 'Golf',       icon: '🇺🇸', name: 'Xander Olympic-G',  title: 'Valhalla Finish',  baseVal: 15 },
+                { id: 'gf_8', theme: 'Golf',       icon: '🇸🇪', name: 'Ludvig Draw-2',     title: 'Torrey Tee-Shot',  baseVal: 10 },
+                { id: 'gf_9', theme: 'Golf',       icon: '🇪🇸', name: 'Jon Rahm-10',       title: 'Masters Charge',   baseVal: 18 },
+                { id: 'gf_10', theme: 'Golf',      icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Tommy Fleetwood',  title: 'Links Flop-Shot',  baseVal: 11 },
+                { id: 'gf_11', theme: 'Golf',      icon: '🎩', name: 'Jack Golden-Bear',  title: '18-Major Icon',    baseVal: 37 },
+                { id: 'gf_12', theme: 'Golf',      icon: '🌟', name: 'Arnold Arnie-King', title: 'Bay Hill Charge',  baseVal: 26 },
+                // TCG (12)
                 { id: 'tc_1', theme: 'TCG',        icon: '⚡', name: 'Volt Mouse',        title: '1st Edition',      baseVal: 4 },
                 { id: 'tc_2', theme: 'TCG',        icon: '🌿', name: 'Flora Dino',        title: 'Jungle Foil',      baseVal: 7 },
                 { id: 'tc_3', theme: 'TCG',        icon: '💧', name: 'Hydro Shell',       title: 'Tsunami Rare',     baseVal: 11 },
                 { id: 'tc_4', theme: 'TCG',        icon: '🔮', name: 'Psy Mew-Clone',     title: 'Secret Alt-Art',   baseVal: 16 },
                 { id: 'tc_5', theme: 'TCG',        icon: '🪷', name: 'Black Lotus Gem', title: 'Alpha Artifact',   baseVal: 28 },
-                { id: 'tc_6', theme: 'TCG',        icon: '🐉', name: 'Flame Drake GX',    title: 'Shadowless Grail', baseVal: 42 }
+                { id: 'tc_6', theme: 'TCG',        icon: '🐉', name: 'Flame Drake GX',    title: 'Shadowless Grail', baseVal: 42 },
+                { id: 'tc_7', theme: 'TCG',        icon: '🌙', name: 'Umbra Moon-Alt',    title: 'Evolving Chase',   baseVal: 25 },
+                { id: 'tc_8', theme: 'TCG',        icon: '⚔️', name: 'Blue-Eyes White',   title: 'LOB Legend',       baseVal: 30 },
+                { id: 'tc_9', theme: 'TCG',        icon: '🪄', name: 'Dark Magician-7',   title: 'Millennium Foil',  baseVal: 22 },
+                { id: 'tc_10', theme: 'TCG',       icon: '💎', name: 'Mox Sapphire-0',    title: 'Power Nine',       baseVal: 36 },
+                { id: 'tc_11', theme: 'TCG',       icon: '🌌', name: 'Giratina Lost-V',   title: 'Alternate Art',    baseVal: 21 },
+                { id: 'tc_12', theme: 'TCG',       icon: '👑', name: 'Pikachu Trophy-1',  title: 'World Champ',      baseVal: 45 }
             ];
 
             const UPGRADES_CONFIG = [
@@ -709,7 +751,7 @@
             function getBinderMultiplier() {
                 const uniqueCount = Object.keys(state.binder).length;
                 const completedSets = getCompletedSetsCount();
-                return 1 + uniqueCount * 0.05 + completedSets * 0.35;
+                return 1 + uniqueCount * 0.05 + completedSets * 0.40;
             }
 
             function getPrestigeMultiplier() {
@@ -1591,6 +1633,13 @@
                 const totalCatalog = CARD_CATALOG.length;
                 const pct = Math.round((uniqueCount / totalCatalog) * 100);
                 const completedSets = getCompletedSetsCount();
+                const cardsPerSet = Math.round(totalCatalog / THEMES.length);
+
+                const allBtn = document.querySelector('.btheme-pill[data-btheme="ALL"]');
+                if (allBtn) allBtn.textContent = `All (${totalCatalog})`;
+
+                const setSizeLabel = document.getElementById('set-card-count-label');
+                if (setSizeLabel) setSizeLabel.textContent = cardsPerSet;
 
                 document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${totalCatalog} (${pct}%)`;
                 document.getElementById('binder-progress-bar').style.width = `${pct}%`;
