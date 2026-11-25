@@ -566,7 +566,8 @@
             HOCKEY:     { id: 'HOCKEY',     label: 'NHL Rink', icon: '🏒', accent: 'text-cyan-400' },
             F1:         { id: 'F1',         label: 'Apex F1', icon: '🏎️', accent: 'text-rose-400' },
             GOLF:       { id: 'GOLF',       label: 'Tour Links', icon: '⛳', accent: 'text-lime-400' },
-            TCG:        { id: 'TCG',        label: 'Mythic TCG', icon: '🔮', accent: 'text-purple-400' }
+            TCG:        { id: 'TCG',        label: 'Mythic TCG', icon: '🔮', accent: 'text-purple-400' },
+            POKEMON:    { id: 'POKEMON',    label: 'Pokémon TCG', icon: '⚡', accent: 'text-yellow-400' }
         };
 
         const THEME_SET_PERKS = {
@@ -576,7 +577,8 @@
             HOCKEY:     { label: 'NHL Rink Bonus', desc: '+25% NHL card sales & -15% NHL pack cost', salesMult: 0.25, packDiscount: 0.15 },
             F1:         { label: 'Paddock Telemetry', desc: '+20% Slab values & -10% grading wait time', slabBoost: 0.20, gradeSpeedBoost: 0.10 },
             GOLF:       { label: 'Clubhouse Precision', desc: '+25% Golf card sales & +2% base luck', salesMult: 0.25, luckBoost: 0.02 },
-            TCG:        { label: 'Arcane Resonance', desc: '+25% Mythic TCG sales & +8% passive LCS cash', salesMult: 0.25, passiveBoost: 0.08 }
+            TCG:        { label: 'Arcane Resonance', desc: '+25% Mythic TCG sales & +8% passive LCS cash', salesMult: 0.25, passiveBoost: 0.08 },
+            POKEMON:    { label: 'Pokédex Master', desc: '+25% Pokémon TCG sales & +2% base luck', salesMult: 0.25, luckBoost: 0.02 }
         };
 
         const MASTER_BINDER_TIERS = [
@@ -840,7 +842,15 @@
             { id: 'tcg_1', theme: 'TCG', name: 'Astral Wyrmling', baseVal: 9.50 },
             { id: 'tcg_2', theme: 'TCG', name: 'Chrono Archmage', baseVal: 12.50 },
             { id: 'tcg_3', theme: 'TCG', name: 'Obsidian Golem', baseVal: 8.00 },
-            { id: 'tcg_4', theme: 'TCG', name: 'Sovereign of Dawn', baseVal: 16.00 }
+            { id: 'tcg_4', theme: 'TCG', name: 'Sovereign of Dawn', baseVal: 16.00 },
+
+            // POKEMON TCG (TCGdex CDN images with automatic SVG fallback)
+            { id: 'pkm_1', theme: 'POKEMON', name: 'Charizard ex', baseVal: 18.50, artUrl: 'https://assets.tcgdex.net/en/sv/sv03.5/006/high.webp' },
+            { id: 'pkm_2', theme: 'POKEMON', name: 'Pikachu ex', baseVal: 15.00, artUrl: 'https://assets.tcgdex.net/en/sv/sv08/057/high.webp' },
+            { id: 'pkm_3', theme: 'POKEMON', name: 'Umbreon VMAX', baseVal: 22.00, artUrl: 'https://assets.tcgdex.net/en/swsh/swsh7/095/high.webp' },
+            { id: 'pkm_4', theme: 'POKEMON', name: 'Rayquaza VMAX', baseVal: 19.50, artUrl: 'https://assets.tcgdex.net/en/swsh/swsh7/110/high.webp' },
+            { id: 'pkm_5', theme: 'POKEMON', name: 'Gengar ex', baseVal: 14.50, artUrl: 'https://assets.tcgdex.net/en/sv/sv05/104/high.webp' },
+            { id: 'pkm_6', theme: 'POKEMON', name: 'Mewtwo ex', baseVal: 16.50, artUrl: 'https://assets.tcgdex.net/en/sv/sv03.5/150/high.webp' }
         ];
 
         const OBJECTIVE_REWARD_CARDS = {
@@ -1164,7 +1174,8 @@
                 theme === 'SOCCER' ? '#059669' :
                 theme === 'HOCKEY' ? '#0284c7' :
                 theme === 'F1' ? '#e11d48' :
-                theme === 'GOLF' ? '#65a30d' : '#7e22ce'
+                theme === 'GOLF' ? '#65a30d' :
+                theme === 'POKEMON' ? '#eab308' : '#7e22ce'
             );
             const secondary = teamMeta ? teamMeta.secondary : '#38bdf8';
             const codeLabel = escapeSvgText(card.teamCode || theme.slice(0, 3));
@@ -1265,6 +1276,20 @@
                     ${foilOverlay}
                 </svg>
             `;
+        }
+
+        function renderCardVisual(card, rarity, opts = {}) {
+            if (card && card.artUrl) {
+                const safeUrl = escapeSvgText(card.artUrl);
+                const safeName = escapeSvgText(card.name || 'Pokémon Card');
+                const fallbackSvg = escapeSvgText(renderCardArtwork(card, rarity, opts));
+                return `
+                    <div class="relative w-full h-full bg-slate-950 flex items-center justify-center">
+                        <img src="${safeUrl}" alt="${safeName}" loading="lazy" class="w-full h-full object-cover object-top" onerror="this.outerHTML = decodeURIComponent('${encodeURIComponent(renderCardArtwork(card, rarity, opts))}')" data-fallback="${fallbackSvg}"/>
+                    </div>
+                `;
+            }
+            return renderCardArtwork(card, rarity, opts);
         }
 
         // ==================== APPLICATION STATE ====================
@@ -2701,7 +2726,7 @@
                             ${p.isNew ? '<span class="text-[9px] font-extrabold bg-emerald-400 text-slate-950 px-1.5 py-0.5 rounded">NEW</span>' : `<span class="text-[9px] font-semibold px-1 py-0.2 rounded border ${cond.badgeClass}">${cond.short}</span>`}
                         </div>
                         <div class="my-1 z-10 rounded-lg overflow-hidden border border-white/10 h-20 bg-slate-950">
-                            ${renderCardArtwork(card, rarity, { chaseId: p.chaseId, isCoty: p.isCoty })}
+                            ${renderCardVisual(card, rarity, { chaseId: p.chaseId, isCoty: p.isCoty })}
                         </div>
                         <div class="z-10 mt-1">
                             <div class="text-[11px] font-bold text-white leading-tight truncate">${card.name}</div>
@@ -2833,7 +2858,7 @@
                     <div class="bg-empire-card border ${item.isKeeper ? 'border-amber-500/40' : (item.graded ? 'border-amber-500/40' : 'border-empire-border')} rounded-2xl p-2.5 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <div class="w-16 h-12 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-slate-950">
-                                ${renderCardArtwork(card, rarity, { chaseId: item.chaseId, isCoty: item.isCoty })}
+                                ${renderCardVisual(card, rarity, { chaseId: item.chaseId, isCoty: item.isCoty })}
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -3049,7 +3074,7 @@
                             <span class="text-[10px]">${THEMES[card.theme]?.icon || ''}</span>
                         </div>
                         <div class="my-1 rounded overflow-hidden border border-white/10 h-12 bg-slate-950 ${owned ? '' : 'grayscale opacity-40'}">
-                            ${renderCardArtwork(card, rarity || RARITIES[0], {})}
+                            ${renderCardVisual(card, rarity || RARITIES[0], {})}
                         </div>
                         <div class="text-[10px] font-bold ${owned ? 'text-white' : 'text-slate-500'} leading-tight truncate">${card.name}</div>
                     </div>
