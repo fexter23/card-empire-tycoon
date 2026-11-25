@@ -154,22 +154,22 @@
                         <!-- Era Pills -->
                         <div id="theme-selector" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
 
-                        <!-- Expansion Set Selector + Live TCGdex Set Importer -->
-                        <div id="team-selector-wrap" class="space-y-2.5">
-                            <div class="flex items-center justify-between text-xs text-slate-400">
-                                <label for="team-filter-select" class="font-semibold text-slate-300">Active Pokémon TCG Set</label>
-                                <span id="team-filter-hint" class="text-amber-300 font-semibold">Loaded</span>
-                            </div>
-                            <select id="team-filter-select" class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400"></select>
-
-                            <div class="pt-1 border-t border-slate-800/80 space-y-1.5">
-                                <div class="text-[11px] font-semibold text-slate-300">Fetch Any TCGdex Set Code (e.g. <span class="text-amber-300">sv01</span>, <span class="text-amber-300">swsh1</span>, <span class="text-amber-300">sm7</span>)</div>
-                                <div class="flex gap-2">
-                                    <input id="custom-set-code-input" type="text" placeholder="Enter TCGdex set id..." class="flex-1 rounded-xl bg-slate-900 border border-slate-700 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400" />
-                                    <button id="btn-fetch-tcgdex-set" type="button" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-400 text-slate-950 hover:brightness-110 transition cursor-pointer">
-                                        Load Set
-                                    </button>
+                        <!-- Cascading Series -> Expansion Set Dropdowns (No Set Code Typing Required) -->
+                        <div id="team-selector-wrap" class="space-y-3 pt-1 border-t border-slate-800/80">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between text-xs text-slate-400">
+                                    <label for="series-cascade-select" class="font-semibold text-slate-300">Series</label>
+                                    <span id="series-count-hint" class="text-sky-300 font-semibold">18 Series</span>
                                 </div>
+                                <select id="series-cascade-select" class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400"></select>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between text-xs text-slate-400">
+                                    <label for="team-filter-select" class="font-semibold text-slate-300">Expansion Set</label>
+                                    <span id="team-filter-hint" class="text-amber-300 font-semibold">Loaded</span>
+                                </div>
+                                <select id="team-filter-select" class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400"></select>
                             </div>
                         </div>
                     </div>
@@ -478,13 +478,34 @@
 
     <script>
         // =========================================================================
-        // POKÉMON TCG ERAS, SETS & ROSTER DATA
+        // POKÉMON TCG ERAS, SERIES, SETS & ROSTER DATA
         // =========================================================================
+        const POKEMON_SERIES_LIST = [
+            { id: 'mega_evolution', name: 'Mega Evolution', dateLabel: 'Sep 26, 2025', era: 'MEGA_EVOLUTION' },
+            { id: 'scarlet_violet', name: 'Scarlet & Violet', dateLabel: 'Mar 31, 2023', era: 'SCARLET_VIOLET' },
+            { id: 'sword_shield', name: 'Sword & Shield', dateLabel: 'Nov 15, 2019', era: 'SWORD_SHIELD' },
+            { id: 'sun_moon', name: 'Sun & Moon', dateLabel: 'Feb 3, 2017', era: 'SUN_MOON' },
+            { id: 'xy', name: 'XY', dateLabel: 'Oct 12, 2013', era: 'BW_XY' },
+            { id: 'black_white', name: 'Black & White', dateLabel: 'Mar 1, 2011', era: 'BW_XY' },
+            { id: 'hgss', name: 'HeartGold & SoulSilver', dateLabel: 'Feb 10, 2010', era: 'EX_DP_HGSS' },
+            { id: 'platinum', name: 'Platinum', dateLabel: 'Feb 11, 2009', era: 'EX_DP_HGSS' },
+            { id: 'diamond_pearl', name: 'Diamond & Pearl', dateLabel: 'May 1, 2007', era: 'EX_DP_HGSS' },
+            { id: 'pop', name: 'POP', dateLabel: 'Sep 1, 2004', era: 'WOTC_BASE' },
+            { id: 'np', name: 'NP', dateLabel: 'Oct 1, 2003', era: 'WOTC_BASE' },
+            { id: 'ex', name: 'EX', dateLabel: 'Jul 1, 2003', era: 'EX_DP_HGSS' },
+            { id: 'ecard', name: 'E-Card', dateLabel: 'Sep 15, 2002', era: 'WOTC_BASE' },
+            { id: 'neo', name: 'Neo', dateLabel: 'Dec 16, 2000', era: 'WOTC_BASE' },
+            { id: 'gym', name: 'Gym', dateLabel: 'Aug 14, 2000', era: 'WOTC_BASE' },
+            { id: 'base', name: 'Base', dateLabel: 'Jan 9, 1999', era: 'WOTC_BASE' },
+            { id: 'other', name: 'Other', dateLabel: 'Various', era: 'SUN_MOON' },
+            { id: 'collections', name: 'Collections', dateLabel: 'Various', era: 'SCARLET_VIOLET' }
+        ];
+
         const THEMES = {
             WOTC_BASE: {
                 id: 'WOTC_BASE',
-                name: 'WotC & Neo Era',
-                shortName: 'WotC & Neo',
+                name: 'Classic & Neo Era',
+                shortName: 'Classic & Neo',
                 icon: '🔥',
                 accent: 'from-amber-500 to-red-700',
                 badgeBg: 'bg-amber-500/15 text-amber-300 border-amber-400/30',
@@ -493,8 +514,8 @@
             },
             EX_DP_HGSS: {
                 id: 'EX_DP_HGSS',
-                name: 'DP, Platinum & HGSS',
-                shortName: 'DP / HGSS',
+                name: 'EX, DP, Platinum & HGSS',
+                shortName: 'EX / DP / HGSS',
                 icon: '✨',
                 accent: 'from-sky-500 to-indigo-700',
                 badgeBg: 'bg-sky-500/15 text-sky-300 border-sky-400/30',
@@ -541,6 +562,16 @@
                 hasTeams: true,
                 tcgdexEra: 'sv'
             },
+            MEGA_EVOLUTION: {
+                id: 'MEGA_EVOLUTION',
+                name: 'Mega Evolution Era',
+                shortName: 'Mega Evolution',
+                icon: '🧬',
+                accent: 'from-orange-500 to-amber-500',
+                badgeBg: 'bg-orange-500/15 text-orange-300 border-orange-400/30',
+                hasTeams: true,
+                tcgdexEra: 'sv'
+            },
             PROMO_VAULT: {
                 id: 'PROMO_VAULT',
                 name: 'Special & Promo Vault',
@@ -554,64 +585,113 @@
         };
 
         const POKEMON_SETS = [
-            // WOTC_BASE
-            { code: 'base1', era: 'WOTC_BASE', name: 'Base Set (1999)', primary: '#F59E0B', secondary: '#1E3A8A' },
-            { code: 'base2', era: 'WOTC_BASE', name: 'Jungle', primary: '#10B981', secondary: '#064E3B' },
-            { code: 'base3', era: 'WOTC_BASE', name: 'Fossil', primary: '#78716C', secondary: '#292524' },
-            { code: 'base4', era: 'WOTC_BASE', name: 'Base Set 2', primary: '#D97706', secondary: '#78350F' },
-            { code: 'gym1', era: 'WOTC_BASE', name: 'Gym Heroes', primary: '#DC2626', secondary: '#1E293B' },
-            { code: 'gym2', era: 'WOTC_BASE', name: 'Gym Challenge', primary: '#7C3AED', secondary: '#1E1B4B' },
-            { code: 'neo1', era: 'WOTC_BASE', name: 'Neo Genesis', primary: '#38BDF8', secondary: '#0F172A' },
-            { code: 'neo4', era: 'WOTC_BASE', name: 'Neo Destiny', primary: '#A855F7', secondary: '#1E1B4B' },
+            // MEGA_EVOLUTION (from screenshot)
+            { code: 'me_flo', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Flowing Fists (Feb 5, 2027)', primary: '#10B981', secondary: '#0F172A' },
+            { code: 'me_dlr', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Delta Reign (Nov 6, 2026)', primary: '#F59E0B', secondary: '#064E3B' },
+            { code: 'me_30th', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: '30th Celebration (Sep 16, 2026)', primary: '#FACC15', secondary: '#1E3A8A' },
+            { code: 'me_30th_cc', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: '30th Anniversary: Classic Collection (Sep 16, 2026)', primary: '#EAB308', secondary: '#1E293B' },
+            { code: 'me_pbl', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Pitch Black (Jul 17, 2026)', primary: '#A855F7', secondary: '#090D16' },
+            { code: 'me_cri', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Chaos Rising (May 22, 2026)', primary: '#38BDF8', secondary: '#312E81' },
+            { code: 'me_por', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Perfect Order (Mar 27, 2026)', primary: '#22C55E', secondary: '#0F172A' },
+            { code: 'me_asc', seriesId: 'mega_evolution', era: 'MEGA_EVOLUTION', name: 'Ascended Heroes (Jan 30, 2026)', primary: '#F97316', secondary: '#1E1B4B' },
 
-            // EX_DP_HGSS
-            { code: 'dp1', era: 'EX_DP_HGSS', name: 'Diamond & Pearl', primary: '#3B82F6', secondary: '#1E3A8A' },
-            { code: 'dp4', era: 'EX_DP_HGSS', name: 'Mysterious Treasures', primary: '#6366F1', secondary: '#1E1B4B' },
-            { code: 'dp7', era: 'EX_DP_HGSS', name: 'Stormfront', primary: '#0EA5E9', secondary: '#082F49' },
-            { code: 'pl1', era: 'EX_DP_HGSS', name: 'Platinum', primary: '#94A3B8', secondary: '#0F172A' },
-            { code: 'hgss1', era: 'EX_DP_HGSS', name: 'HeartGold & SoulSilver', primary: '#EAB308', secondary: '#1E293B' },
-            { code: 'col1', era: 'EX_DP_HGSS', name: 'Call of Legends', primary: '#F97316', secondary: '#1C1917' },
+            // BASE
+            { code: 'base1', seriesId: 'base', era: 'WOTC_BASE', name: 'Base Set (Jan 9, 1999)', primary: '#F59E0B', secondary: '#1E3A8A' },
+            { code: 'base2', seriesId: 'base', era: 'WOTC_BASE', name: 'Jungle', primary: '#10B981', secondary: '#064E3B' },
+            { code: 'base3', seriesId: 'base', era: 'WOTC_BASE', name: 'Fossil', primary: '#78716C', secondary: '#292524' },
+            { code: 'base4', seriesId: 'base', era: 'WOTC_BASE', name: 'Base Set 2', primary: '#D97706', secondary: '#78350F' },
 
-            // BW_XY
-            { code: 'bw1', era: 'BW_XY', name: 'Black & White', primary: '#1F2937', secondary: '#F8FAFC' },
-            { code: 'bw5', era: 'BW_XY', name: 'Dark Explorers', primary: '#4C1D95', secondary: '#090D16' },
-            { code: 'bw11', era: 'BW_XY', name: 'Legendary Treasures', primary: '#F59E0B', secondary: '#312E81' },
-            { code: 'xy1', era: 'BW_XY', name: 'XY Base Set', primary: '#2563EB', secondary: '#DC2626' },
-            { code: 'xy2', era: 'BW_XY', name: 'Flashfire', primary: '#EF4444', secondary: '#18181B' },
-            { code: 'xy10', era: 'BW_XY', name: 'Fates Collide', primary: '#EC4899', secondary: '#1E1B4B' },
-            { code: 'xy12', era: 'BW_XY', name: 'Evolutions', primary: '#F97316', secondary: '#1E3A8A' },
+            // GYM
+            { code: 'gym1', seriesId: 'gym', era: 'WOTC_BASE', name: 'Gym Heroes (Aug 14, 2000)', primary: '#DC2626', secondary: '#1E293B' },
+            { code: 'gym2', seriesId: 'gym', era: 'WOTC_BASE', name: 'Gym Challenge', primary: '#7C3AED', secondary: '#1E1B4B' },
 
-            // SUN_MOON
-            { code: 'sm1', era: 'SUN_MOON', name: 'Sun & Moon Base', primary: '#FACC15', secondary: '#0EA5E9' },
-            { code: 'sm2', era: 'SUN_MOON', name: 'Guardians Rising', primary: '#22D3EE', secondary: '#1E1B4B' },
-            { code: 'sm3', era: 'SUN_MOON', name: 'Burning Shadows', primary: '#F97316', secondary: '#450A0A' },
-            { code: 'sm4', era: 'SUN_MOON', name: 'Crimson Invasion', primary: '#E11D48', secondary: '#1E1B4B' },
-            { code: 'sm7', era: 'SUN_MOON', name: 'Celestial Storm', primary: '#38BDF8', secondary: '#1E293B' },
-            { code: 'sm9', era: 'SUN_MOON', name: 'Team Up', primary: '#F59E0B', secondary: '#0F172A' },
-            { code: 'sm10', era: 'SUN_MOON', name: 'Unbroken Bonds', primary: '#A855F7', secondary: '#090D16' },
-            { code: 'sm12', era: 'SUN_MOON', name: 'Cosmic Eclipse', primary: '#6366F1', secondary: '#FACC15' },
+            // NEO
+            { code: 'neo1', seriesId: 'neo', era: 'WOTC_BASE', name: 'Neo Genesis (Dec 16, 2000)', primary: '#38BDF8', secondary: '#0F172A' },
+            { code: 'neo2', seriesId: 'neo', era: 'WOTC_BASE', name: 'Neo Discovery', primary: '#F59E0B', secondary: '#1E293B' },
+            { code: 'neo3', seriesId: 'neo', era: 'WOTC_BASE', name: 'Neo Revelation', primary: '#6366F1', secondary: '#0F172A' },
+            { code: 'neo4', seriesId: 'neo', era: 'WOTC_BASE', name: 'Neo Destiny', primary: '#A855F7', secondary: '#1E1B4B' },
 
-            // SWORD_SHIELD
-            { code: 'swsh1', era: 'SWORD_SHIELD', name: 'Sword & Shield Base', primary: '#06B6D4', secondary: '#E11D48' },
-            { code: 'swsh4', era: 'SWORD_SHIELD', name: 'Vivid Voltage', primary: '#FACC15', secondary: '#0284C7' },
-            { code: 'swsh7', era: 'SWORD_SHIELD', name: 'Evolving Skies', primary: '#3B82F6', secondary: '#581C87' },
-            { code: 'swsh8', era: 'SWORD_SHIELD', name: 'Fusion Strike', primary: '#EC4899', secondary: '#1E1B4B' },
-            { code: 'swsh9', era: 'SWORD_SHIELD', name: 'Brilliant Stars', primary: '#F59E0B', secondary: '#0F172A' },
-            { code: 'swsh10', era: 'SWORD_SHIELD', name: 'Astral Radiance', primary: '#14B8A6', secondary: '#1E1B4B' },
-            { code: 'swsh12', era: 'SWORD_SHIELD', name: 'Silver Tempest', primary: '#94A3B8', secondary: '#0F172A' },
-            { code: 'swsh12pt5', era: 'SWORD_SHIELD', name: 'Crown Zenith', primary: '#A855F7', secondary: '#FACC15' },
+            // E-CARD
+            { code: 'ecard1', seriesId: 'ecard', era: 'WOTC_BASE', name: 'Expedition Base Set (Sep 15, 2002)', primary: '#EAB308', secondary: '#1E3A8A' },
+            { code: 'ecard2', seriesId: 'ecard', era: 'WOTC_BASE', name: 'Aquapolis', primary: '#0EA5E9', secondary: '#0F172A' },
+            { code: 'ecard3', seriesId: 'ecard', era: 'WOTC_BASE', name: 'Skyridge', primary: '#F97316', secondary: '#1E1B4B' },
 
-            // SCARLET_VIOLET
-            { code: 'sv01', era: 'SCARLET_VIOLET', name: 'Scarlet & Violet Base', primary: '#EF4444', secondary: '#7C3AED' },
-            { code: 'sv02', era: 'SCARLET_VIOLET', name: 'Paldea Evolved', primary: '#10B981', secondary: '#1E293B' },
-            { code: 'sv03', era: 'SCARLET_VIOLET', name: 'Obsidian Flames', primary: '#F97316', secondary: '#18181B' },
-            { code: 'sv03pt5', era: 'SCARLET_VIOLET', name: '151', primary: '#FACC15', secondary: '#7C3AED' },
-            { code: 'sv04', era: 'SCARLET_VIOLET', name: 'Paradox Rift', primary: '#06B6D4', secondary: '#312E81' },
-            { code: 'sv04pt5', era: 'SCARLET_VIOLET', name: 'Paldean Fates', primary: '#EC4899', secondary: '#1E1B4B' },
-            { code: 'sv06', era: 'SCARLET_VIOLET', name: 'Twilight Masquerade', primary: '#8B5CF6', secondary: '#064E3B' },
-            { code: 'sv07', era: 'SCARLET_VIOLET', name: 'Shrouded Fable', primary: '#64748B', secondary: '#3B0764' },
-            { code: 'sv08', era: 'SCARLET_VIOLET', name: 'Surging Sparks', primary: '#FACC15', secondary: '#2563EB' },
-            { code: 'sv08pt5', era: 'SCARLET_VIOLET', name: 'Prismatic Evolutions', primary: '#E879F9', secondary: '#0F172A' }
+            // EX
+            { code: 'ex1', seriesId: 'ex', era: 'EX_DP_HGSS', name: 'EX Ruby & Sapphire (Jul 1, 2003)', primary: '#EF4444', secondary: '#2563EB' },
+            { code: 'ex6', seriesId: 'ex', era: 'EX_DP_HGSS', name: 'EX FireRed & LeafGreen', primary: '#F97316', secondary: '#16A34A' },
+            { code: 'ex16', seriesId: 'ex', era: 'EX_DP_HGSS', name: 'EX Power Keepers', primary: '#A855F7', secondary: '#0F172A' },
+
+            // NP
+            { code: 'np1', seriesId: 'np', era: 'WOTC_BASE', name: 'Nintendo Black Star Promos (Oct 1, 2003)', primary: '#DC2626', secondary: '#F8FAFC' },
+
+            // POP
+            { code: 'pop1', seriesId: 'pop', era: 'WOTC_BASE', name: 'POP Series 1 (Sep 1, 2004)', primary: '#38BDF8', secondary: '#1E293B' },
+            { code: 'pop5', seriesId: 'pop', era: 'WOTC_BASE', name: 'POP Series 5', primary: '#F59E0B', secondary: '#0F172A' },
+            { code: 'pop9', seriesId: 'pop', era: 'WOTC_BASE', name: 'POP Series 9', primary: '#EC4899', secondary: '#1E1B4B' },
+
+            // DIAMOND & PEARL
+            { code: 'dp1', seriesId: 'diamond_pearl', era: 'EX_DP_HGSS', name: 'Diamond & Pearl (May 1, 2007)', primary: '#3B82F6', secondary: '#EC4899' },
+            { code: 'dp4', seriesId: 'diamond_pearl', era: 'EX_DP_HGSS', name: 'Mysterious Treasures', primary: '#6366F1', secondary: '#1E1B4B' },
+            { code: 'dp7', seriesId: 'diamond_pearl', era: 'EX_DP_HGSS', name: 'Stormfront', primary: '#0EA5E9', secondary: '#082F49' },
+
+            // PLATINUM
+            { code: 'pl1', seriesId: 'platinum', era: 'EX_DP_HGSS', name: 'Platinum (Feb 11, 2009)', primary: '#94A3B8', secondary: '#0F172A' },
+            { code: 'pl2', seriesId: 'platinum', era: 'EX_DP_HGSS', name: 'Rising Rivals', primary: '#F59E0B', secondary: '#1E293B' },
+            { code: 'pl4', seriesId: 'platinum', era: 'EX_DP_HGSS', name: 'Arceus', primary: '#EAB308', secondary: '#312E81' },
+
+            // HEARTGOLD & SOULSILVER
+            { code: 'hgss1', seriesId: 'hgss', era: 'EX_DP_HGSS', name: 'HeartGold & SoulSilver (Feb 10, 2010)', primary: '#EAB308', secondary: '#38BDF8' },
+            { code: 'hgss4', seriesId: 'hgss', era: 'EX_DP_HGSS', name: 'HGSS Triumphant', primary: '#A855F7', secondary: '#0F172A' },
+            { code: 'col1', seriesId: 'hgss', era: 'EX_DP_HGSS', name: 'Call of Legends', primary: '#F97316', secondary: '#1C1917' },
+
+            // BLACK & WHITE
+            { code: 'bw1', seriesId: 'black_white', era: 'BW_XY', name: 'Black & White (Mar 1, 2011)', primary: '#1F2937', secondary: '#F8FAFC' },
+            { code: 'bw5', seriesId: 'black_white', era: 'BW_XY', name: 'Dark Explorers', primary: '#4C1D95', secondary: '#090D16' },
+            { code: 'bw11', seriesId: 'black_white', era: 'BW_XY', name: 'Legendary Treasures', primary: '#F59E0B', secondary: '#312E81' },
+
+            // XY
+            { code: 'xy1', seriesId: 'xy', era: 'BW_XY', name: 'XY Base Set (Oct 12, 2013)', primary: '#2563EB', secondary: '#DC2626' },
+            { code: 'xy2', seriesId: 'xy', era: 'BW_XY', name: 'Flashfire', primary: '#EF4444', secondary: '#18181B' },
+            { code: 'xy10', seriesId: 'xy', era: 'BW_XY', name: 'Fates Collide', primary: '#EC4899', secondary: '#1E1B4B' },
+            { code: 'xy12', seriesId: 'xy', era: 'BW_XY', name: 'Evolutions', primary: '#F97316', secondary: '#1E3A8A' },
+
+            // SUN & MOON
+            { code: 'sm1', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Sun & Moon Base (Feb 3, 2017)', primary: '#FACC15', secondary: '#0EA5E9' },
+            { code: 'sm2', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Guardians Rising', primary: '#22D3EE', secondary: '#1E1B4B' },
+            { code: 'sm3', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Burning Shadows', primary: '#F97316', secondary: '#450A0A' },
+            { code: 'sm4', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Crimson Invasion', primary: '#E11D48', secondary: '#1E1B4B' },
+            { code: 'sm7', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Celestial Storm', primary: '#38BDF8', secondary: '#1E293B' },
+            { code: 'sm9', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Team Up', primary: '#F59E0B', secondary: '#0F172A' },
+            { code: 'sm10', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Unbroken Bonds', primary: '#A855F7', secondary: '#090D16' },
+            { code: 'sm12', seriesId: 'sun_moon', era: 'SUN_MOON', name: 'Cosmic Eclipse', primary: '#6366F1', secondary: '#FACC15' },
+
+            // SWORD & SHIELD
+            { code: 'swsh1', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Sword & Shield Base (Nov 15, 2019)', primary: '#06B6D4', secondary: '#E11D48' },
+            { code: 'swsh4', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Vivid Voltage', primary: '#FACC15', secondary: '#0284C7' },
+            { code: 'swsh7', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Evolving Skies', primary: '#3B82F6', secondary: '#581C87' },
+            { code: 'swsh8', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Fusion Strike', primary: '#EC4899', secondary: '#1E1B4B' },
+            { code: 'swsh9', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Brilliant Stars', primary: '#F59E0B', secondary: '#0F172A' },
+            { code: 'swsh10', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Astral Radiance', primary: '#14B8A6', secondary: '#1E1B4B' },
+            { code: 'swsh12', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Silver Tempest', primary: '#94A3B8', secondary: '#0F172A' },
+            { code: 'swsh12pt5', seriesId: 'sword_shield', era: 'SWORD_SHIELD', name: 'Crown Zenith', primary: '#A855F7', secondary: '#FACC15' },
+
+            // SCARLET & VIOLET
+            { code: 'sv01', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Scarlet & Violet Base (Mar 31, 2023)', primary: '#EF4444', secondary: '#7C3AED' },
+            { code: 'sv02', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Paldea Evolved', primary: '#10B981', secondary: '#1E293B' },
+            { code: 'sv03', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Obsidian Flames', primary: '#F97316', secondary: '#18181B' },
+            { code: 'sv03pt5', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: '151', primary: '#FACC15', secondary: '#7C3AED' },
+            { code: 'sv04', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Paradox Rift', primary: '#06B6D4', secondary: '#312E81' },
+            { code: 'sv04pt5', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Paldean Fates', primary: '#EC4899', secondary: '#1E1B4B' },
+            { code: 'sv06', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Twilight Masquerade', primary: '#8B5CF6', secondary: '#064E3B' },
+            { code: 'sv07', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Shrouded Fable', primary: '#64748B', secondary: '#3B0764' },
+            { code: 'sv08', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Surging Sparks', primary: '#FACC15', secondary: '#2563EB' },
+            { code: 'sv08pt5', seriesId: 'scarlet_violet', era: 'SCARLET_VIOLET', name: 'Prismatic Evolutions', primary: '#E879F9', secondary: '#0F172A' },
+
+            // OTHER & COLLECTIONS
+            { code: 'mcd_promo', seriesId: 'other', era: 'SUN_MOON', name: "McDonald's Dragon Discovery", primary: '#FACC15', secondary: '#DC2626' },
+            { code: 'rumble_set', seriesId: 'other', era: 'SUN_MOON', name: 'Pokémon Rumble', primary: '#38BDF8', secondary: '#0F172A' },
+            { code: 'trick_trade', seriesId: 'collections', era: 'SCARLET_VIOLET', name: 'Trick or Trade BOOster Bundle', primary: '#F97316', secondary: '#1E1B4B' },
+            { code: 'holiday_calendar', seriesId: 'collections', era: 'SCARLET_VIOLET', name: 'Holiday Calendar Collection', primary: '#10B981', secondary: '#DC2626' }
         ];
 
         const CUSTOM_SET_STORAGE_KEY = 'pokecard_custom_sets_v1';
@@ -827,6 +907,18 @@
                 { num: '008', name: 'Greninja ex SIR', baseVal: 29.0 },
                 { num: '009', name: 'Dragapult ex', baseVal: 16.5 },
                 { num: '010', name: 'Umbreon ex SIR', baseVal: 38.0 }
+            ],
+            MEGA_EVOLUTION: [
+                { num: '001', name: 'Mega Lucario ex SIR', baseVal: 28.0 },
+                { num: '002', name: 'Mega Rayquaza ex', baseVal: 34.0 },
+                { num: '003', name: 'Mega Gengar ex', baseVal: 29.0 },
+                { num: '004', name: 'Mega Gardevoir ex', baseVal: 24.0 },
+                { num: '005', name: 'Mega Charizard X ex', baseVal: 36.0 },
+                { num: '006', name: 'Mega Blastoise ex', baseVal: 23.0 },
+                { num: '007', name: 'Mega Venusaur ex', baseVal: 22.5 },
+                { num: '008', name: 'Mega Latios ex', baseVal: 21.0 },
+                { num: '009', name: 'Mega Kangaskhan ex', baseVal: 16.5 },
+                { num: '010', name: 'Mega Ampharos ex', baseVal: 17.5 }
             ]
         };
 
@@ -1152,6 +1244,7 @@
         const state = {
             cash: 250.0,
             selectedTheme: 'SUN_MOON',
+            selectedSeriesId: 'sun_moon',
             selectedTeamFilter: 'sm4',
             binderThemeFilter: 'SUN_MOON',
             binderTeamFilter: 'ALL',
@@ -1948,22 +2041,40 @@
 
             const themeObj = THEMES[state.selectedTheme] || THEMES.SUN_MOON;
             const teamWrap = document.getElementById('team-selector-wrap');
+            const seriesSelect = document.getElementById('series-cascade-select');
             const teamSelect = document.getElementById('team-filter-select');
 
             if (themeObj.hasTeams) {
                 teamWrap.classList.remove('hidden');
-                const eraSets = getAllSets().filter(s => s.era === state.selectedTheme);
-                if (eraSets.length > 0 && state.selectedTeamFilter !== 'ALL' && !eraSets.some(s => s.code === state.selectedTeamFilter)) {
-                    state.selectedTeamFilter = eraSets[0].code;
+
+                const matchingSeries = POKEMON_SERIES_LIST.filter(s => s.era === state.selectedTheme);
+                const dropdownSeries = matchingSeries.length > 0 ? matchingSeries : POKEMON_SERIES_LIST;
+                if (!dropdownSeries.some(s => s.id === state.selectedSeriesId)) {
+                    state.selectedSeriesId = dropdownSeries[0].id;
                 }
+
+                seriesSelect.innerHTML = dropdownSeries
+                    .map(s => `<option value="${s.id}">${s.name} • ${s.dateLabel}</option>`)
+                    .join('');
+                seriesSelect.value = state.selectedSeriesId;
+                document.getElementById('series-count-hint').textContent = `${POKEMON_SERIES_LIST.length} Series`;
+
+                const seriesSets = getAllSets().filter(s => s.seriesId === state.selectedSeriesId);
+                const fallbackEraSets = seriesSets.length > 0 ? seriesSets : getAllSets().filter(s => s.era === state.selectedTheme);
+                if (fallbackEraSets.length > 0 && state.selectedTeamFilter !== 'ALL' && !fallbackEraSets.some(s => s.code === state.selectedTeamFilter)) {
+                    state.selectedTeamFilter = fallbackEraSets[0].code;
+                }
+
+                const curSeriesObj = POKEMON_SERIES_LIST.find(s => s.id === state.selectedSeriesId);
                 teamSelect.innerHTML = [
-                    `<option value="ALL">All ${themeObj.shortName} Sets (${eraSets.length})</option>`,
-                    ...eraSets.map(s => `<option value="${s.code}">${s.name} (${s.code.toUpperCase()})</option>`)
+                    `<option value="ALL">All ${curSeriesObj?.name || themeObj.shortName} Sets (${fallbackEraSets.length})</option>`,
+                    ...fallbackEraSets.map(s => `<option value="${s.code}">${s.name}</option>`)
                 ].join('');
                 teamSelect.value = state.selectedTeamFilter || 'ALL';
+
                 const setCount = state.selectedTeamFilter === 'ALL'
-                    ? getThemeCards(state.selectedTheme).length
-                    : getThemeCards(state.selectedTheme).filter(c => c.teamCode === state.selectedTeamFilter).length;
+                    ? fallbackEraSets.reduce((acc, s) => acc + FULL_ROSTER.filter(c => c.teamCode === s.code).length, 0)
+                    : FULL_ROSTER.filter(c => c.teamCode === state.selectedTeamFilter).length;
                 document.getElementById('team-filter-hint').textContent = `${setCount} Cards in Pool`;
             } else {
                 teamWrap.classList.add('hidden');
@@ -2392,7 +2503,20 @@
                 const pill = e.target.closest('[data-theme-id]');
                 if (!pill) return;
                 state.selectedTheme = pill.dataset.themeId;
-                const sets = getAllSets().filter(s => s.era === state.selectedTheme);
+                const matchingSeries = POKEMON_SERIES_LIST.filter(s => s.era === state.selectedTheme);
+                state.selectedSeriesId = matchingSeries[0]?.id || POKEMON_SERIES_LIST[0].id;
+                const sets = getAllSets().filter(s => s.seriesId === state.selectedSeriesId);
+                state.selectedTeamFilter = sets[0]?.code || 'ALL';
+                renderAll();
+            });
+
+            document.getElementById('series-cascade-select').addEventListener('change', e => {
+                state.selectedSeriesId = e.target.value;
+                const sObj = POKEMON_SERIES_LIST.find(s => s.id === state.selectedSeriesId);
+                if (sObj && THEMES[sObj.era]) {
+                    state.selectedTheme = sObj.era;
+                }
+                const sets = getAllSets().filter(s => s.seriesId === state.selectedSeriesId);
                 state.selectedTeamFilter = sets[0]?.code || 'ALL';
                 renderAll();
             });
@@ -2402,17 +2526,23 @@
                 renderAll();
             });
 
-            document.getElementById('btn-fetch-tcgdex-set').addEventListener('click', () => {
-                const input = document.getElementById('custom-set-code-input');
-                fetchAndAddTcgdexSet(input?.value || '');
-            });
+            const fetchBtn = document.getElementById('btn-fetch-tcgdex-set');
+            if (fetchBtn) {
+                fetchBtn.addEventListener('click', () => {
+                    const input = document.getElementById('custom-set-code-input');
+                    fetchAndAddTcgdexSet(input?.value || '');
+                });
+            }
 
-            document.getElementById('custom-set-code-input').addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    fetchAndAddTcgdexSet(e.target.value);
-                }
-            });
+            const setCodeInput = document.getElementById('custom-set-code-input');
+            if (setCodeInput) {
+                setCodeInput.addEventListener('keydown', e => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        fetchAndAddTcgdexSet(e.target.value);
+                    }
+                });
+            }
 
             document.getElementById('packs-grid').addEventListener('click', e => {
                 const btn = e.target.closest('[data-open-pack]');
