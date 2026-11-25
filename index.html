@@ -944,7 +944,12 @@
                     setCode: 'SM4',
                     name: `${cardName} (${padded}/111)`,
                     baseVal,
-                    artUrl: `https://assets.tcgdex.net/en/sm/sm4/${padded}/high.webp`
+                    artUrl: `https://assets.tcgdex.net/en/sm/sm4/${padded}/high.webp`,
+                    fallbackArtUrls: [
+                        `https://assets.tcgdex.net/en/sm/sm4/${padded}/low.webp`,
+                        `https://images.pokemontcg.io/sm4/${num}_hires.png`,
+                        `https://images.pokemontcg.io/sm4/${num}.png`
+                    ]
                 });
             }
             return setCards;
@@ -1329,9 +1334,12 @@
                 const safeUrl = escapeSvgText(card.artUrl);
                 const safeName = escapeSvgText(card.name || 'Pokémon Card');
                 const fallbackSvg = escapeSvgText(renderCardArtwork(card, rarity, opts));
+                const altUrls = Array.isArray(card.fallbackArtUrls) ? card.fallbackArtUrls : [];
+                const nextUrl = altUrls.length > 0 ? escapeSvgText(altUrls[0]) : '';
+                const restUrls = encodeURIComponent(JSON.stringify(altUrls.slice(1)));
                 return `
                     <div class="relative w-full h-full bg-slate-950 flex items-center justify-center p-0.5">
-                        <img src="${safeUrl}" alt="${safeName}" loading="lazy" class="w-full h-full object-contain" onerror="this.outerHTML = decodeURIComponent('${encodeURIComponent(renderCardArtwork(card, rarity, opts))}')" data-fallback="${fallbackSvg}"/>
+                        <img src="${safeUrl}" alt="${safeName}" loading="lazy" data-rest-urls="${restUrls}" class="w-full h-full object-contain" onerror="(function(img){ try { const queue = JSON.parse(decodeURIComponent(img.getAttribute('data-rest-urls') || '%5B%5D')); if (queue.length > 0) { const next = queue.shift(); img.setAttribute('data-rest-urls', encodeURIComponent(JSON.stringify(queue))); img.src = next; return; } } catch (e) {} img.outerHTML = decodeURIComponent('${encodeURIComponent(renderCardArtwork(card, rarity, opts))}'); })(this)" data-fallback="${fallbackSvg}" data-next="${nextUrl}"/>
                     </div>
                 `;
             }
@@ -1375,19 +1383,20 @@
         };
 
         let activeTab = 'rip';
+        let hardResetArmedAt = 0;
         let marketSellAccumulator = 0;
         let autoRipAccumulator = 0;
         let autoListDupesAccumulator = 0;
         let autoListBaseAccumulator = 0;
-        let hardResetArmedAt = 0;
 
-        // ==================== FORMATTERS & HELPERS ====================
-        function formatMoney(val) {
-            const num = Number(val) || 0;
-            if (Math.abs(num) >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
-            if (Math.abs(num) >= 1e6) return '$' + (num / 1e6).toFixed(2) + 'M';
-            if (Math.abs(num) >= 1e3) return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            return '$' + num.toFixed(2);
+        function formatMoney(amount) {
+            const val = Number.isFinite(Number(amount)) ? Number(amount) : 0;
+            const sign = val < 0 ? '-' : '';
+            const abs = Math.abs(val);
+            if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
+            if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
+            if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
+            return `${sign}$${abs.toFixed(2)}`;
         }
 
         function spawnFloatingCash(text, colorClass = 'text-emerald-400', yOffsetPx = 0) {
