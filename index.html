@@ -266,7 +266,7 @@
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
                         <div class="text-[11px] text-slate-400 font-semibold uppercase">Grading Lab</div>
                         <div class="flex items-baseline justify-between mt-1">
-                            <span id="inv-grading-count" class="font-display font-bold text-2xl text-amber-400">0 / 2</span>
+                            <span id="inv-grading-count" class="font-display font-bold text-2xl text-amber-400">0/2 Used</span>
                             <span class="text-[11px] text-amber-300/80 font-semibold">2.8x Slab</span>
                         </div>
                         <div class="text-[10px] text-slate-500 mt-1">18s turnaround • 55% fee</div>
@@ -1555,7 +1555,8 @@
             if (!container || !countEl) return;
 
             const maxSlots = getMaxGradingSlots();
-            countEl.textContent = `${state.gradingQueue.length} / ${maxSlots}`;
+            state.gradingQueue = state.gradingQueue.filter(g => CARD_CATALOG.some(c => c.id === g.cardId));
+            countEl.textContent = `${state.gradingQueue.length}/${maxSlots} Used`;
             if (state.gradingQueue.length === 0) {
                 container.innerHTML = '';
                 return;
@@ -1563,34 +1564,41 @@
 
             const now = Date.now();
             container.innerHTML = state.gradingQueue.map(g => {
-                const card = CARD_CATALOG.find(c => c.id === g.cardId);
-                const rarity = RARITIES.find(r => r.id === g.rarityId);
+                const card = CARD_CATALOG.find(c => c.id === g.cardId) || CARD_CATALOG[0];
+                const rarity = RARITIES.find(r => r.id === g.rarityId) || RARITIES[0];
                 const total = Math.max(1, g.endTime - g.startTime);
                 const pct = Math.min(100, Math.max(0, ((now - g.startTime) / total) * 100));
                 const isDone = now >= g.endTime;
                 const remSec = Math.max(0, Math.ceil((g.endTime - now) / 1000));
 
                 return `
-                <div class="bg-slate-900 border ${isDone ? 'border-amber-400' : 'border-slate-800'} rounded-xl p-2.5 flex items-center justify-between gap-2">
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-1.5">
-                            <span>${card.emoji}</span>
-                            <span class="text-xs font-bold text-white truncate">${card.name}</span>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
+                <div class="bg-slate-900 border ${isDone ? 'border-amber-400' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div class="w-9 h-9 rounded-xl bg-slate-950 border ${rarity.border} flex items-center justify-center text-lg shrink-0">
+                            ${card.emoji}
                         </div>
-                        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5">
-                            <div class="h-full bg-amber-400 transition-all" style="width: ${pct}%"></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-xs font-bold text-white truncate">${card.name}</span>
+                                <span class="text-[10px] font-bold ${isDone ? 'text-amber-400' : 'text-slate-400'} shrink-0">
+                                    ${isDone ? 'READY!' : `${remSec}s`}
+                                </span>
+                            </div>
+                            <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mt-1.5">
+                                <div class="h-full ${isDone ? 'bg-amber-400' : 'bg-sky-500'} transition-all duration-150" style="width: ${pct}%"></div>
+                            </div>
                         </div>
                     </div>
-                    ${isDone
-                        ? `<button onclick="collectGradedCard('${g.uid}')" class="btn-press shrink-0 bg-amber-400 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg">Claim Slab</button>`
-                        : `<span class="shrink-0 text-[11px] font-bold text-slate-400">${remSec}s</span>`
-                    }
+                    <button onclick="collectGradedCard('${g.uid}')" ${isDone ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-40 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-xl">
+                        ${isDone ? 'Claim Slab' : 'Grading...'}
+                    </button>
                 </div>`;
             }).join('');
         }
 
         function renderInventoryTab() {
+            state.inventory = state.inventory.filter(item => item && CARD_CATALOG.some(c => c.id === item.cardId));
+
             const listedTotal = state.listings.reduce((acc, l) => acc + l.price, 0);
             document.getElementById('inv-listed-count').textContent = state.listings.length;
             document.getElementById('inv-listed-val').textContent = formatMoney(listedTotal);
@@ -1603,8 +1611,8 @@
             let allQuickTotal = 0;
 
             state.inventory.forEach(item => {
-                const c = CARD_CATALOG.find(x => x.id === item.cardId);
-                const r = RARITIES.find(x => x.id === item.rarityId);
+                const c = CARD_CATALOG.find(x => x.id === item.cardId) || CARD_CATALOG[0];
+                const r = RARITIES.find(x => x.id === item.rarityId) || RARITIES[0];
                 const q = calculateQuickSellPayout(calculateCardValue(c, r, item.graded, true));
                 allQuickTotal += q;
                 if (dupeUidsSet.has(item.uid)) dupeQuickTotal += q;
@@ -1622,53 +1630,56 @@
             if (state.inventory.length === 0) {
                 listEl.innerHTML = `
                 <div class="text-center py-8 bg-slate-900/60 border border-dashed border-slate-800 rounded-2xl">
-                    <p class="text-xs font-semibold text-slate-400">No raw singles in inventory</p>
-                    <p class="text-[11px] text-slate-500 mt-1">Rip packs to pull duplicate singles for resale or grading.</p>
+                    <p class="text-xs font-semibold text-slate-400">No duplicate singles in inventory</p>
+                    <p class="text-[11px] text-slate-500 mt-1">First-time pulls auto-slot into your Binder. Pull duplicates to list or grade Holo+ cards here.</p>
                 </div>`;
                 return;
             }
 
             const sorted = [...state.inventory].sort((a, b) => {
-                const ca = CARD_CATALOG.find(c => c.id === a.cardId);
-                const ra = RARITIES.find(r => r.id === a.rarityId);
-                const cb = CARD_CATALOG.find(c => c.id === b.cardId);
-                const rb = RARITIES.find(r => r.id === b.rarityId);
+                const ca = CARD_CATALOG.find(c => c.id === a.cardId) || CARD_CATALOG[0];
+                const ra = RARITIES.find(r => r.id === a.rarityId) || RARITIES[0];
+                const cb = CARD_CATALOG.find(c => c.id === b.cardId) || CARD_CATALOG[0];
+                const rb = RARITIES.find(r => r.id === b.rarityId) || RARITIES[0];
                 return calculateCardValue(cb, rb, b.graded) - calculateCardValue(ca, ra, a.graded);
             });
 
             const maxSlots = getMaxGradingSlots();
             listEl.innerHTML = sorted.slice(0, 40).map(item => {
-                const card = CARD_CATALOG.find(c => c.id === item.cardId);
-                const rarity = RARITIES.find(r => r.id === item.rarityId);
+                const card = CARD_CATALOG.find(c => c.id === item.cardId) || CARD_CATALOG[0];
+                const rarity = RARITIES.find(r => r.id === item.rarityId) || RARITIES[0];
                 const grossVal = calculateCardValue(card, rarity, item.graded, true);
-                const netVal = calculateNetListingPayout(grossVal);
+                const netListVal = calculateNetListingPayout(grossVal);
                 const quickVal = calculateQuickSellPayout(grossVal);
-                const gradeFee = Math.max(10, grossVal * 0.55);
-                const canGrade = !item.graded && rarity.tier >= 1 && state.gradingQueue.length < maxSlots && state.cash >= gradeFee;
+                const gradingFee = Math.max(10, grossVal * 0.55);
+                const canGrade = !item.graded && rarity.tier >= 1 && state.gradingQueue.length < maxSlots && state.cash >= gradingFee;
 
                 return `
-                <div class="bg-slate-900 border ${rarity.border} rounded-xl p-2.5 flex items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-base">${card.emoji}</span>
-                            <span class="text-xs font-bold text-white truncate">${card.name}</span>
-                            ${item.graded ? '<span class="text-[9px] font-extrabold bg-amber-400 text-slate-950 px-1.5 rounded">PSA 10</span>' : ''}
+                <div class="bg-slate-900 border ${item.graded ? 'border-amber-500/60' : 'border-slate-800'} rounded-2xl p-2.5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-slate-950 border ${rarity.border} flex items-center justify-center text-xl shrink-0 relative">
+                            ${card.emoji}
+                            ${item.graded ? '<span class="absolute -top-1.5 -right-1.5 bg-amber-400 text-slate-950 text-[8px] font-black px-1 rounded">PSA 10</span>' : ''}
                         </div>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <span class="text-[9px] px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
-                            <span class="text-[10px] text-slate-400">${SPORT_LABELS[card.theme]}</span>
-                            <span class="font-display font-bold text-xs text-emerald-400">${formatMoney(netVal)} net</span>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold text-white truncate">${card.name}</span>
+                                <span class="text-[8px] font-bold px-1.5 py-0.2 rounded ${rarity.badge} shrink-0">${rarity.name}</span>
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">
+                                ${SPORT_LABELS[card.theme]} • Market Net: <strong class="text-emerald-400">${formatMoney(netListVal)}</strong>
+                            </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         ${!item.graded && rarity.tier >= 1 ? `
-                        <button onclick="submitCardForGrading('${item.uid}')" ${canGrade ? '' : 'disabled'} class="btn-press disabled:opacity-35 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-bold px-2 py-1.5 rounded-lg" title="Grade for ${formatMoney(gradeFee)}">
-                            Grade ${formatMoney(gradeFee)}
+                        <button onclick="submitCardForGrading('${item.uid}')" ${canGrade ? '' : 'disabled'} title="Grade Slab (${formatMoney(gradingFee)})" class="btn-press disabled:opacity-35 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-[10px] font-bold px-2 py-1.5 rounded-xl">
+                            Slab ${formatMoney(gradingFee)}
                         </button>` : ''}
-                        <button onclick="quickSellCardUid('${item.uid}'); updateAllUI();" class="btn-press bg-slate-800 hover:bg-slate-700 text-amber-300 text-[10px] font-bold px-2 py-1.5 rounded-lg">
-                            ${formatMoney(quickVal)}
+                        <button onclick="quickSellCardUid('${item.uid}'); SoundFX.cash(); updateAllUI();" title="Quick Sell 70%" class="btn-press bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 text-[10px] font-bold px-2 py-1.5 rounded-xl">
+                            ⚡${formatMoney(quickVal)}
                         </button>
-                        <button onclick="listCardUid('${item.uid}'); updateAllUI();" class="btn-press bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg">
+                        <button onclick="listCardUid('${item.uid}'); SoundFX.click(); updateAllUI();" class="btn-press bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-[10px] font-extrabold px-2.5 py-1.5 rounded-xl">
                             List
                         </button>
                     </div>
@@ -1677,48 +1688,55 @@
         }
 
         function renderEmpireTab() {
-            const netFlowEl = document.getElementById('empire-net-flow');
-            if (netFlowEl) {
-                const netRate = getPassiveIncomePerSec();
-                netFlowEl.textContent = `${netRate >= 0 ? '+' : ''}${formatMoney(netRate)}/s`;
+            const flowEl = document.getElementById('empire-net-flow');
+            if (flowEl) {
+                const net = getPassiveIncomePerSec();
+                flowEl.textContent = `${net >= 0 ? '+' : ''}${formatMoney(net)}/s`;
             }
 
             const container = document.getElementById('upgrades-list');
+            if (!container) return;
+
             container.innerHTML = UPGRADES_CONFIG.map(upg => {
                 const lvl = state.upgrades[upg.id] || 0;
-                const isMax = lvl >= upg.maxLevel;
+                const isMaxed = lvl >= upg.maxLevel;
                 const cost = getUpgradeCost(upg);
-                const canAfford = !isMax && state.cash >= cost;
+                const canAfford = !isMaxed && state.cash >= cost;
 
                 return `
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-1.5">
-                            <span class="text-base">${upg.icon}</span>
-                            <span class="text-xs font-extrabold text-white truncate">${upg.name}</span>
-                            <span class="text-[10px] font-bold bg-slate-800 text-sky-400 px-1.5 py-0.5 rounded">Lv ${lvl}/${upg.maxLevel}</span>
+                    <div class="flex items-start gap-2.5 min-w-0">
+                        <div class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl shrink-0">
+                            ${upg.icon}
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">${upg.desc}</p>
-                        <div class="text-[10px] font-semibold text-emerald-400 mt-1">${upg.statLabel(lvl)}</div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-extrabold text-white truncate">${upg.name}</span>
+                                <span class="text-[10px] font-bold text-sky-400 bg-sky-500/10 border border-sky-500/30 px-1.5 py-0.2 rounded">Lv ${lvl}/${upg.maxLevel}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">${upg.desc}</p>
+                            <div class="text-[10px] font-semibold text-emerald-400 mt-1">${upg.statLabel(lvl)}</div>
+                        </div>
                     </div>
-                    <button onclick="buyUpgrade('${upg.id}')" ${canAfford ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-40 bg-sky-500 hover:bg-sky-400 text-slate-950 font-display font-extrabold text-xs px-3 py-2.5 rounded-xl min-w-[84px]">
-                        ${isMax ? 'MAXED' : formatMoney(cost)}
+                    <button onclick="buyUpgrade('${upg.id}')" ${canAfford ? '' : 'disabled'} class="btn-press shrink-0 disabled:opacity-40 bg-sky-500 hover:bg-sky-400 text-slate-950 font-display font-extrabold text-xs px-3 py-2.5 rounded-xl shadow-md">
+                        ${isMaxed ? 'MAX' : formatMoney(cost)}
                     </button>
                 </div>`;
             }).join('');
         }
 
         function renderBinderTab() {
-            const unlockedCount = getBinderUniqueCount();
-            document.getElementById('binder-progress-text').textContent = `${unlockedCount} / ${CARD_CATALOG.length}`;
-
             const claimable = getClaimablePrestigeBadges();
-            const nextMilestone = getNextPrestigeMilestoneCash();
-            const careerEl = document.getElementById('binder-career-earnings');
-            if (careerEl) careerEl.textContent = formatMoney(state.careerEarnings || state.lifetimeCash);
+            const career = Math.max(state.careerEarnings || 0, state.lifetimeCash || 0);
+            document.getElementById('binder-career-earnings').textContent = formatMoney(career);
             document.getElementById('prestige-claim-amount').textContent = claimable;
-            document.getElementById('prestige-req-text').textContent = `Next badge milestone: ${formatMoney(nextMilestone)} career`;
-            document.getElementById('prestige-reset-btn').disabled = claimable <= 0;
+            document.getElementById('prestige-req-text').textContent = `Next badge milestone: ${formatMoney(getNextPrestigeMilestoneCash())} career`;
+
+            const resetBtn = document.getElementById('prestige-reset-btn');
+            resetBtn.disabled = claimable <= 0;
+
+            const uniqueCount = getBinderUniqueCount();
+            document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${CARD_CATALOG.length}`;
 
             const filteredCards = state.binderFilter === 'ALL'
                 ? CARD_CATALOG
@@ -1727,38 +1745,44 @@
             const grid = document.getElementById('binder-grid');
             grid.innerHTML = filteredCards.map(card => {
                 const ownedRarityId = state.binder[card.id];
-                if (!ownedRarityId) {
+                const rarity = ownedRarityId ? (RARITIES.find(r => r.id === ownedRarityId) || RARITIES[0]) : null;
+
+                if (!rarity) {
                     return `
-                    <div class="bg-slate-900/50 border border-dashed border-slate-800 rounded-xl p-2 text-center opacity-60">
-                        <div class="text-xl grayscale opacity-40">❓</div>
-                        <div class="text-[10px] font-semibold text-slate-500 truncate mt-1">${card.name}</div>
-                        <div class="text-[9px] text-slate-600 mt-0.5">${SPORT_LABELS[card.theme]}</div>
+                    <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-2 flex flex-col items-center justify-center text-center opacity-50 h-[96px]">
+                        <span class="text-lg grayscale">❓</span>
+                        <span class="text-[10px] font-semibold text-slate-500 mt-1 line-clamp-1">${card.name}</span>
+                        <span class="text-[8px] text-slate-600 uppercase mt-0.5">${SPORT_LABELS[card.theme]}</span>
                     </div>`;
                 }
 
-                const rarity = RARITIES.find(r => r.id === ownedRarityId) || RARITIES[0];
                 return `
-                <div class="bg-slate-900 border ${rarity.border} rounded-xl p-2 text-center shadow-md">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[8px] px-1 rounded ${rarity.badge}">${rarity.name}</span>
-                        <span class="text-[8px] text-slate-400">${SPORT_LABELS[card.theme].split(' ')[0]}</span>
+                <div class="bg-slate-900 border ${rarity.border} rounded-xl p-2 flex flex-col items-center justify-between text-center h-[96px] shadow">
+                    <span class="text-[8px] font-bold uppercase px-1.5 py-0.2 rounded ${rarity.badge}">${rarity.name}</span>
+                    <div class="text-xl leading-none">${card.emoji}</div>
+                    <div class="w-full">
+                        <div class="text-[10px] font-bold text-white truncate">${card.name}</div>
+                        <div class="text-[8px] text-slate-400">${SPORT_LABELS[card.theme]}</div>
                     </div>
-                    <div class="text-xl my-1">${card.emoji}</div>
-                    <div class="text-[10px] font-bold text-white truncate">${card.name}</div>
                 </div>`;
             }).join('');
         }
 
         function updateAllUI() {
             updateTopBarUI();
-            if (activeTab === 'rip') renderPackList();
-            if (activeTab === 'inventory') renderInventoryTab();
-            if (activeTab === 'empire') renderEmpireTab();
-            if (activeTab === 'binder') renderBinderTab();
+            if (activeTab === 'rip') {
+                renderPackList();
+            } else if (activeTab === 'inventory') {
+                renderInventoryTab();
+            } else if (activeTab === 'empire') {
+                renderEmpireTab();
+            } else if (activeTab === 'binder') {
+                renderBinderTab();
+            }
         }
 
         /* ==========================================================================
-           10. PERSISTENCE (LocalStorage + Offline Progress) & BOOTSTRAP
+           10. PERSISTENCE (LOCALSTORAGE + OFFLINE PROGRESS) & BOOTSTRAP
            ========================================================================== */
         function saveGame() {
             try {
@@ -1772,45 +1796,39 @@
                 const raw = localStorage.getItem(SAVE_KEY);
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
-                if (!parsed || typeof parsed !== 'object') return;
+                if (parsed && typeof parsed === 'object') {
+                    state = {
+                        ...state,
+                        ...parsed,
+                        upgrades: { ...state.upgrades, ...(parsed.upgrades || {}) },
+                        inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
+                        listings: Array.isArray(parsed.listings) ? parsed.listings : [],
+                        gradingQueue: Array.isArray(parsed.gradingQueue) ? parsed.gradingQueue : [],
+                        binder: parsed.binder && typeof parsed.binder === 'object' ? parsed.binder : {}
+                    };
 
-                state = {
-                    ...state,
-                    ...parsed,
-                    careerEarnings: Math.max(parsed.careerEarnings || 0, parsed.lifetimeCash || 0, parsed.cash || 25),
-                    upgrades: {
-                        ...state.upgrades,
-                        ...(parsed.upgrades || {})
-                    },
-                    binder: parsed.binder || {},
-                    inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
-                    listings: Array.isArray(parsed.listings) ? parsed.listings : [],
-                    gradingQueue: Array.isArray(parsed.gradingQueue) ? parsed.gradingQueue : []
-                };
-
-                const muteBtn = document.getElementById('mute-toggle-btn');
-                if (muteBtn) muteBtn.textContent = state.muted ? '🔇' : '🔊';
-
-                const elapsedSec = Math.max(0, Math.min(8 * 3600, (Date.now() - (state.lastTick || Date.now())) / 1000));
-                const netRate = getPassiveIncomePerSec();
-                if (elapsedSec > 5 && netRate > 0) {
-                    const offlineEarned = netRate * elapsedSec * 0.75;
-                    recordEarnings(offlineEarned);
-                    setTimeout(() => {
-                        spawnFloatingCash(`+${formatMoney(offlineEarned)} offline`, 'text-emerald-400', 25);
-                    }, 400);
+                    const now = Date.now();
+                    const awaySec = Math.min(28800, Math.max(0, (now - (state.lastTick || now)) / 1000));
+                    if (awaySec > 5) {
+                        const passiveRate = getPassiveIncomePerSec();
+                        if (passiveRate > 0) {
+                            const offlineEarned = passiveRate * awaySec * 0.5;
+                            recordEarnings(offlineEarned);
+                            setTimeout(() => {
+                                spawnFloatingCash(`Offline: +${formatMoney(offlineEarned)}`, 'text-sky-300', 22);
+                            }, 500);
+                        }
+                    }
                 }
-            } catch (err) {
-                console.warn('Resetting corrupted save state:', err);
-            }
+            } catch (e) {}
         }
 
         window.onload = function () {
             loadGame();
+            document.getElementById('mute-toggle-btn').textContent = state.muted ? '🔇' : '🔊';
             updateAllUI();
             setInterval(gameTick, 100);
             setInterval(saveGame, 5000);
-            window.addEventListener('beforeunload', saveGame);
         };
     </script>
 </body>
