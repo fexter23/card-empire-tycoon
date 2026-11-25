@@ -14,8 +14,12 @@
         * {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            box-sizing: border-box;
         }
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: #090d16;
             color: #f8fafc;
@@ -90,29 +94,30 @@
             80% { transform: rotate(3deg) scale(1.01); }
         }
         .animate-pack-shake {
-            animation: packShake 0.42s ease-in-out;
+            animation: packShake 0.36s ease-in-out;
         }
         @keyframes floatUpFade {
-            0% { opacity: 0; transform: translateY(8px) scale(0.95); }
-            18% { opacity: 1; transform: translateY(0px) scale(1); }
-            100% { opacity: 0; transform: translateY(-44px) scale(1.04); }
+            0% { transform: translateY(0px) scale(0.95); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translateY(-56px) scale(1.05); opacity: 0; }
         }
         .floating-cash {
-            animation: floatUpFade 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: floatUpFade 1.15s ease-out forwards;
         }
     </style>
 </head>
-<body class="bg-[#090d16] text-slate-100 antialiased selection:bg-sky-500/30">
-    <div id="app-shell" class="max-w-md mx-auto h-dvh flex flex-col bg-[#0b101d] border-x border-slate-800/80 shadow-2xl relative overflow-hidden">
+<body>
+    <div id="app-shell" class="h-full max-w-md mx-auto flex flex-col bg-[#090d16] relative overflow-hidden border-x border-slate-800/60">
 
-        <!-- TOP STICKY ECONOMY HEADER -->
+        <!-- TOP HUD HEADER -->
         <header class="shrink-0 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3.5 pt-2.5 pb-2 z-30">
             <div class="flex items-center justify-between gap-2">
-                <!-- Cash Balance -->
-                <div class="min-w-0">
-                    <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                        <span>Bankroll</span>
+                <!-- Cash & Net Passive Income -->
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Bankroll</span>
                         <span id="passive-income-badge" class="text-emerald-400 font-display font-bold text-xs">+$0.00/s</span>
+                        <button id="mute-toggle-btn" onclick="toggleMute()" class="ml-auto text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700" title="Toggle Sound">🔊</button>
                     </div>
                     <div id="ui-cash" class="font-display font-bold text-xl text-white tracking-tight truncate">$25.00</div>
                 </div>
@@ -138,7 +143,7 @@
                     <span id="ui-hot-market-badge" class="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold truncate">🔥 Hot: --</span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <span id="ui-market-timer" class="text-[10px] font-mono text-slate-500">0:00</span>
+                    <span id="ui-market-timer" class="text-[10px] font-mono text-slate-500">0:45</span>
                     <div id="ui-discount-badge" class="text-purple-400 font-medium hidden">Bulk: -0%</div>
                 </div>
             </div>
@@ -232,7 +237,7 @@
                             <span id="inv-listed-count" class="font-display font-bold text-2xl text-sky-400">0</span>
                             <span id="inv-listed-val" class="text-xs text-emerald-400 font-semibold">$0.00</span>
                         </div>
-                        <div class="text-[10px] text-slate-500 mt-1">Every <span id="inv-sell-rate" class="text-slate-300 font-semibold">5.5s</span> • Fee: <span id="inv-fee-rate" class="text-rose-300 font-semibold">18%</span></div>
+                        <div class="text-[10px] text-slate-500 mt-1">Every <span id="inv-sell-rate" class="text-slate-300 font-semibold">5.50s</span> • Fee: <span id="inv-fee-rate" class="text-rose-300 font-semibold">18%</span></div>
                     </div>
 
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
@@ -313,7 +318,7 @@
                         <div>
                             <div class="text-[10px] uppercase text-slate-400">Claimable on Reset</div>
                             <div class="font-display font-bold text-xl text-amber-400">+<span id="prestige-claim-amount">0</span> Badges</div>
-                            <div id="prestige-req-text" class="text-[10px] text-slate-400">Next threshold: $15,000 lifetime</div>
+                            <div id="prestige-req-text" class="text-[10px] text-slate-400">Next badge milestone: $15.0K lifetime</div>
                         </div>
                         <button id="prestige-reset-btn" onclick="openPrestigeConfirm()" disabled class="btn-press disabled:opacity-40 bg-gradient-to-r from-amber-500 to-rose-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg">
                             Host Show
@@ -325,7 +330,7 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-sky-400">Master Collector Binder</h3>
-                        <span id="binder-progress-text" class="text-xs font-bold text-white">0 / 42 (0%)</span>
+                        <span id="binder-progress-text" class="text-xs font-bold text-white">0 / 84 (0%)</span>
                     </div>
                     <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
                         <div id="binder-progress-bar" class="h-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-300" style="width: 0%"></div>
@@ -333,7 +338,7 @@
 
                     <!-- Binder Category Filter Pills -->
                     <div id="binder-theme-selector" class="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
-                        <button onclick="setBinderFilter('ALL')" data-btheme="ALL" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-sky-500 text-slate-950 shrink-0">All (42)</button>
+                        <button onclick="setBinderFilter('ALL')" data-btheme="ALL" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-sky-500 text-slate-950 shrink-0">All (84)</button>
                         <button onclick="setBinderFilter('Basketball')" data-btheme="Basketball" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏀 Hoops</button>
                         <button onclick="setBinderFilter('Football')" data-btheme="Football" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">🏈 Gridiron</button>
                         <button onclick="setBinderFilter('Soccer')" data-btheme="Soccer" class="btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0">⚽ Pitch</button>
@@ -344,7 +349,7 @@
                     </div>
 
                     <p class="text-[11px] text-slate-400 leading-snug">
-                        <strong class="text-sky-400">+5%</strong> cash per unique card &amp; <strong class="text-emerald-400">+35%</strong> per completed 6-card set (<span id="completed-sets-count" class="text-white font-bold">0/7</span> sets done).
+                        <strong class="text-sky-400">+5%</strong> cash per unique card &amp; <strong class="text-emerald-400">+40%</strong> per completed <span id="set-card-count-label" class="text-white font-bold">12</span>-card set (<span id="completed-sets-count" class="text-white font-bold">0/7</span> sets done).
                     </p>
                 </div>
 
@@ -399,1340 +404,1389 @@
 
         <!-- FLOATING FEEDBACK LAYER -->
         <div id="floating-layer" class="pointer-events-none fixed inset-0 z-40 overflow-hidden"></div>
-
-        <script>
-            /* ==========================================================================
-               1. AUDIO ENGINE (Web Audio API - Zero external MP3s required)
-               ========================================================================== */
-            const SoundFX = (() => {
-                let ctx = null;
-
-                function getCtx() {
-                    if (!state || state.muted) return null;
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioCtx) return null;
-                    if (!ctx) {
-                        ctx = new AudioCtx();
-                    }
-                    if (ctx.state === 'suspended') {
-                        ctx.resume().catch(() => {});
-                    }
-                    return ctx;
-                }
-
-                function playTone(freq, duration, type = 'sine', gainPeak = 0.08, delay = 0) {
-                    try {
-                        const c = getCtx();
-                        if (!c) return;
-                        const now = c.currentTime + delay;
-                        const osc = c.createOscillator();
-                        const gain = c.createGain();
-                        osc.type = type;
-                        osc.frequency.setValueAtTime(freq, now);
-
-                        gain.gain.setValueAtTime(0.0001, now);
-                        gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.015);
-                        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
-                        osc.connect(gain);
-                        gain.connect(c.destination);
-                        osc.start(now);
-                        osc.stop(now + duration + 0.02);
-                    } catch (_) {}
-                }
-
-                return {
-                    click: () => playTone(520, 0.06, 'triangle', 0.06),
-                    flip: () => playTone(680, 0.08, 'sine', 0.07),
-                    cash: () => {
-                        playTone(784, 0.09, 'triangle', 0.07, 0);
-                        playTone(1046.5, 0.14, 'triangle', 0.08, 0.07);
-                    },
-                    rarePull: (tier = 1) => {
-                        const baseNotes = [587.33, 783.99, 987.77, 1174.66];
-                        const count = Math.min(4, Math.max(2, tier + 1));
-                        for (let i = 0; i < count; i++) {
-                            playTone(baseNotes[i], 0.14, 'triangle', 0.085, i * 0.065);
-                        }
-                    }
-                };
-            })();
-
-            /* ==========================================================================
-               2. GAME DATA CATALOG (Packs, Rarities, Multi-Sport/TCG Cards, Upgrades)
-               ========================================================================== */
-            const RARITIES = [
-                { id: 'base',     name: 'Base',      mult: 0.85, css: 'rarity-base',     badge: 'bg-slate-700 text-slate-200',   tier: 0 },
-                { id: 'holo',     name: 'Holo',      mult: 2.2,  css: 'rarity-holo',     badge: 'bg-sky-500/30 text-sky-300',     tier: 1 },
-                { id: 'numbered', name: '/99',       mult: 6.5,  css: 'rarity-numbered', badge: 'bg-purple-500/30 text-purple-300', tier: 2 },
-                { id: 'patch',    name: 'Auto Patch',mult: 19,   css: 'rarity-patch',    badge: 'bg-amber-500/30 text-amber-300', tier: 3 },
-                { id: 'grail',    name: '1/1 Grail', mult: 75,   css: 'rarity-grail',    badge: 'bg-rose-500/30 text-rose-200',   tier: 4 }
-            ];
-
-            const PACKS = [
-                {
-                    id: 'basic',
-                    name: 'Retail Cello Pack',
-                    desc: 'Tight retail margins. Mostly base & occasional holo hits.',
-                    baseCost: 12,
-                    icon: '📦',
-                    accent: 'from-slate-800 to-slate-900 border-slate-700',
-                    weights: [82, 14.5, 3, 0.45, 0.05]
-                },
-                {
-                    id: 'bronze',
-                    name: 'Bronze Blaster Box',
-                    desc: 'Stepped-up blaster with sharper /99 & patch chase odds.',
-                    baseCost: 65,
-                    icon: '🥉',
-                    accent: 'from-amber-950/60 to-slate-900 border-amber-700/50',
-                    weights: [64, 25, 8.5, 2.2, 0.3]
-                },
-                {
-                    id: 'silver',
-                    name: 'Silver Mega Box',
-                    desc: 'Serious hobby allocation. Numbered parallels & rare patches.',
-                    baseCost: 320,
-                    icon: '🥈',
-                    accent: 'from-sky-950/60 to-slate-900 border-sky-600/50',
-                    weights: [42, 34, 16.5, 6.5, 1.0]
-                },
-                {
-                    id: 'gold',
-                    name: 'Gold Hobby Box',
-                    desc: 'High-stakes hobby box. Heavy numbered & patch upside.',
-                    baseCost: 1650,
-                    icon: '🥇',
-                    accent: 'from-yellow-950/60 to-slate-900 border-yellow-500/50',
-                    weights: [22, 36, 26, 13, 3.0]
-                },
-                {
-                    id: 'platinum',
-                    name: 'Platinum Flawless Case',
-                    desc: 'Ultra-premium case. True 1/1 Grail hunting.',
-                    baseCost: 8500,
-                    icon: '💎',
-                    accent: 'from-purple-950/70 to-slate-900 border-purple-500/60',
-                    weights: [5, 29, 34, 23, 9.0]
-                }
-            ];
-
-            const THEMES = ['Basketball', 'Football', 'Soccer', 'Hockey', 'F1', 'Golf', 'TCG'];
-
-            // 42 Unique Cards across 7 categories (6 cards per category)
-            const CARD_CATALOG = [
-                // Basketball (6)
-                { id: 'bb_1', theme: 'Basketball', icon: '🏀', name: 'Vic Wemby-Tower',   title: 'Alien Block',      baseVal: 4 },
-                { id: 'bb_2', theme: 'Basketball', icon: '🎯', name: 'Steph Splash-30',   title: 'Logo Deep-3',      baseVal: 7 },
-                { id: 'bb_3', theme: 'Basketball', icon: '🪄', name: 'Luka Magic-77',     title: 'Stepback Fade',    baseVal: 10 },
-                { id: 'bb_4', theme: 'Basketball', icon: '🃏', name: 'Nikola Joker-15',   title: 'Sombor Shuffle',   baseVal: 15 },
-                { id: 'bb_5', theme: 'Basketball', icon: '👑', name: 'LeBron King-23',    title: 'Chosen One',       baseVal: 24 },
-                { id: 'bb_6', theme: 'Basketball', icon: '🔥', name: 'Air Jordan-23',     title: 'Flu Game 97',      baseVal: 42 },
-                // Football (6)
-                { id: 'fb_1', theme: 'Football',   icon: '🏈', name: 'Caleb Ice-QB1',     title: 'Off-Platform',     baseVal: 4 },
-                { id: 'fb_2', theme: 'Football',   icon: '🕺', name: 'Justin Griddy-18',  title: '100-Yard Route',   baseVal: 7 },
-                { id: 'fb_3', theme: 'Football',   icon: '⚡', name: 'Lamar MVP-8',       title: 'Juke & Spin',      baseVal: 11 },
-                { id: 'fb_4', theme: 'Football',   icon: '🎽', name: 'Christian CMC-23',  title: 'All-Purpose',      baseVal: 16 },
-                { id: 'fb_5', theme: 'Football',   icon: '🔫', name: 'Patrick Showtime',  title: 'No-Look Laser',    baseVal: 25 },
-                { id: 'fb_6', theme: 'Football',   icon: '🐐', name: 'Tom Terrific-12',   title: '7-Ring Comeback',  baseVal: 44 },
-                // Soccer (6)
-                { id: 'sc_1', theme: 'Soccer',     icon: '⚽', name: 'Lamine Wonderkid',  title: 'Curled Top-Bin',   baseVal: 4 },
-                { id: 'sc_2', theme: 'Soccer',     icon: '🙌', name: 'Jude Hey-Belling',  title: 'Stoppage Volley',  baseVal: 7 },
-                { id: 'sc_3', theme: 'Soccer',     icon: '🤖', name: 'Erling Cyborg-9',   title: 'Golden Boot',      baseVal: 11 },
-                { id: 'sc_4', theme: 'Soccer',     icon: '💨', name: 'Kylian Jet-Mbappe', title: 'Hat-Trick Final',  baseVal: 16 },
-                { id: 'sc_5', theme: 'Soccer',     icon: '🇵🇹', name: 'Cristiano CR7',     title: 'Bicycle UCL',      baseVal: 26 },
-                { id: 'sc_6', theme: 'Soccer',     icon: '🇦🇷', name: 'Lionel La-Pulga',   title: 'World Cup Crown',  baseVal: 45 },
-                // Hockey (6)
-                { id: 'hk_1', theme: 'Hockey',     icon: '🏒', name: 'Connor McJet',      title: 'Rookie Ice',       baseVal: 3 },
-                { id: 'hk_2', theme: 'Hockey',     icon: '🥅', name: 'Patrick Roy-al',    title: 'Glove Save',       baseVal: 5 },
-                { id: 'hk_3', theme: 'Hockey',     icon: '🚨', name: 'Alex Ovech-King',   title: 'One-Timer',        baseVal: 8 },
-                { id: 'hk_4', theme: 'Hockey',     icon: '🏆', name: 'Sidney Frostby',    title: 'Captain Clutch',   baseVal: 12 },
-                { id: 'hk_5', theme: 'Hockey',     icon: '⚡', name: 'Cale Makar-ov',     title: 'Blue Line Jet',    baseVal: 18 },
-                { id: 'hk_6', theme: 'Hockey',     icon: '👑', name: 'Wayne Great-One',   title: '99 Dynasty',       baseVal: 32 },
-                // F1 (6)
-                { id: 'f1_1', theme: 'F1',         icon: '🏎️', name: 'Max Apex',          title: 'Pole Position',    baseVal: 4 },
-                { id: 'f1_2', theme: 'F1',         icon: '🏁', name: 'Lewis Hammer',      title: '7x Crown',         baseVal: 7 },
-                { id: 'f1_3', theme: 'F1',         icon: '🔥', name: 'Charles Monaco',    title: 'Red Scuderia',     baseVal: 10 },
-                { id: 'f1_4', theme: 'F1',         icon: '⏱️', name: 'Lando Turbo',       title: 'Papaya Flash',     baseVal: 15 },
-                { id: 'f1_5', theme: 'F1',         icon: '🛞', name: 'Fernando ElPlan',   title: 'Street Master',    baseVal: 22 },
-                { id: 'f1_6', theme: 'F1',         icon: '🇧🇷', name: 'Ayrton Rainmaster', title: 'Monaco Legend',    baseVal: 36 },
-                // Golf (6)
-                { id: 'gf_1', theme: 'Golf',       icon: '⛳', name: 'Rory Fairway',      title: '340yd Bomb',       baseVal: 3 },
-                { id: 'gf_2', theme: 'Golf',       icon: '🏌️', name: 'Scottie Number1',   title: 'Green Jacket',     baseVal: 6 },
-                { id: 'gf_3', theme: 'Golf',       icon: '🦅', name: 'Viktor Smiles',     title: 'Sunday Eagle',     baseVal: 9 },
-                { id: 'gf_4', theme: 'Golf',       icon: '🌊', name: 'Collin Ironplay',   title: 'Pebble Approach',  baseVal: 14 },
-                { id: 'gf_5', theme: 'Golf',       icon: '🕶️', name: 'Brooks Major',      title: 'Sunday Pressure',  baseVal: 20 },
-                { id: 'gf_6', theme: 'Golf',       icon: '🐅', name: 'Tiger Sunday-Red',  title: 'Roar at Augusta',  baseVal: 35 },
-                // TCG (6)
-                { id: 'tc_1', theme: 'TCG',        icon: '⚡', name: 'Volt Mouse',        title: '1st Edition',      baseVal: 4 },
-                { id: 'tc_2', theme: 'TCG',        icon: '🌿', name: 'Flora Dino',        title: 'Jungle Foil',      baseVal: 7 },
-                { id: 'tc_3', theme: 'TCG',        icon: '💧', name: 'Hydro Shell',       title: 'Tsunami Rare',     baseVal: 11 },
-                { id: 'tc_4', theme: 'TCG',        icon: '🔮', name: 'Psy Mew-Clone',     title: 'Secret Alt-Art',   baseVal: 16 },
-                { id: 'tc_5', theme: 'TCG',        icon: '🪷', name: 'Black Lotus Gem', title: 'Alpha Artifact',   baseVal: 28 },
-                { id: 'tc_6', theme: 'TCG',        icon: '🐉', name: 'Flame Drake GX',    title: 'Shadowless Grail', baseVal: 42 }
-            ];
-
-            const UPGRADES_CONFIG = [
-                {
-                    id: 'autoRipper',
-                    name: 'Auto-Ripper Bot',
-                    icon: '🤖',
-                    desc: 'Auto-rips packs (reserves 2x pack cost so you do not bankrupt yourself).',
-                    baseCost: 220,
-                    costMult: 2.25,
-                    maxLevel: 15,
-                    statLabel: (lvl) => lvl === 0 ? 'Locked' : `1 pack every ${Math.max(1.2, 6.5 - lvl * 0.35).toFixed(1)}s`
-                },
-                {
-                    id: 'shippingClerk',
-                    name: 'Shipping & Listing Clerk',
-                    icon: '🚚',
-                    desc: 'Faster marketplace sales & lowers shipping/listing fee from 18% down to 5%.',
-                    baseCost: 110,
-                    costMult: 1.95,
-                    maxLevel: 20,
-                    statLabel: (lvl) => `${getMarketplaceFeeRate(lvl).toFixed(1)}% fee • ${getSellIntervalFromLevel(lvl).toFixed(2)}s cycle`
-                },
-                {
-                    id: 'distributor',
-                    name: 'Distributor Allocation',
-                    icon: '🏭',
-                    desc: 'Wholesale contracts cut sealed pack costs by 3% per level (cap -45%).',
-                    baseCost: 280,
-                    costMult: 2.2,
-                    maxLevel: 15,
-                    statLabel: (lvl) => `-${Math.min(45, lvl * 3)}% pack cost`
-                },
-                {
-                    id: 'storefront',
-                    name: 'Local Card Shop (LCS)',
-                    icon: '🏪',
-                    desc: 'Generates foot-traffic revenue minus rent/utility overhead.',
-                    baseCost: 160,
-                    costMult: 1.85,
-                    maxLevel: 40,
-                    statLabel: (lvl) => `Net +$${getShopNetPerSecFromLevel(lvl).toFixed(2)}/sec`
-                },
-                {
-                    id: 'marketing',
-                    name: 'Breaker Live-Stream',
-                    icon: '📱',
-                    desc: 'Boosts card market value (+9%/lv) & Reputation gains on sales.',
-                    baseCost: 240,
-                    costMult: 2.05,
-                    maxLevel: 20,
-                    statLabel: (lvl) => `+${lvl * 9}% card value`
-                }
-            ];
-
-            /* ==========================================================================
-               3. GAME STATE & MARKET ROTATION STATE
-               ========================================================================== */
-            const SAVE_KEY = 'card_empire_tycoon_v2';
-            const MARKET_CYCLE_SECONDS = 45;
-
-            let state = {
-                cash: 25.00,
-                lifetimeCash: 25.00,
-                reputation: 10,
-                prestigeBadges: 0,
-                themeFilter: 'ALL',
-                binderFilter: 'ALL',
-                autoRipEnabled: false,
-                muted: false,
-                lastTick: Date.now(),
-                marketSeed: Math.floor(Date.now() / (MARKET_CYCLE_SECONDS * 1000)),
-                inventory: [],
-                listings: [],
-                gradingQueue: [],
-                binder: {},
-                upgrades: {
-                    autoRipper: 0,
-                    shippingClerk: 0,
-                    distributor: 0,
-                    storefront: 0,
-                    marketing: 0
-                }
-            };
-
-            let currentRevealedPack = [];
-            let activeTab = 'rip';
-            let autoRipAccumulator = 0;
-            let marketSellAccumulator = 0;
-            let isSwipingCards = false;
-
-            /* ==========================================================================
-               4. ECONOMY, MARKET FLUCTUATION & FORMULA HELPERS
-               ========================================================================== */
-            function formatMoney(num) {
-                const sign = num < 0 ? '-' : '';
-                const abs = Math.abs(num);
-                if (abs >= 1e9) return sign + '$' + (abs / 1e9).toFixed(2) + 'B';
-                if (abs >= 1e6) return sign + '$' + (abs / 1e6).toFixed(2) + 'M';
-                if (abs >= 1e4) return sign + '$' + (abs / 1e3).toFixed(1) + 'K';
-                return sign + '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            }
-
-            // Deterministic pseudo-random market modifiers per 45s market window
-            function getMarketModifiers(seed = state.marketSeed) {
-                const s = Math.abs(seed * 9301 + 49297) % 233280;
-                const hotIdx = s % THEMES.length;
-                let coldIdx = (s * 7 + 3) % THEMES.length;
-                if (coldIdx === hotIdx) coldIdx = (hotIdx + 1) % THEMES.length;
-
-                const hotTheme = THEMES[hotIdx];
-                const coldTheme = THEMES[coldIdx];
-                const mods = {};
-                THEMES.forEach(t => {
-                    if (t === hotTheme) mods[t] = 1.45;      // +45% Hot Demand
-                    else if (t === coldTheme) mods[t] = 0.72; // -28% Cold Demand
-                    else mods[t] = 1.0;
-                });
-                return { hotTheme, coldTheme, mods };
-            }
-
-            function getThemeMarketMult(theme) {
-                const { mods } = getMarketModifiers();
-                return mods[theme] || 1.0;
-            }
-
-            function getCompletedSetsCount() {
-                let completed = 0;
-                THEMES.forEach(theme => {
-                    const setCards = CARD_CATALOG.filter(c => c.theme === theme);
-                    const hasAll = setCards.every(c => state.binder[c.id] !== undefined);
-                    if (hasAll) completed++;
-                });
-                return completed;
-            }
-
-            function getBinderMultiplier() {
-                const uniqueCount = Object.keys(state.binder).length;
-                const completedSets = getCompletedSetsCount();
-                return 1 + uniqueCount * 0.05 + completedSets * 0.35;
-            }
-
-            function getPrestigeMultiplier() {
-                return 1 + state.prestigeBadges * 0.20;
-            }
-
-            function getGlobalCashMultiplier() {
-                const marketingMult = 1 + state.upgrades.marketing * 0.09;
-                const repMult = 1 + Math.min(1.5, state.reputation / 750);
-                return getBinderMultiplier() * getPrestigeMultiplier() * marketingMult * repMult;
-            }
-
-            function getShopNetPerSecFromLevel(lvl) {
-                if (lvl <= 0) return 0;
-                // Gross sales vs escalating overhead/staff wages
-                const gross = lvl * 5.2;
-                const overhead = lvl * (1.4 + lvl * 0.09);
-                return gross - overhead;
-            }
-
-            function getPassiveIncomePerSec() {
-                const netShop = getShopNetPerSecFromLevel(state.upgrades.storefront);
-                if (netShop >= 0) {
-                    return netShop * getBinderMultiplier() * getPrestigeMultiplier();
-                }
-                return netShop;
-            }
-
-            function getPackDiscount() {
-                return Math.min(0.45, state.upgrades.distributor * 0.03);
-            }
-
-            function getPackCost(pack) {
-                return Math.max(2, Math.ceil(pack.baseCost * (1 - getPackDiscount())));
-            }
-
-            function getUpgradeCost(upg) {
-                const lvl = state.upgrades[upg.id] || 0;
-                // Non-linear acceleration at higher levels so late upgrades demand real planning
-                const superLinearPenalty = Math.pow(1.06, Math.max(0, lvl - 3));
-                return Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl) * superLinearPenalty);
-            }
-
-            function getSellIntervalFromLevel(lvl = state.upgrades.shippingClerk) {
-                return Math.max(0.85, 5.5 - lvl * 0.22);
-            }
-
-            function getSellInterval() {
-                return getSellIntervalFromLevel(state.upgrades.shippingClerk);
-            }
-
-            function getMarketplaceFeeRate(lvl = state.upgrades.shippingClerk) {
-                // Starts at 18% fee (shipping, sleeves, platform cut), drops toward 5%
-                return Math.max(5.0, 18.0 - lvl * 0.65);
-            }
-
-            function getAutoRipInterval() {
-                if (state.upgrades.autoRipper <= 0) return Infinity;
-                return Math.max(1.2, 6.5 - state.upgrades.autoRipper * 0.35);
-            }
-
-            function calculateCardValue(card, rarity, graded = false, applyMarket = true) {
-                const marketMult = applyMarket ? getThemeMarketMult(card.theme) : 1.0;
-                const raw = card.baseVal * rarity.mult * (graded ? 2.8 : 1.0) * marketMult;
-                return raw * getGlobalCashMultiplier();
-            }
-
-            function calculateNetListingPayout(grossValue) {
-                const feeMult = 1 - (getMarketplaceFeeRate() / 100);
-                return Math.max(0.25, grossValue * feeMult);
-            }
-
-            function calculateQuickSellPayout(grossValue) {
-                // Instant wholesale flip pays 70% of market value with zero wait time
-                return Math.max(0.15, grossValue * 0.70);
-            }
-
-            // Escalating prestige thresholds: $15k for 1st badge, steeper curve thereafter
-            function getClaimablePrestigeBadges() {
-                if (state.lifetimeCash < 15000) return 0;
-                const rawBadges = Math.floor(Math.pow(state.lifetimeCash / 15000, 0.68));
-                return Math.max(0, rawBadges - state.prestigeBadges);
-            }
-
-            function getNextPrestigeMilestoneCash() {
-                const targetTotalBadges = state.prestigeBadges + Math.max(1, getClaimablePrestigeBadges() + 1);
-                return 15000 * Math.pow(targetTotalBadges, 1 / 0.68);
-            }
-
-            function spawnFloatingCash(text, colorClass = 'text-emerald-400', xPercent = null) {
-                const layer = document.getElementById('floating-layer');
-                if (!layer) return;
-                const el = document.createElement('div');
-                const left = xPercent !== null ? xPercent : (22 + Math.random() * 52);
-                el.className = `floating-cash absolute font-display font-bold text-base drop-shadow-md ${colorClass}`;
-                el.style.left = `${left}%`;
-                el.style.top = '11%';
-                el.textContent = text;
-                layer.appendChild(el);
-                setTimeout(() => el.remove(), 1150);
-            }
-
-            /* ==========================================================================
-               5. PACK OPENING & CARD GENERATION LOGIC
-               ========================================================================== */
-            function rollRarity(pack) {
-                // Modest luck edge from prestige badges; top chases stay scarce
-                const luckBonus = Math.min(8, state.prestigeBadges * 0.45);
-                const weights = [...pack.weights];
-                if (weights[0] > luckBonus) {
-                    weights[0] -= luckBonus;
-                    weights[1] += luckBonus * 0.55;
-                    weights[2] += luckBonus * 0.30;
-                    weights[3] += luckBonus * 0.12;
-                    weights[4] += luckBonus * 0.03;
-                }
-                const total = weights.reduce((a, b) => a + b, 0);
-                let roll = Math.random() * total;
-                for (let i = 0; i < weights.length; i++) {
-                    if (roll < weights[i]) return RARITIES[i];
-                    roll -= weights[i];
-                }
-                return RARITIES[0];
-            }
-
-            function rollCardFromPool() {
-                let pool = CARD_CATALOG;
-                if (state.themeFilter !== 'ALL') {
-                    pool = CARD_CATALOG.filter(c => c.theme === state.themeFilter);
-                }
-                return pool[Math.floor(Math.random() * pool.length)];
-            }
-
-            function buyAndRipPack(packId, isAuto = false) {
-                const pack = PACKS.find(p => p.id === packId);
-                if (!pack) return false;
-                const cost = getPackCost(pack);
-                if (state.cash < cost) return false;
-
-                state.cash -= cost;
-                if (!isAuto) SoundFX.click();
-
-                const pulledCards = [];
-                let bestTier = 0;
-
-                for (let i = 0; i < 3; i++) {
-                    const card = rollCardFromPool();
-                    const rarity = rollRarity(pack);
-                    if (rarity.tier > bestTier) bestTier = rarity.tier;
-
-                    const isNewToBinder = state.binder[card.id] === undefined;
-                    if (isNewToBinder || rarity.tier > state.binder[card.id]) {
-                        state.binder[card.id] = rarity.tier;
-                    }
-
-                    const val = calculateCardValue(card, rarity, false, true);
-                    const item = {
-                        uid: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-                        cardId: card.id,
-                        rarityId: rarity.id,
-                        graded: false,
-                        value: val
-                    };
-
-                    state.inventory.push(item);
-                    pulledCards.push({
-                        ...item,
-                        card,
-                        rarity,
-                        flipped: isAuto,
-                        isNew: isNewToBinder
-                    });
-                }
-
-                currentRevealedPack = pulledCards;
-
-                if (!isAuto) {
-                    const btn = document.getElementById(`pack-btn-${packId}`);
-                    if (btn) {
-                        btn.classList.remove('animate-pack-shake');
-                        void btn.offsetWidth;
-                        btn.classList.add('animate-pack-shake');
-                    }
-                } else if (bestTier >= 2) {
-                    SoundFX.rarePull(bestTier);
-                }
-
-                renderRevealStage(pack.name);
-                updateAllUI();
-                return true;
-            }
-
-            function flipCardAtIndex(idx) {
-                const entry = currentRevealedPack[idx];
-                if (!entry || entry.flipped) return;
-                entry.flipped = true;
-
-                if (entry.rarity.tier >= 1) {
-                    SoundFX.rarePull(entry.rarity.tier);
-                } else {
-                    SoundFX.flip();
-                }
-
-                const cardEl = document.getElementById(`reveal-card-${idx}`);
-                if (cardEl) {
-                    cardEl.classList.add('card-flipped');
-                }
-                checkAllFlippedStatus();
-            }
-
-            function flipAllRevealedCards() {
-                let highest = 0;
-                currentRevealedPack.forEach((c, idx) => {
-                    if (!c.flipped) {
-                        c.flipped = true;
-                        if (c.rarity.tier > highest) highest = c.rarity.tier;
-                        const cardEl = document.getElementById(`reveal-card-${idx}`);
-                        if (cardEl) cardEl.classList.add('card-flipped');
-                    }
-                });
-                if (highest >= 1) SoundFX.rarePull(highest);
-                else SoundFX.flip();
-                checkAllFlippedStatus();
-            }
-
-            function checkAllFlippedStatus() {
-                const unflippedCount = currentRevealedPack.filter(c => !c.flipped).length;
-                const flipBtn = document.getElementById('flip-all-btn');
-                const postActions = document.getElementById('post-rip-actions');
-                const pullTotalEl = document.getElementById('pull-total-value');
-
-                if (unflippedCount === 0 && currentRevealedPack.length > 0) {
-                    flipBtn.classList.add('hidden');
-                    postActions.classList.remove('hidden');
-                    const sum = currentRevealedPack.reduce((acc, c) => acc + c.value, 0);
-                    pullTotalEl.textContent = formatMoney(sum);
-                } else if (unflippedCount > 0) {
-                    flipBtn.classList.remove('hidden');
-                    postActions.classList.add('hidden');
-                }
-            }
-
-            function setThemeFilter(theme) {
-                state.themeFilter = theme;
-                SoundFX.click();
-                document.querySelectorAll('.theme-pill').forEach(btn => {
-                    if (btn.dataset.theme === theme) {
-                        btn.className = 'theme-pill px-2.5 py-1 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shrink-0';
-                    } else {
-                        btn.className = 'theme-pill px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 shrink-0';
-                    }
-                });
-            }
-
-            function setBinderFilter(theme) {
-                state.binderFilter = theme;
-                SoundFX.click();
-                document.querySelectorAll('.btheme-pill').forEach(btn => {
-                    if (btn.dataset.btheme === theme) {
-                        btn.className = 'btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-sky-500 text-slate-950 shrink-0';
-                    } else {
-                        btn.className = 'btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0';
-                    }
-                });
-                if (activeTab === 'binder') renderBinderTab();
-            }
-
-            function toggleAutoRip() {
-                if (state.upgrades.autoRipper <= 0) {
-                    switchTab('empire');
-                    return;
-                }
-                state.autoRipEnabled = !state.autoRipEnabled;
-                SoundFX.click();
-                updateAutoRipButton();
-            }
-
-            /* ==========================================================================
-               6. INVENTORY, MARKETPLACE SALES, QUICK FLIPS & GRADING LAB
-               ========================================================================== */
-            function getDuplicateUids() {
-                const grouped = {};
-                state.inventory.forEach(item => {
-                    if (!grouped[item.cardId]) grouped[item.cardId] = [];
-                    grouped[item.cardId].push(item);
-                });
-
-                const dupes = [];
-                Object.values(grouped).forEach(list => {
-                    if (list.length > 1) {
-                        list.sort((a, b) => {
-                            const ca = CARD_CATALOG.find(c => c.id === a.cardId);
-                            const ra = RARITIES.find(r => r.id === a.rarityId);
-                            const cb = CARD_CATALOG.find(c => c.id === b.cardId);
-                            const rb = RARITIES.find(r => r.id === b.rarityId);
-                            return calculateCardValue(cb, rb, b.graded) - calculateCardValue(ca, ra, a.graded);
-                        });
-                        for (let i = 1; i < list.length; i++) {
-                            dupes.push(list[i].uid);
-                        }
-                    }
-                });
-                return dupes;
-            }
-
-            function quickSellCardUid(uid) {
-                const idx = state.inventory.findIndex(i => i.uid === uid);
-                if (idx === -1) return 0;
-                const [item] = state.inventory.splice(idx, 1);
-                const card = CARD_CATALOG.find(c => c.id === item.cardId);
-                const rarity = RARITIES.find(r => r.id === item.rarityId);
-                const gross = calculateCardValue(card, rarity, item.graded);
-                const payout = calculateQuickSellPayout(gross);
-
-                state.cash += payout;
-                state.lifetimeCash += payout;
-                return payout;
-            }
-
-            function quickSellDuplicatesInstant() {
-                const dupeUids = getDuplicateUids();
-                if (dupeUids.length === 0) return;
-                let totalPayout = 0;
-                dupeUids.forEach(uid => {
-                    totalPayout += quickSellCardUid(uid);
-                });
-                SoundFX.cash();
-                spawnFloatingCash(`+${formatMoney(totalPayout)} (Quick)`, 'text-amber-300');
-                updateAllUI();
-            }
-
-            function listCardUid(uid) {
-                const idx = state.inventory.findIndex(i => i.uid === uid);
-                if (idx === -1) return;
-                const [item] = state.inventory.splice(idx, 1);
-                const card = CARD_CATALOG.find(c => c.id === item.cardId);
-                const rarity = RARITIES.find(r => r.id === item.rarityId);
-                const gross = calculateCardValue(card, rarity, item.graded);
-                const netPayout = calculateNetListingPayout(gross);
-
-                state.listings.push({
-                    uid: item.uid,
-                    cardId: item.cardId,
-                    rarityId: item.rarityId,
-                    graded: item.graded,
-                    price: netPayout
-                });
-            }
-
-            function quickListDuplicates() {
-                const dupeUids = getDuplicateUids();
-                if (dupeUids.length === 0) return;
-                dupeUids.forEach(uid => listCardUid(uid));
-                SoundFX.click();
-                updateAllUI();
-            }
-
-            function listAllSingles() {
-                if (state.inventory.length === 0) return;
-                const allUids = state.inventory.map(i => i.uid);
-                allUids.forEach(uid => listCardUid(uid));
-                SoundFX.click();
-                updateAllUI();
-            }
-
-            function submitCardForGrading(uid) {
-                if (state.gradingQueue.length >= 2) return;
-                const idx = state.inventory.findIndex(i => i.uid === uid);
-                if (idx === -1) return;
-
-                const item = state.inventory[idx];
-                if (item.graded) return;
-
-                const card = CARD_CATALOG.find(c => c.id === item.cardId);
-                const rarity = RARITIES.find(r => r.id === item.rarityId);
-                const rawVal = calculateCardValue(card, rarity, false);
-                const fee = Math.max(10, rawVal * 0.55);
-
-                if (state.cash < fee) return;
-
-                state.cash -= fee;
-                state.inventory.splice(idx, 1);
-                SoundFX.click();
-
-                const duration = 18;
-                state.gradingQueue.push({
-                    uid: item.uid,
-                    cardId: item.cardId,
-                    rarityId: item.rarityId,
-                    finishTime: Date.now() + duration * 1000,
-                    duration
-                });
-
-                updateAllUI();
-            }
-
-            function collectGradedCard(uid) {
-                const idx = state.gradingQueue.findIndex(g => g.uid === uid);
-                if (idx === -1) return;
-                const gItem = state.gradingQueue[idx];
-                if (Date.now() < gItem.finishTime) return;
-
-                state.gradingQueue.splice(idx, 1);
-                const card = CARD_CATALOG.find(c => c.id === gItem.cardId);
-                const rarity = RARITIES.find(r => r.id === gItem.rarityId);
-                const slabVal = calculateCardValue(card, rarity, true);
-
-                state.inventory.push({
-                    uid: gItem.uid,
-                    cardId: gItem.cardId,
-                    rarityId: gItem.rarityId,
-                    graded: true,
-                    value: slabVal
-                });
-
-                SoundFX.rarePull(3);
-                updateAllUI();
-            }
-
-            /* ==========================================================================
-               7. UPGRADES & PRESTIGE
-               ========================================================================== */
-            function buyUpgrade(upgradeId) {
-                const cfg = UPGRADES_CONFIG.find(u => u.id === upgradeId);
-                if (!cfg) return;
-                const currentLvl = state.upgrades[upgradeId] || 0;
-                if (currentLvl >= cfg.maxLevel) return;
-
-                const cost = getUpgradeCost(cfg);
-                if (state.cash < cost) return;
-
-                state.cash -= cost;
-                state.upgrades[upgradeId] = currentLvl + 1;
-
-                if (upgradeId === 'autoRipper' && currentLvl === 0) {
-                    state.autoRipEnabled = true;
-                }
-
-                SoundFX.click();
-                updateAllUI();
-            }
-
-            function openPrestigeConfirm() {
-                const gain = getClaimablePrestigeBadges();
-                if (gain <= 0) return;
-                document.getElementById('modal-prestige-gain').textContent = gain;
-                document.getElementById('prestige-modal').classList.remove('hidden');
-            }
-
-            function closePrestigeConfirm() {
-                document.getElementById('prestige-modal').classList.add('hidden');
-            }
-
-            function executePrestige() {
-                const gain = getClaimablePrestigeBadges();
-                if (gain <= 0) return;
-
-                state.prestigeBadges += gain;
-                state.cash = 25 + state.prestigeBadges * 10;
-                state.lifetimeCash = state.cash;
-                state.reputation = 10 + state.prestigeBadges * 5;
-                state.inventory = [];
-                state.listings = [];
-                state.gradingQueue = [];
-                state.autoRipEnabled = false;
-                state.upgrades = {
-                    autoRipper: 0,
-                    shippingClerk: 0,
-                    distributor: 0,
-                    storefront: 0,
-                    marketing: 0
-                };
-                currentRevealedPack = [];
-
-                closePrestigeConfirm();
-                SoundFX.rarePull(4);
-                spawnFloatingCash(`+${gain} PRESTIGE BADGES!`, 'text-amber-400', 22);
-                saveGame();
-                switchTab('rip');
-                updateAllUI();
-            }
-
-            /* ==========================================================================
-               8. MAIN IDLE GAME LOOP (100ms Tick + Dynamic Market Cycle)
-               ========================================================================== */
-            let lastLoopTime = Date.now();
-
-            function gameTick() {
-                const now = Date.now();
-                const dt = Math.min(1.0, (now - lastLoopTime) / 1000);
-                lastLoopTime = now;
-
-                // Rotate Market Demand every 45 seconds
-                const currentSeed = Math.floor(now / (MARKET_CYCLE_SECONDS * 1000));
-                if (currentSeed !== state.marketSeed) {
-                    state.marketSeed = currentSeed;
-                    if (activeTab === 'inventory' || activeTab === 'rip') {
-                        updateAllUI();
-                    }
-                }
-
-                // 1. Passive Storefront Net Flow (can dip negative if over-expanded without income)
-                const netRate = getPassiveIncomePerSec();
-                if (Math.abs(netRate) > 0) {
-                    const delta = netRate * dt;
-                    state.cash = Math.max(0, state.cash + delta);
-                    if (delta > 0) state.lifetimeCash += delta;
-                }
-
-                // 2. Marketplace Automatic Sales (pays Net After Fee)
-                if (state.listings.length > 0) {
-                    marketSellAccumulator += dt;
-                    const sellEvery = getSellInterval();
-                    if (marketSellAccumulator >= sellEvery) {
-                        marketSellAccumulator = 0;
-                        const soldItem = state.listings.shift();
-                        if (soldItem) {
-                            const card = CARD_CATALOG.find(c => c.id === soldItem.cardId);
-                            const rarity = RARITIES.find(r => r.id === soldItem.rarityId);
-                            const gross = calculateCardValue(card, rarity, soldItem.graded, true);
-                            const netSale = calculateNetListingPayout(gross);
-
-                            state.cash += netSale;
-                            state.lifetimeCash += netSale;
-                            state.reputation += 1 + Math.floor((state.upgrades.shippingClerk + state.upgrades.marketing) / 5);
-
-                            if (activeTab === 'inventory' || Math.random() < 0.30) {
-                                spawnFloatingCash(`+${formatMoney(netSale)} net`, 'text-emerald-400');
-                            }
-                            if (activeTab === 'inventory') SoundFX.cash();
-                        }
-                    }
-                } else {
-                    marketSellAccumulator = 0;
-                }
-
-                // 3. Auto-Ripper Bot (keeps a 2x pack reserve so bot cannot drain last dollar)
-                if (state.autoRipEnabled && state.upgrades.autoRipper > 0) {
-                    autoRipAccumulator += dt;
-                    const ripEvery = getAutoRipInterval();
-                    if (autoRipAccumulator >= ripEvery) {
-                        autoRipAccumulator = 0;
-                        let chosenPack = null;
-                        for (let i = PACKS.length - 1; i >= 0; i--) {
-                            const pCost = getPackCost(PACKS[i]);
-                            if (state.cash >= pCost * 2) {
-                                chosenPack = PACKS[i];
-                                break;
-                            }
-                        }
-                        if (chosenPack) {
-                            buyAndRipPack(chosenPack.id, true);
-                            if (state.inventory.length > 15) {
-                                quickListDuplicates();
-                            }
-                        }
-                    }
-                }
-
-                updateTopBarUI();
-                if (activeTab === 'inventory' && state.gradingQueue.length > 0) {
-                    renderGradingQueue();
-                }
-            }
-
-            /* ==========================================================================
-               9. UI RENDERING & NAVIGATION
-               ========================================================================== */
-            function switchTab(tabName) {
-                activeTab = tabName;
-                SoundFX.click();
-
-                ['rip', 'inventory', 'empire', 'binder'].forEach(t => {
-                    const sec = document.getElementById(`tab-${t}`);
-                    if (sec) sec.classList.toggle('hidden', t !== tabName);
-                });
-
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    const isSelected = btn.dataset.tab === tabName;
-                    btn.className = isSelected
-                        ? 'nav-btn btn-press flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 bg-sky-500/10 relative'
-                        : 'nav-btn btn-press flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 relative';
-                });
-
-                updateAllUI();
-            }
-
-            function updateTopBarUI() {
-                document.getElementById('ui-cash').textContent = formatMoney(state.cash);
-                document.getElementById('ui-rep').textContent = state.reputation.toLocaleString();
-
-                const netRate = getPassiveIncomePerSec();
-                const badge = document.getElementById('passive-income-badge');
-                badge.textContent = `${netRate >= 0 ? '+' : ''}${formatMoney(netRate)}/s`;
-                badge.className = netRate >= 0
-                    ? 'text-emerald-400 font-display font-bold text-xs'
-                    : 'text-rose-400 font-display font-bold text-xs';
-
-                document.getElementById('ui-binder-mult').textContent = `${getBinderMultiplier().toFixed(2)}x`;
-                document.getElementById('ui-prestige-badges').textContent = state.prestigeBadges;
-
-                const { hotTheme, coldTheme } = getMarketModifiers();
-                document.getElementById('ui-hot-market-badge').textContent = `🔥 ${hotTheme} +45%`;
-
-                const nowSec = Math.floor(Date.now() / 1000);
-                const secsLeft = Math.max(0, MARKET_CYCLE_SECONDS - (nowSec % MARKET_CYCLE_SECONDS));
-                document.getElementById('ui-market-timer').textContent = `0:${secsLeft < 10 ? '0' : ''}${secsLeft}`;
-
-                const disc = Math.round(getPackDiscount() * 100);
-                const discEl = document.getElementById('ui-discount-badge');
-                if (disc > 0) {
-                    discEl.textContent = `Bulk: -${disc}%`;
-                    discEl.classList.remove('hidden');
-                } else {
-                    discEl.classList.add('hidden');
-                }
-
-                const ripStrip = document.getElementById('rip-market-summary');
-                if (ripStrip) {
-                    ripStrip.innerHTML = `<span class="text-emerald-400 font-bold">${hotTheme} (+45%)</span> • <span class="text-rose-400 font-bold">${coldTheme} (-28%)</span>`;
-                }
-
-                const empireFlow = document.getElementById('empire-net-flow');
-                if (empireFlow) {
-                    empireFlow.textContent = `${netRate >= 0 ? '+' : ''}${formatMoney(netRate)}/s`;
-                    empireFlow.className = `font-display font-bold text-sm ${netRate >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-                }
-
-                const prestigeGain = getClaimablePrestigeBadges();
-                document.getElementById('top-prestige-btn').classList.toggle('hidden', prestigeGain <= 0);
-            }
-
-            function updateAutoRipButton() {
-                const btn = document.getElementById('auto-rip-toggle');
-                const dot = document.getElementById('auto-rip-dot');
-                const label = document.getElementById('auto-rip-label');
-                if (!btn || !dot || !label) return;
-
-                if (state.upgrades.autoRipper <= 0) {
-                    btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1';
-                    dot.className = 'w-2 h-2 rounded-full bg-slate-500';
-                    label.textContent = 'Bot Locked';
-                    return;
-                }
-
-                if (state.autoRipEnabled) {
-                    btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-emerald-500/50 bg-emerald-500/20 text-emerald-300 flex items-center gap-1';
-                    dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
-                    label.textContent = 'Auto ON';
-                } else {
-                    btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-amber-500/40 bg-slate-800 text-amber-300 flex items-center gap-1';
-                    dot.className = 'w-2 h-2 rounded-full bg-amber-400';
-                    label.textContent = 'Auto OFF';
-                }
-            }
-
-            function renderRevealStage(packName) {
-                const emptyEl = document.getElementById('reveal-empty-state');
-                const gridEl = document.getElementById('reveal-cards-grid');
-                const labelEl = document.getElementById('reveal-pack-label');
-                const flipBtn = document.getElementById('flip-all-btn');
-                const postActions = document.getElementById('post-rip-actions');
-
-                labelEl.textContent = packName ? `Opened: ${packName}` : 'Tap cards to flip';
-                emptyEl.classList.add('hidden');
-                gridEl.classList.remove('hidden');
-                postActions.classList.add('hidden');
-
-                gridEl.innerHTML = currentRevealedPack.map((entry, idx) => {
-                    const flippedCls = entry.flipped ? 'card-flipped' : '';
-                    return `
-                    <div id="reveal-card-${idx}" onclick="flipCardAtIndex(${idx})" class="card-3d ${flippedCls} h-36 cursor-pointer select-none">
-                        <div class="card-3d-inner relative w-full h-full">
-                            <div class="card-face absolute inset-0 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-950 border border-sky-500/30 flex flex-col items-center justify-center p-2 shadow-md">
-                                <div class="text-2xl mb-1">🃏</div>
-                                <div class="text-[9px] font-bold uppercase tracking-wider text-sky-300">Tap to Flip</div>
-                            </div>
-                            <div class="card-face card-back absolute inset-0 rounded-xl border ${entry.rarity.css} p-2 flex flex-col items-center justify-between text-center shadow-lg">
-                                <div class="w-full flex items-center justify-between gap-1">
-                                    <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${entry.rarity.badge}">${entry.rarity.name}</span>
-                                    ${entry.isNew ? '<span class="text-[8px] font-black px-1 py-0.5 rounded bg-emerald-400 text-slate-950">NEW</span>' : ''}
-                                </div>
-                                <div class="text-2xl leading-none">${entry.card.icon}</div>
-                                <div class="w-full">
-                                    <div class="text-[10px] font-extrabold text-white truncate">${entry.card.name}</div>
-                                    <div class="text-[10px] font-display font-bold text-emerald-400">${formatMoney(entry.value)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
-
-                const allFlipped = currentRevealedPack.every(c => c.flipped);
-                flipBtn.classList.toggle('hidden', allFlipped);
-                if (allFlipped) checkAllFlippedStatus();
-            }
-
-            function renderPackStore() {
-                const container = document.getElementById('pack-list');
-                container.innerHTML = PACKS.map(pack => {
-                    const cost = getPackCost(pack);
-                    const canAfford = state.cash >= cost;
-                    const chaseOdds = (pack.weights[2] + pack.weights[3] + pack.weights[4]).toFixed(1);
-
-                    return `
-                    <button id="pack-btn-${pack.id}" onclick="buyAndRipPack('${pack.id}')" ${!canAfford ? 'disabled' : ''}
-                        class="w-full text-left btn-press disabled:opacity-45 bg-gradient-to-r ${pack.accent} border rounded-2xl p-3 flex items-center justify-between gap-3 shadow-md">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-12 h-12 rounded-xl bg-slate-950/70 border border-white/10 flex items-center justify-center text-2xl shrink-0">
-                                ${pack.icon}
-                            </div>
-                            <div class="min-w-0">
-                                <h3 class="text-sm font-extrabold text-white truncate">${pack.name}</h3>
-                                <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">${pack.desc}</p>
-                                <div class="text-[10px] text-sky-400 font-semibold mt-1">/99+ Chase Odds: ${chaseOdds}%</div>
-                            </div>
-                        </div>
-                        <div class="shrink-0 text-right">
-                            <div class="px-3 py-2 rounded-xl font-display font-bold text-base ${canAfford ? 'bg-emerald-500 text-slate-950 shadow-sm' : 'bg-slate-800 text-slate-400'}">
-                                ${formatMoney(cost)}
-                            </div>
-                        </div>
-                    </button>`;
-                }).join('');
-            }
-
-            function renderGradingQueue() {
-                const container = document.getElementById('grading-queue-list');
-                const countEl = document.getElementById('inv-grading-count');
-                if (!container || !countEl) return;
-
-                countEl.textContent = `${state.gradingQueue.length} / 2`;
-                if (state.gradingQueue.length === 0) {
-                    container.innerHTML = '';
-                    return;
-                }
-
-                const now = Date.now();
-                container.innerHTML = state.gradingQueue.map(g => {
-                    const card = CARD_CATALOG.find(c => c.id === g.cardId);
-                    const rarity = RARITIES.find(r => r.id === g.rarityId);
-                    const remainingSec = Math.max(0, Math.ceil((g.finishTime - now) / 1000));
-                    const isReady = remainingSec <= 0;
-                    const progressPct = Math.min(100, Math.max(0, ((g.duration * 1000 - Math.max(0, g.finishTime - now)) / (g.duration * 1000)) * 100));
-
-                    return `
-                    <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div class="text-xl">${card ? card.icon : '🏅'}</div>
-                            <div class="min-w-0 flex-1">
-                                <div class="text-xs font-bold text-white truncate">${card ? card.name : 'Card'} <span class="text-[10px] text-amber-300">(${rarity ? rarity.name : ''})</span></div>
-                                <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden mt-1">
-                                    <div class="h-full bg-amber-400 transition-all duration-200" style="width: ${progressPct}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                        ${isReady
-                            ? `<button onclick="collectGradedCard('${g.uid}')" class="btn-press bg-amber-400 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg shrink-0">Claim Slab</button>`
-                            : `<span class="text-xs font-mono font-bold text-amber-300 shrink-0">${remainingSec}s</span>`
-                        }
-                    </div>`;
-                }).join('');
-            }
-
-            function renderInventoryTab() {
-                const listedTotal = state.listings.reduce((acc, l) => acc + l.price, 0);
-                document.getElementById('inv-listed-count').textContent = state.listings.length;
-                document.getElementById('inv-listed-val').textContent = formatMoney(listedTotal);
-                document.getElementById('inv-sell-rate').textContent = `${getSellInterval().toFixed(2)}s`;
-                document.getElementById('inv-fee-rate').textContent = `${getMarketplaceFeeRate().toFixed(0)}%`;
-
-                const dupes = getDuplicateUids();
-                document.getElementById('dupe-count-badge').textContent = dupes.length;
-                document.getElementById('total-inv-cards').textContent = `${state.inventory.length} cards`;
-
-                renderGradingQueue();
-
-                const listEl = document.getElementById('inventory-list');
-                if (state.inventory.length === 0) {
-                    listEl.innerHTML = `<div class="text-center py-8 text-xs text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800/80">Your raw card box is empty. Rip some packs!</div>`;
-                    return;
-                }
-
-                const { hotTheme, coldTheme } = getMarketModifiers();
-                const sorted = [...state.inventory].sort((a, b) => {
-                    const ca = CARD_CATALOG.find(c => c.id === a.cardId);
-                    const ra = RARITIES.find(r => r.id === a.rarityId);
-                    const cb = CARD_CATALOG.find(c => c.id === b.cardId);
-                    const rb = RARITIES.find(r => r.id === b.rarityId);
-                    return calculateCardValue(cb, rb, b.graded) - calculateCardValue(ca, ra, a.graded);
-                });
-
-                listEl.innerHTML = sorted.slice(0, 40).map(item => {
-                    const card = CARD_CATALOG.find(c => c.id === item.cardId);
-                    const rarity = RARITIES.find(r => r.id === item.rarityId);
-                    const grossVal = calculateCardValue(card, rarity, item.graded, true);
-                    const netVal = calculateNetListingPayout(grossVal);
-                    const quickVal = calculateQuickSellPayout(grossVal);
-                    const gradeFee = Math.max(10, grossVal * 0.55);
-                    const canGrade = !item.graded && rarity.tier >= 1 && state.gradingQueue.length < 2 && state.cash >= gradeFee;
-
-                    const mktTag = card.theme === hotTheme
-                        ? '<span class="text-[9px] font-bold text-emerald-400">🔥+45%</span>'
-                        : (card.theme === coldTheme ? '<span class="text-[9px] font-bold text-rose-400">❄️-28%</span>' : '');
-
-                    return `
-                    <div class="bg-slate-900 border ${item.graded ? 'border-amber-500/50' : 'border-slate-800'} rounded-xl p-2.5 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <div class="w-10 h-10 rounded-lg bg-slate-950 flex items-center justify-center text-xl shrink-0 border border-white/5">
-                                ${card.icon}
-                            </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1 flex-wrap">
-                                    <span class="text-xs font-extrabold text-white truncate">${card.name}</span>
-                                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
-                                    ${item.graded ? '<span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-950">PSA 10</span>' : ''}
-                                    ${mktTag}
-                                </div>
-                                <div class="text-[11px] text-emerald-400 font-display font-bold mt-0.5">
-                                    Net: ${formatMoney(netVal)} <span class="text-slate-500 font-sans text-[10px]">• Quick: ${formatMoney(quickVal)}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-1 shrink-0">
-                            ${!item.graded && rarity.tier >= 1 ? `
-                                <button onclick="submitCardForGrading('${item.uid}')" ${!canGrade ? 'disabled' : ''}
-                                    class="btn-press disabled:opacity-35 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold px-1.5 py-1.5 rounded-lg">
-                                    Grade (${formatMoney(gradeFee)})
-                                </button>
-                            ` : ''}
-                            <button onclick="quickSellCardUid('${item.uid}'); updateAllUI();"
-                                class="btn-press bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-500/30 text-[10px] font-bold px-2 py-1.5 rounded-lg">
-                                Flip
-                            </button>
-                            <button onclick="listCardUid('${item.uid}'); updateAllUI();"
-                                class="btn-press bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[10px] font-bold px-2 py-1.5 rounded-lg">
-                                List
-                            </button>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-
-            function renderEmpireTab() {
-                const container = document.getElementById('upgrades-list');
-                container.innerHTML = UPGRADES_CONFIG.map(upg => {
-                    const lvl = state.upgrades[upg.id] || 0;
-                    const isMax = lvl >= upg.maxLevel;
-                    const cost = getUpgradeCost(upg);
-                    const canAfford = !isMax && state.cash >= cost;
-
-                    return `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
-                        <div class="flex items-start gap-3 min-w-0">
-                            <div class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl shrink-0">
-                                ${upg.icon}
-                            </div>
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="text-sm font-extrabold text-white truncate">${upg.name}</h3>
-                                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-sky-400">Lv.${lvl}/${upg.maxLevel}</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">${upg.desc}</p>
-                                <div class="text-[11px] font-semibold text-emerald-400 mt-1">${upg.statLabel(lvl)}</div>
-                            </div>
-                        </div>
-
-                        <button onclick="buyUpgrade('${upg.id}')" ${!canAfford ? 'disabled' : ''}
-                            class="shrink-0 btn-press disabled:opacity-45 px-3 py-2.5 rounded-xl font-display font-bold text-sm ${isMax ? 'bg-slate-800 text-slate-400' : (canAfford ? 'bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20' : 'bg-slate-800 text-slate-300')}">
-                            ${isMax ? 'MAXED' : formatMoney(cost)}
-                        </button>
-                    </div>`;
-                }).join('');
-            }
-
-            function renderBinderTab() {
-                const uniqueCount = Object.keys(state.binder).length;
-                const totalCatalog = CARD_CATALOG.length;
-                const pct = Math.round((uniqueCount / totalCatalog) * 100);
-                const completedSets = getCompletedSetsCount();
-
-                document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${totalCatalog} (${pct}%)`;
-                document.getElementById('binder-progress-bar').style.width = `${pct}%`;
-                document.getElementById('completed-sets-count').textContent = `${completedSets}/${THEMES.length}`;
-
-                const claimable = getClaimablePrestigeBadges();
-                const nextMilestone = getNextPrestigeMilestoneCash();
-                document.getElementById('prestige-claim-amount').textContent = claimable;
-                document.getElementById('prestige-req-text').textContent = `Next badge milestone: ${formatMoney(nextMilestone)} lifetime`;
-                document.getElementById('prestige-reset-btn').disabled = claimable <= 0;
-
-                const visibleCards = state.binderFilter === 'ALL'
-                    ? CARD_CATALOG
-                    : CARD_CATALOG.filter(c => c.theme === state.binderFilter);
-
-                const grid = document.getElementById('binder-grid');
-                grid.innerHTML = visibleCards.map(card => {
-                    const unlockedTier = state.binder[card.id];
-                    const isUnlocked = unlockedTier !== undefined;
-
-                    if (!isUnlocked) {
-                        return `
-                        <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 flex flex-col items-center justify-center text-center h-28 opacity-55">
-                            <div class="text-xl grayscale mb-1">❓</div>
-                            <div class="text-[10px] font-bold text-slate-500 truncate w-full">${card.theme}</div>
-                            <div class="text-[9px] text-slate-600">Undiscovered</div>
-                        </div>`;
-                    }
-
-                    const rarity = RARITIES[unlockedTier] || RARITIES[0];
-                    return `
-                    <div class="relative rounded-xl border ${rarity.css} p-2 flex flex-col items-center justify-between text-center h-28 overflow-hidden">
-                        <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
-                        <div class="text-2xl leading-none">${card.icon}</div>
-                        <div class="w-full">
-                            <div class="text-[10px] font-extrabold text-white truncate">${card.name}</div>
-                            <div class="text-[8px] text-slate-400 truncate">${card.theme}</div>
-                        </div>
-                    </div>`;
-                }).join('');
-            }
-
-            function updateAllUI() {
-                updateTopBarUI();
-                updateAutoRipButton();
-
-                if (activeTab === 'rip') {
-                    renderPackStore();
-                } else if (activeTab === 'inventory') {
-                    renderInventoryTab();
-                } else if (activeTab === 'empire') {
-                    renderEmpireTab();
-                } else if (activeTab === 'binder') {
-                    renderBinderTab();
-                }
-            }
-
-            function setupTouchSwipeReveal() {
-                const stage = document.getElementById('reveal-stage');
-                if (!stage) return;
-                let touchStartX = 0;
-
-                stage.addEventListener('touchstart', (e) => {
-                    if (e.touches && e.touches.length > 0) {
-                        touchStartX = e.touches[0].clientX;
-                        isSwipingCards = true;
-                    }
-                }, { passive: true });
-
-                stage.addEventListener('touchend', (e) => {
-                    if (!isSwipingCards) return;
-                    isSwipingCards = false;
-                    const endX = e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0].clientX : touchStartX;
-                    if (Math.abs(endX - touchStartX) > 40 && currentRevealedPack.length > 0) {
-                        flipAllRevealedCards();
-                    }
-                }, { passive: true });
-            }
-
-            /* ==========================================================================
-               10. SAVE / LOAD & INITIALIZATION
-               ========================================================================== */
-            function saveGame() {
-                try {
-                    state.lastTick = Date.now();
-                    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-                } catch (err) {
-                    console.warn('Could not save game state:', err);
-                }
-            }
-
-            function loadGame() {
-                try {
-                    const raw = localStorage.getItem(SAVE_KEY);
-                    if (!raw) return;
-                    const parsed = JSON.parse(raw);
-                    state = {
-                        ...state,
-                        ...parsed,
-                        upgrades: {
-                            ...state.upgrades,
-                            ...(parsed.upgrades || {})
-                        },
-                        binder: parsed.binder || {},
-                        inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
-                        listings: Array.isArray(parsed.listings) ? parsed.listings : [],
-                        gradingQueue: Array.isArray(parsed.gradingQueue) ? parsed.gradingQueue : []
-                    };
-
-                    const elapsedSec = Math.max(0, Math.min(8 * 3600, (Date.now() - (state.lastTick || Date.now())) / 1000));
-                    const netRate = getPassiveIncomePerSec();
-                    if (elapsedSec > 5 && netRate > 0) {
-                        const offlineEarned = netRate * elapsedSec * 0.75;
-                        state.cash += offlineEarned;
-                        state.lifetimeCash += offlineEarned;
-                        setTimeout(() => {
-                            spawnFloatingCash(`+${formatMoney(offlineEarned)} offline`, 'text-emerald-400', 25);
-                        }, 400);
-                    }
-                } catch (err) {
-                    console.warn('Could not load save state:', err);
-                }
-            }
-
-            window.onload = function () {
-                loadGame();
-                setThemeFilter(state.themeFilter || 'ALL');
-                setBinderFilter(state.binderFilter || 'ALL');
-                setupTouchSwipeReveal();
-                updateAllUI();
-
-                // Main 100ms idle engine loop
-                setInterval(gameTick, 100);
-
-                // Periodic auto-save every 10s and on page hide
-                setInterval(saveGame, 10000);
-                window.addEventListener('beforeunload', saveGame);
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) saveGame();
-                });
-            };
-        </script>
     </div>
+
+    <script>
+        /* ==========================================================================
+           1. AUDIO ENGINE (Web Audio API - Zero external MP3s required)
+           ========================================================================== */
+        const SoundFX = (() => {
+            let ctx = null;
+
+            function getCtx() {
+                if (!state || state.muted) return null;
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return null;
+                if (!ctx) {
+                    ctx = new AudioCtx();
+                }
+                if (ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
+                }
+                return ctx;
+            }
+
+            function playTone(freq, duration, type = 'sine', gainPeak = 0.08, delay = 0) {
+                try {
+                    const c = getCtx();
+                    if (!c) return;
+                    const now = c.currentTime + delay;
+                    const osc = c.createOscillator();
+                    const gain = c.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.015);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                    osc.connect(gain);
+                    gain.connect(c.destination);
+                    osc.start(now);
+                    osc.stop(now + duration + 0.02);
+                } catch (_) {}
+            }
+
+            return {
+                click: () => playTone(520, 0.06, 'triangle', 0.06),
+                flip: () => playTone(680, 0.08, 'sine', 0.07),
+                cash: () => {
+                    playTone(784, 0.09, 'triangle', 0.07, 0);
+                    playTone(1046.5, 0.14, 'triangle', 0.08, 0.07);
+                },
+                rarePull: (tier = 1) => {
+                    const baseNotes = [587.33, 783.99, 987.77, 1174.66];
+                    const count = Math.min(4, Math.max(2, tier + 1));
+                    for (let i = 0; i < count; i++) {
+                        playTone(baseNotes[i], 0.14, 'triangle', 0.085, i * 0.065);
+                    }
+                }
+            };
+        })();
+
+        /* ==========================================================================
+           2. GAME DATA CATALOG (Packs, Rarities, Multi-Sport/TCG Cards, Upgrades)
+           ========================================================================== */
+        const RARITIES = [
+            { id: 'base',     name: 'Base',      mult: 0.85, css: 'rarity-base',     badge: 'bg-slate-700 text-slate-200',     tier: 0 },
+            { id: 'holo',     name: 'Holo',      mult: 2.2,  css: 'rarity-holo',     badge: 'bg-sky-500/30 text-sky-300',      tier: 1 },
+            { id: 'numbered', name: '/99',       mult: 6.5,  css: 'rarity-numbered', badge: 'bg-purple-500/30 text-purple-300', tier: 2 },
+            { id: 'patch',    name: 'Auto Patch',mult: 19,   css: 'rarity-patch',    badge: 'bg-amber-500/30 text-amber-300',  tier: 3 },
+            { id: 'grail',    name: '1/1 Grail', mult: 75,   css: 'rarity-grail',    badge: 'bg-rose-500/30 text-rose-200',    tier: 4 }
+        ];
+
+        const PACKS = [
+            {
+                id: 'basic',
+                name: 'Retail Cello Pack',
+                desc: 'Tight retail margins. Mostly base & occasional holo hits.',
+                baseCost: 12,
+                icon: '📦',
+                accent: 'from-slate-800 to-slate-900 border-slate-700',
+                weights: [82, 14.5, 3, 0.45, 0.05]
+            },
+            {
+                id: 'bronze',
+                name: 'Bronze Blaster Box',
+                desc: 'Stepped-up blaster with sharper /99 & patch chase odds.',
+                baseCost: 65,
+                icon: '🥉',
+                accent: 'from-amber-950/60 to-slate-900 border-amber-700/50',
+                weights: [64, 25, 8.5, 2.2, 0.3]
+            },
+            {
+                id: 'silver',
+                name: 'Silver Mega Box',
+                desc: 'Serious hobby allocation. Numbered parallels & rare patches.',
+                baseCost: 320,
+                icon: '🥈',
+                accent: 'from-sky-950/60 to-slate-900 border-sky-600/50',
+                weights: [42, 34, 16.5, 6.5, 1.0]
+            },
+            {
+                id: 'gold',
+                name: 'Gold Hobby Box',
+                desc: 'High-stakes hobby box. Heavy numbered & patch upside.',
+                baseCost: 1650,
+                icon: '🥇',
+                accent: 'from-yellow-950/60 to-slate-900 border-yellow-500/50',
+                weights: [22, 36, 26, 13, 3.0]
+            },
+            {
+                id: 'platinum',
+                name: 'Platinum Flawless Case',
+                desc: 'Ultra-premium case. True 1/1 Grail hunting.',
+                baseCost: 8500,
+                icon: '💎',
+                accent: 'from-purple-950/70 to-slate-900 border-purple-500/60',
+                weights: [5, 29, 34, 23, 9.0]
+            }
+        ];
+
+        const THEMES = ['Basketball', 'Football', 'Soccer', 'Hockey', 'F1', 'Golf', 'TCG'];
+
+        // 84 Unique Cards across 7 categories (12 cards per category)
+        const CARD_CATALOG = [
+            // Basketball (12)
+            { id: 'bb_1', theme: 'Basketball', icon: '🏀', name: 'Vic Wemby-Tower',   title: 'Alien Block',      baseVal: 4 },
+            { id: 'bb_2', theme: 'Basketball', icon: '🎯', name: 'Steph Splash-30',   title: 'Logo Deep-3',      baseVal: 7 },
+            { id: 'bb_3', theme: 'Basketball', icon: '🪄', name: 'Luka Magic-77',     title: 'Stepback Fade',    baseVal: 10 },
+            { id: 'bb_4', theme: 'Basketball', icon: '🃏', name: 'Nikola Joker-15',   title: 'Sombor Shuffle',   baseVal: 15 },
+            { id: 'bb_5', theme: 'Basketball', icon: '👑', name: 'LeBron King-23',    title: 'Chosen One',       baseVal: 24 },
+            { id: 'bb_6', theme: 'Basketball', icon: '🔥', name: 'Air Jordan-23',     title: 'Flu Game 97',      baseVal: 42 },
+            { id: 'bb_7', theme: 'Basketball', icon: '🐜', name: 'Ant-Man Fly-5',     title: 'Baseline Poster',  baseVal: 9 },
+            { id: 'bb_8', theme: 'Basketball', icon: '⚡', name: 'Shai Smooth-2',     title: 'Midrange Dagger',  baseVal: 13 },
+            { id: 'bb_9', theme: 'Basketball', icon: '🔱', name: 'Greek Freak-34',    title: 'Euro-Step Dunk',   baseVal: 22 },
+            { id: 'bb_10', theme: 'Basketball', icon: '🍀', name: 'Jayson C-Tatum',   title: 'Finals Sidestep',  baseVal: 18 },
+            { id: 'bb_11', theme: 'Basketball', icon: '🦅', name: 'Kobe Mamba-24',    title: '81-Point Night',   baseVal: 38 },
+            { id: 'bb_12', theme: 'Basketball', icon: '🐻', name: 'Ja Morant-12',     title: 'Skyward Bounce',   baseVal: 14 },
+            // Football (12)
+            { id: 'fb_1', theme: 'Football',   icon: '🏈', name: 'Caleb Ice-QB1',     title: 'Off-Platform',     baseVal: 4 },
+            { id: 'fb_2', theme: 'Football',   icon: '🕺', name: 'Justin Griddy-18',  title: '100-Yard Route',   baseVal: 7 },
+            { id: 'fb_3', theme: 'Football',   icon: '⚡', name: 'Lamar MVP-8',       title: 'Juke & Spin',      baseVal: 11 },
+            { id: 'fb_4', theme: 'Football',   icon: '🎽', name: 'Christian CMC-23',  title: 'All-Purpose',      baseVal: 16 },
+            { id: 'fb_5', theme: 'Football',   icon: '🔫', name: 'Patrick Showtime',  title: 'No-Look Laser',    baseVal: 25 },
+            { id: 'fb_6', theme: 'Football',   icon: '🐐', name: 'Tom Terrific-12',   title: '7-Ring Comeback',  baseVal: 44 },
+            { id: 'fb_7', theme: 'Football',   icon: '🦬', name: 'Josh Cannon-17',    title: 'Hurdle & Bomb',    baseVal: 15 },
+            { id: 'fb_8', theme: 'Football',   icon: '🐯', name: 'Joe Cool-9',        title: 'Burrowhead Ice',   baseVal: 17 },
+            { id: 'fb_9', theme: 'Football',   icon: '🐆', name: 'Cheetah Hill-10',   title: 'Sub-4.3 Jet',      baseVal: 19 },
+            { id: 'fb_10', theme: 'Football',  icon: '🛡️', name: 'Micah Lion-11',     title: 'Edge Blitz',       baseVal: 14 },
+            { id: 'fb_11', theme: 'Football',  icon: '☀️', name: 'Amon-Ra SunGod',    title: 'Slot Chain-Mover', baseVal: 12 },
+            { id: 'fb_12', theme: 'Football',  icon: '🌟', name: 'Barry Sand-20',     title: 'Ankle Breaker',    baseVal: 39 },
+            // Soccer (12)
+            { id: 'sc_1', theme: 'Soccer',     icon: '⚽', name: 'Lamine Wonderkid',  title: 'Curled Top-Bin',   baseVal: 4 },
+            { id: 'sc_2', theme: 'Soccer',     icon: '🙌', name: 'Jude Hey-Belling',  title: 'Stoppage Volley',  baseVal: 7 },
+            { id: 'sc_3', theme: 'Soccer',     icon: '🤖', name: 'Erling Cyborg-9',   title: 'Golden Boot',      baseVal: 11 },
+            { id: 'sc_4', theme: 'Soccer',     icon: '💨', name: 'Kylian Jet-Mbappe', title: 'Hat-Trick Final',  baseVal: 16 },
+            { id: 'sc_5', theme: 'Soccer',     icon: '🇵🇹', name: 'Cristiano CR7',     title: 'Bicycle UCL',      baseVal: 26 },
+            { id: 'sc_6', theme: 'Soccer',     icon: '🇦🇷', name: 'Lionel La-Pulga',   title: 'World Cup Crown',  baseVal: 45 },
+            { id: 'sc_7', theme: 'Soccer',     icon: '🇪🇬', name: 'Mo Pharaoh-11',     title: 'Anfield Cutter',   baseVal: 18 },
+            { id: 'sc_8', theme: 'Soccer',     icon: '🇧🇷', name: 'Vini Samba-7',      title: 'Wembley Finish',   baseVal: 21 },
+            { id: 'sc_9', theme: 'Soccer',     icon: '🧙', name: 'Kevin Vision-17',   title: 'Outside-Boot Pass',baseVal: 20 },
+            { id: 'sc_10', theme: 'Soccer',    icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Bukayo Starboy-7', title: 'Emirates Curler',  baseVal: 13 },
+            { id: 'sc_11', theme: 'Soccer',    icon: '🪄', name: 'Rodri Metronome',   title: 'Final Winner',     baseVal: 17 },
+            { id: 'sc_12', theme: 'Soccer',    icon: '🇧🇷', name: 'O Rei Pele-10',     title: '3x Jules Rimet',   baseVal: 43 },
+            // Hockey (12)
+            { id: 'hk_1', theme: 'Hockey',     icon: '🏒', name: 'Connor McJet',      title: 'Rookie Ice',       baseVal: 3 },
+            { id: 'hk_2', theme: 'Hockey',     icon: '🥅', name: 'Patrick Roy-al',    title: 'Glove Save',       baseVal: 5 },
+            { id: 'hk_3', theme: 'Hockey',     icon: '🚨', name: 'Alex Ovech-King',   title: 'One-Timer',        baseVal: 8 },
+            { id: 'hk_4', theme: 'Hockey',     icon: '🏆', name: 'Sidney Frostby',    title: 'Captain Clutch',   baseVal: 12 },
+            { id: 'hk_5', theme: 'Hockey',     icon: '⚡', name: 'Cale Makar-ov',     title: 'Blue Line Jet',    baseVal: 18 },
+            { id: 'hk_6', theme: 'Hockey',     icon: '👑', name: 'Wayne Great-One',   title: '99 Dynasty',       baseVal: 32 },
+            { id: 'hk_7', theme: 'Hockey',     icon: '🎯', name: 'Auston Snipe-34',   title: '40-Goal Rocket',   baseVal: 14 },
+            { id: 'hk_8', theme: 'Hockey',     icon: '🧸', name: 'Leon Drai-Laser',   title: 'Powerplay Bank',   baseVal: 16 },
+            { id: 'hk_9', theme: 'Hockey',     icon: '🦊', name: 'Igor Wall-31',      title: 'Garden Shutout',   baseVal: 13 },
+            { id: 'hk_10', theme: 'Hockey',    icon: '🔥', name: 'Nathan Mac-29',     title: 'Cup Rush',         baseVal: 19 },
+            { id: 'hk_11', theme: 'Hockey',    icon: '🇨🇦', name: 'Mario Lemieux-66',  title: 'Five-Goal Night',  baseVal: 34 },
+            { id: 'hk_12', theme: 'Hockey',    icon: '🛡️', name: 'Nikita Kucher-86',  title: 'Playoff Maestro',  baseVal: 15 },
+            // F1 (12)
+            { id: 'f1_1', theme: 'F1',         icon: '🏎️', name: 'Max Apex',          title: 'Pole Position',    baseVal: 4 },
+            { id: 'f1_2', theme: 'F1',         icon: '🏁', name: 'Lewis Hammer',      title: '7x Crown',         baseVal: 7 },
+            { id: 'f1_3', theme: 'F1',         icon: '🔥', name: 'Charles Monaco',    title: 'Red Scuderia',     baseVal: 10 },
+            { id: 'f1_4', theme: 'F1',         icon: '⏱️', name: 'Lando Turbo',       title: 'Papaya Flash',     baseVal: 15 },
+            { id: 'f1_5', theme: 'F1',         icon: '🛞', name: 'Fernando ElPlan',   title: 'Street Master',    baseVal: 22 },
+            { id: 'f1_6', theme: 'F1',         icon: '🇧🇷', name: 'Ayrton Rainmaster', title: 'Monaco Legend',    baseVal: 36 },
+            { id: 'f1_7', theme: 'F1',         icon: '🇦🇺', name: 'Oscar Piastri-81',  title: 'Baku Late-Brake',  baseVal: 12 },
+            { id: 'f1_8', theme: 'F1',         icon: '🇬🇧', name: 'George Russell-63', title: 'Spa Pole',         baseVal: 11 },
+            { id: 'f1_9', theme: 'F1',         icon: '🇪🇸', name: 'Carlos Smooth-55',  title: 'Singapore Win',    baseVal: 13 },
+            { id: 'f1_10', theme: 'F1',        icon: '🇩🇪', name: 'Michael Baron-7',   title: 'Suzuka Rain',      baseVal: 35 },
+            { id: 'f1_11', theme: 'F1',        icon: '🇳🇱', name: 'Max Interlagos',    title: 'P17 to P1',        baseVal: 24 },
+            { id: 'f1_12', theme: 'F1',        icon: '🇦🇹', name: 'Niki Comeback-1',   title: 'Scar & Glory',     baseVal: 27 },
+            // Golf (12)
+            { id: 'gf_1', theme: 'Golf',       icon: '⛳', name: 'Rory Fairway',      title: '340yd Bomb',       baseVal: 3 },
+            { id: 'gf_2', theme: 'Golf',       icon: '🏌️', name: 'Scottie Number1',   title: 'Green Jacket',     baseVal: 6 },
+            { id: 'gf_3', theme: 'Golf',       icon: '🦅', name: 'Viktor Smiles',     title: 'Sunday Eagle',     baseVal: 9 },
+            { id: 'gf_4', theme: 'Golf',       icon: '🌊', name: 'Collin Ironplay',   title: 'Pebble Approach',  baseVal: 14 },
+            { id: 'gf_5', theme: 'Golf',       icon: '🕶️', name: 'Brooks Major',      title: 'Sunday Pressure',  baseVal: 20 },
+            { id: 'gf_6', theme: 'Golf',       icon: '🐅', name: 'Tiger Sunday-Red',  title: 'Roar at Augusta',  baseVal: 35 },
+            { id: 'gf_7', theme: 'Golf',       icon: '🇺🇸', name: 'Xander Olympic-G',  title: 'Valhalla Finish',  baseVal: 15 },
+            { id: 'gf_8', theme: 'Golf',       icon: '🇸🇪', name: 'Ludvig Draw-2',     title: 'Torrey Tee-Shot',  baseVal: 10 },
+            { id: 'gf_9', theme: 'Golf',       icon: '🇪🇸', name: 'Jon Rahm-10',       title: 'Masters Charge',   baseVal: 18 },
+            { id: 'gf_10', theme: 'Golf',      icon: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', name: 'Tommy Fleetwood',  title: 'Links Flop-Shot',  baseVal: 11 },
+            { id: 'gf_11', theme: 'Golf',      icon: '🎩', name: 'Jack Golden-Bear',  title: '18-Major Icon',    baseVal: 37 },
+            { id: 'gf_12', theme: 'Golf',      icon: '🌟', name: 'Arnold Arnie-King', title: 'Bay Hill Charge',  baseVal: 26 },
+            // TCG (12)
+            { id: 'tc_1', theme: 'TCG',        icon: '⚡', name: 'Volt Mouse',        title: '1st Edition',      baseVal: 4 },
+            { id: 'tc_2', theme: 'TCG',        icon: '🌿', name: 'Flora Dino',        title: 'Jungle Foil',      baseVal: 7 },
+            { id: 'tc_3', theme: 'TCG',        icon: '💧', name: 'Hydro Shell',       title: 'Tsunami Rare',     baseVal: 11 },
+            { id: 'tc_4', theme: 'TCG',        icon: '🔮', name: 'Psy Mew-Clone',     title: 'Secret Alt-Art',   baseVal: 16 },
+            { id: 'tc_5', theme: 'TCG',        icon: '🪷', name: 'Black Lotus Gem', title: 'Alpha Artifact',   baseVal: 28 },
+            { id: 'tc_6', theme: 'TCG',        icon: '🐉', name: 'Flame Drake GX',    title: 'Shadowless Grail', baseVal: 42 },
+            { id: 'tc_7', theme: 'TCG',        icon: '🌙', name: 'Umbra Moon-Alt',    title: 'Evolving Chase',   baseVal: 25 },
+            { id: 'tc_8', theme: 'TCG',        icon: '⚔️', name: 'Blue-Eyes White',   title: 'LOB Legend',       baseVal: 30 },
+            { id: 'tc_9', theme: 'TCG',        icon: '🪄', name: 'Dark Magician-7',   title: 'Millennium Foil',  baseVal: 22 },
+            { id: 'tc_10', theme: 'TCG',       icon: '💎', name: 'Mox Sapphire-0',    title: 'Power Nine',       baseVal: 36 },
+            { id: 'tc_11', theme: 'TCG',       icon: '🌌', name: 'Giratina Lost-V',   title: 'Alternate Art',    baseVal: 21 },
+            { id: 'tc_12', theme: 'TCG',       icon: '👑', name: 'Pikachu Trophy-1',  title: 'World Champ',      baseVal: 45 }
+        ];
+
+        const UPGRADES_CONFIG = [
+            {
+                id: 'autoRipper',
+                name: 'Auto-Ripper Bot',
+                icon: '🤖',
+                desc: 'Auto-rips packs (reserves 2x pack cost so you do not bankrupt yourself).',
+                baseCost: 220,
+                costMult: 2.25,
+                maxLevel: 15,
+                statLabel: (lvl) => lvl === 0 ? 'Locked' : `1 pack every ${Math.max(1.2, 6.5 - lvl * 0.35).toFixed(1)}s`
+            },
+            {
+                id: 'shippingClerk',
+                name: 'Shipping & Listing Clerk',
+                icon: '🚚',
+                desc: 'Faster marketplace sales & lowers shipping/listing fee from 18% down to 5%.',
+                baseCost: 110,
+                costMult: 1.95,
+                maxLevel: 20,
+                statLabel: (lvl) => `${getMarketplaceFeeRate(lvl).toFixed(1)}% fee • ${getSellIntervalFromLevel(lvl).toFixed(2)}s cycle`
+            },
+            {
+                id: 'distributor',
+                name: 'Distributor Allocation',
+                icon: '🏭',
+                desc: 'Wholesale contracts cut sealed pack costs by 3% per level (cap -45%).',
+                baseCost: 280,
+                costMult: 2.2,
+                maxLevel: 15,
+                statLabel: (lvl) => `-${Math.min(45, lvl * 3)}% pack cost`
+            },
+            {
+                id: 'storefront',
+                name: 'Local Card Shop (LCS)',
+                icon: '🏪',
+                desc: 'Generates foot-traffic revenue minus rent/utility overhead.',
+                baseCost: 160,
+                costMult: 1.85,
+                maxLevel: 40,
+                statLabel: (lvl) => `Net +$${getShopNetPerSecFromLevel(lvl).toFixed(2)}/sec`
+            },
+            {
+                id: 'marketing',
+                name: 'Breaker Live-Stream',
+                icon: '📱',
+                desc: 'Boosts card market value (+9%/lv) & Reputation gains on sales.',
+                baseCost: 240,
+                costMult: 2.05,
+                maxLevel: 20,
+                statLabel: (lvl) => `+${lvl * 9}% card value`
+            }
+        ];
+
+        /* ==========================================================================
+           3. GAME STATE & MARKET ROTATION STATE
+           ========================================================================== */
+        const SAVE_KEY = 'card_empire_tycoon_v2';
+        const MARKET_CYCLE_SECONDS = 45;
+
+        let state = {
+            cash: 25.00,
+            lifetimeCash: 25.00,
+            reputation: 10,
+            prestigeBadges: 0,
+            themeFilter: 'ALL',
+            binderFilter: 'ALL',
+            autoRipEnabled: false,
+            muted: false,
+            lastTick: Date.now(),
+            marketSeed: Math.floor(Date.now() / (MARKET_CYCLE_SECONDS * 1000)),
+            inventory: [],
+            listings: [],
+            gradingQueue: [],
+            binder: {},
+            upgrades: {
+                autoRipper: 0,
+                shippingClerk: 0,
+                distributor: 0,
+                storefront: 0,
+                marketing: 0
+            }
+        };
+
+        let currentRevealedPack = [];
+        let activeTab = 'rip';
+        let autoRipAccumulator = 0;
+        let marketSellAccumulator = 0;
+        let isSwipingCards = false;
+
+        /* ==========================================================================
+           4. ECONOMY, MARKET FLUCTUATION & FORMULA HELPERS
+           ========================================================================== */
+        function formatMoney(num) {
+            const sign = num < 0 ? '-' : '';
+            const abs = Math.abs(num);
+            if (abs >= 1e9) return sign + '$' + (abs / 1e9).toFixed(2) + 'B';
+            if (abs >= 1e6) return sign + '$' + (abs / 1e6).toFixed(2) + 'M';
+            if (abs >= 1e4) return sign + '$' + (abs / 1e3).toFixed(1) + 'K';
+            return sign + '$' + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function getMarketModifiers(seed = state.marketSeed) {
+            const s = Math.abs(seed * 9301 + 49297) % 233280;
+            const hotIdx = s % THEMES.length;
+            let coldIdx = (s * 7 + 3) % THEMES.length;
+            if (coldIdx === hotIdx) coldIdx = (hotIdx + 1) % THEMES.length;
+
+            const hotTheme = THEMES[hotIdx];
+            const coldTheme = THEMES[coldIdx];
+            const mods = {};
+            THEMES.forEach(t => {
+                if (t === hotTheme) mods[t] = 1.45;
+                else if (t === coldTheme) mods[t] = 0.72;
+                else mods[t] = 1.0;
+            });
+            return { hotTheme, coldTheme, mods };
+        }
+
+        function getThemeMarketMult(theme) {
+            const { mods } = getMarketModifiers();
+            return mods[theme] || 1.0;
+        }
+
+        function getCompletedSetsCount() {
+            let completed = 0;
+            THEMES.forEach(theme => {
+                const setCards = CARD_CATALOG.filter(c => c.theme === theme);
+                const hasAll = setCards.every(c => state.binder[c.id] !== undefined);
+                if (hasAll) completed++;
+            });
+            return completed;
+        }
+
+        function getBinderMultiplier() {
+            const uniqueCount = Object.keys(state.binder).length;
+            const completedSets = getCompletedSetsCount();
+            return 1 + uniqueCount * 0.05 + completedSets * 0.40;
+        }
+
+        function getPrestigeMultiplier() {
+            return 1 + state.prestigeBadges * 0.20;
+        }
+
+        function getGlobalCashMultiplier() {
+            const marketingMult = 1 + state.upgrades.marketing * 0.09;
+            const repMult = 1 + Math.min(1.5, state.reputation / 750);
+            return getBinderMultiplier() * getPrestigeMultiplier() * marketingMult * repMult;
+        }
+
+        function getShopNetPerSecFromLevel(lvl) {
+            if (lvl <= 0) return 0;
+            const gross = lvl * 5.2;
+            const overhead = lvl * (1.4 + lvl * 0.09);
+            return gross - overhead;
+        }
+
+        function getPassiveIncomePerSec() {
+            const netShop = getShopNetPerSecFromLevel(state.upgrades.storefront);
+            if (netShop >= 0) {
+                return netShop * getBinderMultiplier() * getPrestigeMultiplier();
+            }
+            return netShop;
+        }
+
+        function getPackDiscount() {
+            return Math.min(0.45, state.upgrades.distributor * 0.03);
+        }
+
+        function getPackCost(pack) {
+            return Math.max(2, Math.ceil(pack.baseCost * (1 - getPackDiscount())));
+        }
+
+        function getUpgradeCost(upg) {
+            const lvl = state.upgrades[upg.id] || 0;
+            const superLinearPenalty = Math.pow(1.06, Math.max(0, lvl - 3));
+            return Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl) * superLinearPenalty);
+        }
+
+        function getSellIntervalFromLevel(lvl = state.upgrades.shippingClerk) {
+            return Math.max(0.85, 5.5 - lvl * 0.22);
+        }
+
+        function getSellInterval() {
+            return getSellIntervalFromLevel(state.upgrades.shippingClerk);
+        }
+
+        function getMarketplaceFeeRate(lvl = state.upgrades.shippingClerk) {
+            return Math.max(5.0, 18.0 - lvl * 0.65);
+        }
+
+        function getAutoRipInterval() {
+            if (state.upgrades.autoRipper <= 0) return Infinity;
+            return Math.max(1.2, 6.5 - state.upgrades.autoRipper * 0.35);
+        }
+
+        function calculateCardValue(card, rarity, graded = false, applyMarket = true) {
+            const marketMult = applyMarket ? getThemeMarketMult(card.theme) : 1.0;
+            const raw = card.baseVal * rarity.mult * (graded ? 2.8 : 1.0) * marketMult;
+            return raw * getGlobalCashMultiplier();
+        }
+
+        function calculateNetListingPayout(grossValue) {
+            const feeMult = 1 - (getMarketplaceFeeRate() / 100);
+            return Math.max(0.25, grossValue * feeMult);
+        }
+
+        function calculateQuickSellPayout(grossValue) {
+            return Math.max(0.15, grossValue * 0.70);
+        }
+
+        function getClaimablePrestigeBadges() {
+            if (state.lifetimeCash < 15000) return 0;
+            const rawBadges = Math.floor(Math.pow(state.lifetimeCash / 15000, 0.68));
+            return Math.max(0, rawBadges - state.prestigeBadges);
+        }
+
+        function getNextPrestigeMilestoneCash() {
+            const targetTotalBadges = state.prestigeBadges + Math.max(1, getClaimablePrestigeBadges() + 1);
+            return 15000 * Math.pow(targetTotalBadges, 1 / 0.68);
+        }
+
+        function spawnFloatingCash(text, colorClass = 'text-emerald-400', xPercent = null) {
+            const layer = document.getElementById('floating-layer');
+            if (!layer) return;
+            const el = document.createElement('div');
+            const left = xPercent !== null ? xPercent : (22 + Math.random() * 52);
+            el.className = `floating-cash absolute font-display font-bold text-base drop-shadow-md ${colorClass}`;
+            el.style.left = `${left}%`;
+            el.style.top = '11%';
+            el.textContent = text;
+            layer.appendChild(el);
+            setTimeout(() => el.remove(), 1150);
+        }
+
+        function toggleMute() {
+            state.muted = !state.muted;
+            const btn = document.getElementById('mute-toggle-btn');
+            if (btn) btn.textContent = state.muted ? '🔇' : '🔊';
+            saveGame();
+        }
+
+        /* ==========================================================================
+           5. PACK OPENING & CARD GENERATION LOGIC
+           ========================================================================== */
+        function rollRarity(pack) {
+            const luckBonus = Math.min(8, state.prestigeBadges * 0.45);
+            const weights = [...pack.weights];
+            if (weights[0] > luckBonus) {
+                weights[0] -= luckBonus;
+                weights[1] += luckBonus * 0.55;
+                weights[2] += luckBonus * 0.30;
+                weights[3] += luckBonus * 0.12;
+                weights[4] += luckBonus * 0.03;
+            }
+            const total = weights.reduce((a, b) => a + b, 0);
+            let roll = Math.random() * total;
+            for (let i = 0; i < weights.length; i++) {
+                if (roll < weights[i]) return RARITIES[i];
+                roll -= weights[i];
+            }
+            return RARITIES[0];
+        }
+
+        function rollCardFromPool() {
+            let pool = CARD_CATALOG;
+            if (state.themeFilter !== 'ALL') {
+                pool = CARD_CATALOG.filter(c => c.theme === state.themeFilter);
+            }
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function buyAndRipPack(packId, isAuto = false) {
+            const pack = PACKS.find(p => p.id === packId);
+            if (!pack) return false;
+            const cost = getPackCost(pack);
+            if (state.cash < cost) return false;
+
+            state.cash -= cost;
+            if (!isAuto) SoundFX.click();
+
+            const pulledCards = [];
+            let bestTier = 0;
+
+            for (let i = 0; i < 3; i++) {
+                const card = rollCardFromPool();
+                const rarity = rollRarity(pack);
+                if (rarity.tier > bestTier) bestTier = rarity.tier;
+
+                const isNewToBinder = state.binder[card.id] === undefined;
+                if (isNewToBinder || rarity.tier > state.binder[card.id]) {
+                    state.binder[card.id] = rarity.tier;
+                }
+
+                const val = calculateCardValue(card, rarity, false, true);
+                const item = {
+                    uid: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+                    cardId: card.id,
+                    rarityId: rarity.id,
+                    graded: false,
+                    value: val
+                };
+
+                state.inventory.push(item);
+                pulledCards.push({
+                    ...item,
+                    card,
+                    rarity,
+                    flipped: isAuto,
+                    isNew: isNewToBinder
+                });
+            }
+
+            currentRevealedPack = pulledCards;
+
+            if (!isAuto) {
+                const btn = document.getElementById(`pack-btn-${packId}`);
+                if (btn) {
+                    btn.classList.remove('animate-pack-shake');
+                    void btn.offsetWidth;
+                    btn.classList.add('animate-pack-shake');
+                }
+            } else if (bestTier >= 2) {
+                SoundFX.rarePull(bestTier);
+            }
+
+            renderRevealStage(pack.name);
+            updateAllUI();
+            return true;
+        }
+
+        function flipCardAtIndex(idx) {
+            const entry = currentRevealedPack[idx];
+            if (!entry || entry.flipped) return;
+            entry.flipped = true;
+
+            if (entry.rarity.tier >= 1) {
+                SoundFX.rarePull(entry.rarity.tier);
+            } else {
+                SoundFX.flip();
+            }
+
+            const cardEl = document.getElementById(`reveal-card-${idx}`);
+            if (cardEl) {
+                cardEl.classList.add('card-flipped');
+            }
+            checkAllFlippedStatus();
+        }
+
+        function flipAllRevealedCards() {
+            let highest = 0;
+            currentRevealedPack.forEach((c, idx) => {
+                if (!c.flipped) {
+                    c.flipped = true;
+                    if (c.rarity.tier > highest) highest = c.rarity.tier;
+                    const cardEl = document.getElementById(`reveal-card-${idx}`);
+                    if (cardEl) cardEl.classList.add('card-flipped');
+                }
+            });
+            if (highest >= 1) SoundFX.rarePull(highest);
+            else SoundFX.flip();
+            checkAllFlippedStatus();
+        }
+
+        function checkAllFlippedStatus() {
+            const unflippedCount = currentRevealedPack.filter(c => !c.flipped).length;
+            const flipBtn = document.getElementById('flip-all-btn');
+            const postActions = document.getElementById('post-rip-actions');
+            const pullTotalEl = document.getElementById('pull-total-value');
+
+            if (unflippedCount === 0 && currentRevealedPack.length > 0) {
+                flipBtn.classList.add('hidden');
+                postActions.classList.remove('hidden');
+                const sum = currentRevealedPack.reduce((acc, c) => acc + c.value, 0);
+                pullTotalEl.textContent = formatMoney(sum);
+            } else if (unflippedCount > 0) {
+                flipBtn.classList.remove('hidden');
+                postActions.classList.add('hidden');
+            }
+        }
+
+        function setThemeFilter(theme) {
+            state.themeFilter = theme;
+            document.querySelectorAll('.theme-pill').forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.className = 'theme-pill px-2.5 py-1 rounded-xl text-xs font-semibold bg-sky-500 text-slate-950 shrink-0';
+                } else {
+                    btn.className = 'theme-pill px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 shrink-0';
+                }
+            });
+        }
+
+        function setBinderFilter(theme) {
+            state.binderFilter = theme;
+            document.querySelectorAll('.btheme-pill').forEach(btn => {
+                if (btn.dataset.btheme === theme) {
+                    btn.className = 'btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-sky-500 text-slate-950 shrink-0';
+                } else {
+                    btn.className = 'btheme-pill px-2 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 text-slate-300 shrink-0';
+                }
+            });
+            if (activeTab === 'binder') renderBinderTab();
+        }
+
+        function toggleAutoRip() {
+            if (state.upgrades.autoRipper <= 0) {
+                switchTab('empire');
+                return;
+            }
+            state.autoRipEnabled = !state.autoRipEnabled;
+            SoundFX.click();
+            updateAutoRipButton();
+        }
+
+        /* ==========================================================================
+           6. INVENTORY, MARKETPLACE SALES, QUICK FLIPS & GRADING LAB
+           ========================================================================== */
+        function getDuplicateUids() {
+            const grouped = {};
+            state.inventory.forEach(item => {
+                if (!grouped[item.cardId]) grouped[item.cardId] = [];
+                grouped[item.cardId].push(item);
+            });
+
+            const dupes = [];
+            Object.values(grouped).forEach(list => {
+                if (list.length > 1) {
+                    list.sort((a, b) => {
+                        const ca = CARD_CATALOG.find(c => c.id === a.cardId);
+                        const ra = RARITIES.find(r => r.id === a.rarityId);
+                        const cb = CARD_CATALOG.find(c => c.id === b.cardId);
+                        const rb = RARITIES.find(r => r.id === b.rarityId);
+                        return calculateCardValue(cb, rb, b.graded) - calculateCardValue(ca, ra, a.graded);
+                    });
+                    for (let i = 1; i < list.length; i++) {
+                        dupes.push(list[i].uid);
+                    }
+                }
+            });
+            return dupes;
+        }
+
+        function quickSellCardUid(uid) {
+            const idx = state.inventory.findIndex(i => i.uid === uid);
+            if (idx === -1) return 0;
+            const [item] = state.inventory.splice(idx, 1);
+            const card = CARD_CATALOG.find(c => c.id === item.cardId);
+            const rarity = RARITIES.find(r => r.id === item.rarityId);
+            const gross = calculateCardValue(card, rarity, item.graded);
+            const payout = calculateQuickSellPayout(gross);
+
+            state.cash += payout;
+            state.lifetimeCash += payout;
+            return payout;
+        }
+
+        function quickSellDuplicatesInstant() {
+            const dupeUids = getDuplicateUids();
+            if (dupeUids.length === 0) return;
+            let totalPayout = 0;
+            dupeUids.forEach(uid => {
+                totalPayout += quickSellCardUid(uid);
+            });
+            SoundFX.cash();
+            spawnFloatingCash(`+${formatMoney(totalPayout)} (Quick)`, 'text-amber-300');
+            updateAllUI();
+        }
+
+        function listCardUid(uid) {
+            const idx = state.inventory.findIndex(i => i.uid === uid);
+            if (idx === -1) return;
+            const [item] = state.inventory.splice(idx, 1);
+            const card = CARD_CATALOG.find(c => c.id === item.cardId);
+            const rarity = RARITIES.find(r => r.id === item.rarityId);
+            const gross = calculateCardValue(card, rarity, item.graded);
+            const netPayout = calculateNetListingPayout(gross);
+
+            state.listings.push({
+                uid: item.uid,
+                cardId: item.cardId,
+                rarityId: item.rarityId,
+                graded: item.graded,
+                price: netPayout
+            });
+        }
+
+        function quickListDuplicates() {
+            const dupeUids = getDuplicateUids();
+            if (dupeUids.length === 0) return;
+            dupeUids.forEach(uid => listCardUid(uid));
+            SoundFX.click();
+            updateAllUI();
+        }
+
+        function listAllSingles() {
+            if (state.inventory.length === 0) return;
+            const allUids = state.inventory.map(i => i.uid);
+            allUids.forEach(uid => listCardUid(uid));
+            SoundFX.click();
+            updateAllUI();
+        }
+
+        function submitCardForGrading(uid) {
+            if (state.gradingQueue.length >= 2) return;
+            const idx = state.inventory.findIndex(i => i.uid === uid);
+            if (idx === -1) return;
+
+            const item = state.inventory[idx];
+            if (item.graded) return;
+
+            const card = CARD_CATALOG.find(c => c.id === item.cardId);
+            const rarity = RARITIES.find(r => r.id === item.rarityId);
+            const rawVal = calculateCardValue(card, rarity, false);
+            const fee = Math.max(10, rawVal * 0.55);
+
+            if (state.cash < fee) return;
+
+            state.cash -= fee;
+            state.inventory.splice(idx, 1);
+            SoundFX.click();
+
+            const duration = 18;
+            state.gradingQueue.push({
+                uid: item.uid,
+                cardId: item.cardId,
+                rarityId: item.rarityId,
+                finishTime: Date.now() + duration * 1000,
+                duration
+            });
+
+            updateAllUI();
+        }
+
+        function collectGradedCard(uid) {
+            const idx = state.gradingQueue.findIndex(g => g.uid === uid);
+            if (idx === -1) return;
+            const gItem = state.gradingQueue[idx];
+            if (Date.now() < gItem.finishTime) return;
+
+            state.gradingQueue.splice(idx, 1);
+            const card = CARD_CATALOG.find(c => c.id === gItem.cardId);
+            const rarity = RARITIES.find(r => r.id === gItem.rarityId);
+            const slabVal = calculateCardValue(card, rarity, true);
+
+            state.inventory.push({
+                uid: gItem.uid,
+                cardId: gItem.cardId,
+                rarityId: gItem.rarityId,
+                graded: true,
+                value: slabVal
+            });
+
+            SoundFX.rarePull(3);
+            updateAllUI();
+        }
+
+        /* ==========================================================================
+           7. UPGRADES & PRESTIGE
+           ========================================================================== */
+        function buyUpgrade(upgradeId) {
+            const cfg = UPGRADES_CONFIG.find(u => u.id === upgradeId);
+            if (!cfg) return;
+            const currentLvl = state.upgrades[upgradeId] || 0;
+            if (currentLvl >= cfg.maxLevel) return;
+
+            const cost = getUpgradeCost(cfg);
+            if (state.cash < cost) return;
+
+            state.cash -= cost;
+            state.upgrades[upgradeId] = currentLvl + 1;
+
+            if (upgradeId === 'autoRipper' && currentLvl === 0) {
+                state.autoRipEnabled = true;
+            }
+
+            SoundFX.click();
+            updateAllUI();
+        }
+
+        function openPrestigeConfirm() {
+            const gain = getClaimablePrestigeBadges();
+            if (gain <= 0) return;
+            document.getElementById('modal-prestige-gain').textContent = gain;
+            document.getElementById('prestige-modal').classList.remove('hidden');
+        }
+
+        function closePrestigeConfirm() {
+            document.getElementById('prestige-modal').classList.add('hidden');
+        }
+
+        function executePrestige() {
+            const gain = getClaimablePrestigeBadges();
+            if (gain <= 0) return;
+
+            state.prestigeBadges += gain;
+            state.cash = 25 + state.prestigeBadges * 10;
+            state.lifetimeCash = state.cash;
+            state.reputation = 10 + state.prestigeBadges * 5;
+            state.inventory = [];
+            state.listings = [];
+            state.gradingQueue = [];
+            state.autoRipEnabled = false;
+            state.upgrades = {
+                autoRipper: 0,
+                shippingClerk: 0,
+                distributor: 0,
+                storefront: 0,
+                marketing: 0
+            };
+            currentRevealedPack = [];
+
+            closePrestigeConfirm();
+            SoundFX.rarePull(4);
+            spawnFloatingCash(`+${gain} PRESTIGE BADGES!`, 'text-amber-400', 22);
+            saveGame();
+            switchTab('rip');
+            updateAllUI();
+        }
+
+        /* ==========================================================================
+           8. MAIN IDLE GAME LOOP (100ms Tick + Dynamic Market Cycle)
+           ========================================================================== */
+        let lastLoopTime = Date.now();
+
+        function gameTick() {
+            const now = Date.now();
+            const dt = Math.min(1.0, (now - lastLoopTime) / 1000);
+            lastLoopTime = now;
+
+            const currentSeed = Math.floor(now / (MARKET_CYCLE_SECONDS * 1000));
+            if (currentSeed !== state.marketSeed) {
+                state.marketSeed = currentSeed;
+                if (activeTab === 'inventory' || activeTab === 'rip') {
+                    updateAllUI();
+                }
+            }
+
+            const netRate = getPassiveIncomePerSec();
+            if (Math.abs(netRate) > 0) {
+                const delta = netRate * dt;
+                state.cash = Math.max(0, state.cash + delta);
+                if (delta > 0) state.lifetimeCash += delta;
+            }
+
+            if (state.listings.length > 0) {
+                marketSellAccumulator += dt;
+                const sellEvery = getSellInterval();
+                if (marketSellAccumulator >= sellEvery) {
+                    marketSellAccumulator = 0;
+                    const soldItem = state.listings.shift();
+                    if (soldItem) {
+                        const card = CARD_CATALOG.find(c => c.id === soldItem.cardId);
+                        const rarity = RARITIES.find(r => r.id === soldItem.rarityId);
+                        const gross = calculateCardValue(card, rarity, soldItem.graded, true);
+                        const netSale = calculateNetListingPayout(gross);
+
+                        state.cash += netSale;
+                        state.lifetimeCash += netSale;
+                        state.reputation += 1 + Math.floor((state.upgrades.shippingClerk + state.upgrades.marketing) / 5);
+
+                        if (activeTab === 'inventory' || Math.random() < 0.30) {
+                            spawnFloatingCash(`+${formatMoney(netSale)} net`, 'text-emerald-400');
+                        }
+                        if (activeTab === 'inventory') SoundFX.cash();
+                    }
+                }
+            } else {
+                marketSellAccumulator = 0;
+            }
+
+            if (state.autoRipEnabled && state.upgrades.autoRipper > 0) {
+                autoRipAccumulator += dt;
+                const ripEvery = getAutoRipInterval();
+                if (autoRipAccumulator >= ripEvery) {
+                    autoRipAccumulator = 0;
+                    let chosenPack = null;
+                    for (let i = PACKS.length - 1; i >= 0; i--) {
+                        const pCost = getPackCost(PACKS[i]);
+                        if (state.cash >= pCost * 2) {
+                            chosenPack = PACKS[i];
+                            break;
+                        }
+                    }
+                    if (chosenPack) {
+                        buyAndRipPack(chosenPack.id, true);
+                        if (state.inventory.length > 15) {
+                            quickListDuplicates();
+                        }
+                    }
+                }
+            }
+
+            updateTopBarUI();
+            if (activeTab === 'inventory' && state.gradingQueue.length > 0) {
+                renderGradingQueue();
+            }
+        }
+
+        /* ==========================================================================
+           9. UI RENDERING & NAVIGATION
+           ========================================================================== */
+        function switchTab(tabName) {
+            activeTab = tabName;
+            SoundFX.click();
+
+            ['rip', 'inventory', 'empire', 'binder'].forEach(t => {
+                const sec = document.getElementById(`tab-${t}`);
+                if (sec) sec.classList.toggle('hidden', t !== tabName);
+            });
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isSelected = btn.dataset.tab === tabName;
+                btn.className = isSelected
+                    ? 'nav-btn btn-press flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 bg-sky-500/10 relative'
+                    : 'nav-btn btn-press flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 relative';
+            });
+
+            updateAllUI();
+        }
+
+        function updateTopBarUI() {
+            document.getElementById('ui-cash').textContent = formatMoney(state.cash);
+            document.getElementById('ui-rep').textContent = state.reputation.toLocaleString();
+
+            const netRate = getPassiveIncomePerSec();
+            const badge = document.getElementById('passive-income-badge');
+            badge.textContent = `${netRate >= 0 ? '+' : ''}${formatMoney(netRate)}/s`;
+            badge.className = netRate >= 0
+                ? 'text-emerald-400 font-display font-bold text-xs'
+                : 'text-rose-400 font-display font-bold text-xs';
+
+            document.getElementById('ui-binder-mult').textContent = `${getBinderMultiplier().toFixed(2)}x`;
+            document.getElementById('ui-prestige-badges').textContent = state.prestigeBadges;
+
+            const { hotTheme, coldTheme } = getMarketModifiers();
+            document.getElementById('ui-hot-market-badge').textContent = `🔥 ${hotTheme} +45%`;
+
+            const nowSec = Math.floor(Date.now() / 1000);
+            const secsLeft = Math.max(0, MARKET_CYCLE_SECONDS - (nowSec % MARKET_CYCLE_SECONDS));
+            document.getElementById('ui-market-timer').textContent = `0:${secsLeft < 10 ? '0' : ''}${secsLeft}`;
+
+            const disc = Math.round(getPackDiscount() * 100);
+            const discEl = document.getElementById('ui-discount-badge');
+            if (disc > 0) {
+                discEl.textContent = `Bulk: -${disc}%`;
+                discEl.classList.remove('hidden');
+            } else {
+                discEl.classList.add('hidden');
+            }
+
+            const ripStrip = document.getElementById('rip-market-summary');
+            if (ripStrip) {
+                ripStrip.innerHTML = `<span class="text-emerald-400 font-bold">${hotTheme} (+45%)</span> • <span class="text-rose-400 font-bold">${coldTheme} (-28%)</span>`;
+            }
+
+            const empireFlow = document.getElementById('empire-net-flow');
+            if (empireFlow) {
+                empireFlow.textContent = `${netRate >= 0 ? '+' : ''}${formatMoney(netRate)}/s`;
+                empireFlow.className = `font-display font-bold text-sm ${netRate >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            }
+
+            const prestigeGain = getClaimablePrestigeBadges();
+            document.getElementById('top-prestige-btn').classList.toggle('hidden', prestigeGain <= 0);
+        }
+
+        function updateAutoRipButton() {
+            const btn = document.getElementById('auto-rip-toggle');
+            const dot = document.getElementById('auto-rip-dot');
+            const label = document.getElementById('auto-rip-label');
+            if (!btn || !dot || !label) return;
+
+            if (state.upgrades.autoRipper <= 0) {
+                btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1';
+                dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+                label.textContent = 'Bot Locked';
+                return;
+            }
+
+            if (state.autoRipEnabled) {
+                btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-emerald-500/50 bg-emerald-500/20 text-emerald-300 flex items-center gap-1';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                label.textContent = 'Auto ON';
+            } else {
+                btn.className = 'shrink-0 px-2.5 py-1 rounded-xl text-xs font-bold border border-amber-500/40 bg-slate-800 text-amber-300 flex items-center gap-1';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+                label.textContent = 'Auto OFF';
+            }
+        }
+
+        function renderRevealStage(packName) {
+            const emptyEl = document.getElementById('reveal-empty-state');
+            const gridEl = document.getElementById('reveal-cards-grid');
+            const labelEl = document.getElementById('reveal-pack-label');
+            const flipBtn = document.getElementById('flip-all-btn');
+            const postActions = document.getElementById('post-rip-actions');
+
+            labelEl.textContent = packName ? `Opened: ${packName}` : 'Tap cards to flip';
+            emptyEl.classList.add('hidden');
+            gridEl.classList.remove('hidden');
+            postActions.classList.add('hidden');
+
+            gridEl.innerHTML = currentRevealedPack.map((entry, idx) => {
+                const flippedCls = entry.flipped ? 'card-flipped' : '';
+                return `
+                <div id="reveal-card-${idx}" onclick="flipCardAtIndex(${idx})" class="card-3d ${flippedCls} h-36 cursor-pointer select-none">
+                    <div class="card-3d-inner relative w-full h-full">
+                        <div class="card-face absolute inset-0 rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-950 border border-sky-500/30 flex flex-col items-center justify-center p-2 shadow-md">
+                            <div class="text-2xl mb-1">🃏</div>
+                            <div class="text-[9px] font-bold uppercase tracking-wider text-sky-300">Tap to Flip</div>
+                        </div>
+                        <div class="card-face card-back absolute inset-0 rounded-xl border ${entry.rarity.css} p-2 flex flex-col items-center justify-between text-center shadow-lg">
+                            <div class="w-full flex items-center justify-between gap-1">
+                                <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${entry.rarity.badge}">${entry.rarity.name}</span>
+                                ${entry.isNew ? '<span class="text-[8px] font-black px-1 py-0.5 rounded bg-emerald-400 text-slate-950">NEW</span>' : ''}
+                            </div>
+                            <div class="text-2xl leading-none">${entry.card.icon}</div>
+                            <div class="w-full">
+                                <div class="text-[10px] font-extrabold text-white truncate">${entry.card.name}</div>
+                                <div class="text-[10px] font-display font-bold text-emerald-400">${formatMoney(entry.value)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const allFlipped = currentRevealedPack.every(c => c.flipped);
+            flipBtn.classList.toggle('hidden', allFlipped);
+            if (allFlipped) checkAllFlippedStatus();
+        }
+
+        function renderPackStore() {
+            const container = document.getElementById('pack-list');
+            container.innerHTML = PACKS.map(pack => {
+                const cost = getPackCost(pack);
+                const canAfford = state.cash >= cost;
+                const chaseOdds = (pack.weights[2] + pack.weights[3] + pack.weights[4]).toFixed(1);
+
+                return `
+                <button id="pack-btn-${pack.id}" onclick="buyAndRipPack('${pack.id}')" ${!canAfford ? 'disabled' : ''}
+                    class="w-full text-left btn-press disabled:opacity-45 bg-gradient-to-r ${pack.accent} border rounded-2xl p-3 flex items-center justify-between gap-3 shadow-md">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-12 h-12 rounded-xl bg-slate-950/70 border border-white/10 flex items-center justify-center text-2xl shrink-0">
+                            ${pack.icon}
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-sm font-extrabold text-white truncate">${pack.name}</h3>
+                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">${pack.desc}</p>
+                            <div class="text-[10px] text-sky-400 font-semibold mt-1">/99+ Chase Odds: ${chaseOdds}%</div>
+                        </div>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <div class="px-3 py-2 rounded-xl font-display font-bold text-base ${canAfford ? 'bg-emerald-500 text-slate-950 shadow-sm' : 'bg-slate-800 text-slate-400'}">
+                            ${formatMoney(cost)}
+                        </div>
+                    </div>
+                </button>`;
+            }).join('');
+        }
+
+        function renderGradingQueue() {
+            const container = document.getElementById('grading-queue-list');
+            const countEl = document.getElementById('inv-grading-count');
+            if (!container || !countEl) return;
+
+            countEl.textContent = `${state.gradingQueue.length} / 2`;
+            if (state.gradingQueue.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const now = Date.now();
+            container.innerHTML = state.gradingQueue.map(g => {
+                const card = CARD_CATALOG.find(c => c.id === g.cardId);
+                const rarity = RARITIES.find(r => r.id === g.rarityId);
+                const remainingSec = Math.max(0, Math.ceil((g.finishTime - now) / 1000));
+                const isReady = remainingSec <= 0;
+                const progressPct = Math.min(100, Math.max(0, ((g.duration * 1000 - Math.max(0, g.finishTime - now)) / (g.duration * 1000)) * 100));
+
+                return `
+                <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div class="text-xl">${card ? card.icon : '🏅'}</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-white truncate">${card ? card.name : 'Card'} <span class="text-[10px] text-amber-300">(${rarity ? rarity.name : ''})</span></div>
+                            <div class="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden mt-1">
+                                <div class="h-full bg-amber-400 transition-all duration-200" style="width: ${progressPct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    ${isReady
+                        ? `<button onclick="collectGradedCard('${g.uid}')" class="btn-press bg-amber-400 text-slate-950 font-extrabold text-[11px] px-3 py-1.5 rounded-lg shrink-0">Claim Slab</button>`
+                        : `<span class="text-xs font-mono font-bold text-amber-300 shrink-0">${remainingSec}s</span>`
+                    }
+                </div>`;
+            }).join('');
+        }
+
+        function renderInventoryTab() {
+            const listedTotal = state.listings.reduce((acc, l) => acc + l.price, 0);
+            document.getElementById('inv-listed-count').textContent = state.listings.length;
+            document.getElementById('inv-listed-val').textContent = formatMoney(listedTotal);
+            document.getElementById('inv-sell-rate').textContent = `${getSellInterval().toFixed(2)}s`;
+            document.getElementById('inv-fee-rate').textContent = `${getMarketplaceFeeRate().toFixed(0)}%`;
+
+            const dupes = getDuplicateUids();
+            document.getElementById('dupe-count-badge').textContent = dupes.length;
+            document.getElementById('total-inv-cards').textContent = `${state.inventory.length} cards`;
+
+            renderGradingQueue();
+
+            const listEl = document.getElementById('inventory-list');
+            if (state.inventory.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-8 text-xs text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800/80">Your raw card box is empty. Rip some packs!</div>`;
+                return;
+            }
+
+            const { hotTheme, coldTheme } = getMarketModifiers();
+            const sorted = [...state.inventory].sort((a, b) => {
+                const ca = CARD_CATALOG.find(c => c.id === a.cardId);
+                const ra = RARITIES.find(r => r.id === a.rarityId);
+                const cb = CARD_CATALOG.find(c => c.id === b.cardId);
+                const rb = RARITIES.find(r => r.id === b.rarityId);
+                return calculateCardValue(cb, rb, b.graded) - calculateCardValue(ca, ra, a.graded);
+            });
+
+            listEl.innerHTML = sorted.slice(0, 40).map(item => {
+                const card = CARD_CATALOG.find(c => c.id === item.cardId);
+                const rarity = RARITIES.find(r => r.id === item.rarityId);
+                const grossVal = calculateCardValue(card, rarity, item.graded, true);
+                const netVal = calculateNetListingPayout(grossVal);
+                const quickVal = calculateQuickSellPayout(grossVal);
+                const gradeFee = Math.max(10, grossVal * 0.55);
+                const canGrade = !item.graded && rarity.tier >= 1 && state.gradingQueue.length < 2 && state.cash >= gradeFee;
+
+                const mktTag = card.theme === hotTheme
+                    ? '<span class="text-[9px] font-bold text-emerald-400">🔥+45%</span>'
+                    : (card.theme === coldTheme ? '<span class="text-[9px] font-bold text-rose-400">❄️-28%</span>' : '');
+
+                return `
+                <div class="bg-slate-900 border ${item.graded ? 'border-amber-500/50' : 'border-slate-800'} rounded-xl p-2.5 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-10 h-10 rounded-lg bg-slate-950 flex items-center justify-center text-xl shrink-0 border border-white/5">
+                            ${card.icon}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1 flex-wrap">
+                                <span class="text-xs font-extrabold text-white truncate">${card.name}</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
+                                ${item.graded ? '<span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-950">PSA 10</span>' : ''}
+                                ${mktTag}
+                            </div>
+                            <div class="text-[11px] text-emerald-400 font-display font-bold mt-0.5">
+                                Net: ${formatMoney(netVal)} <span class="text-slate-500 font-sans text-[10px]">• Quick: ${formatMoney(quickVal)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0">
+                        ${!item.graded && rarity.tier >= 1 ? `
+                            <button onclick="submitCardForGrading('${item.uid}')" ${!canGrade ? 'disabled' : ''}
+                                class="btn-press disabled:opacity-35 bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold px-1.5 py-1.5 rounded-lg">
+                                Grade (${formatMoney(gradeFee)})
+                            </button>
+                        ` : ''}
+                        <button onclick="quickSellCardUid('${item.uid}'); updateAllUI();"
+                            class="btn-press bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-500/30 text-[10px] font-bold px-2 py-1.5 rounded-lg">
+                            Flip
+                        </button>
+                        <button onclick="listCardUid('${item.uid}'); updateAllUI();"
+                            class="btn-press bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[10px] font-bold px-2 py-1.5 rounded-lg">
+                            List
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderEmpireTab() {
+            const container = document.getElementById('upgrades-list');
+            container.innerHTML = UPGRADES_CONFIG.map(upg => {
+                const lvl = state.upgrades[upg.id] || 0;
+                const isMax = lvl >= upg.maxLevel;
+                const cost = getUpgradeCost(upg);
+                const canAfford = !isMax && state.cash >= cost;
+
+                return `
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                    <div class="flex items-start gap-3 min-w-0">
+                        <div class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl shrink-0">
+                            ${upg.icon}
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-extrabold text-white truncate">${upg.name}</h3>
+                                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-sky-400">Lv.${lvl}/${upg.maxLevel}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">${upg.desc}</p>
+                            <div class="text-[11px] font-semibold text-emerald-400 mt-1">${upg.statLabel(lvl)}</div>
+                        </div>
+                    </div>
+
+                    <button onclick="buyUpgrade('${upg.id}')" ${!canAfford ? 'disabled' : ''}
+                        class="shrink-0 btn-press disabled:opacity-45 px-3 py-2.5 rounded-xl font-display font-bold text-sm ${isMax ? 'bg-slate-800 text-slate-400' : (canAfford ? 'bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20' : 'bg-slate-800 text-slate-300')}">
+                        ${isMax ? 'MAXED' : formatMoney(cost)}
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBinderTab() {
+            const uniqueCount = Object.keys(state.binder).length;
+            const totalCatalog = CARD_CATALOG.length;
+            const pct = Math.round((uniqueCount / totalCatalog) * 100);
+            const completedSets = getCompletedSetsCount();
+            const cardsPerSet = Math.round(totalCatalog / THEMES.length);
+
+            const allBtn = document.querySelector('.btheme-pill[data-btheme="ALL"]');
+            if (allBtn) allBtn.textContent = `All (${totalCatalog})`;
+
+            const setSizeLabel = document.getElementById('set-card-count-label');
+            if (setSizeLabel) setSizeLabel.textContent = cardsPerSet;
+
+            document.getElementById('binder-progress-text').textContent = `${uniqueCount} / ${totalCatalog} (${pct}%)`;
+            document.getElementById('binder-progress-bar').style.width = `${pct}%`;
+            document.getElementById('completed-sets-count').textContent = `${completedSets}/${THEMES.length}`;
+
+            const claimable = getClaimablePrestigeBadges();
+            const nextMilestone = getNextPrestigeMilestoneCash();
+            document.getElementById('prestige-claim-amount').textContent = claimable;
+            document.getElementById('prestige-req-text').textContent = `Next badge milestone: ${formatMoney(nextMilestone)} lifetime`;
+            document.getElementById('prestige-reset-btn').disabled = claimable <= 0;
+
+            const visibleCards = state.binderFilter === 'ALL'
+                ? CARD_CATALOG
+                : CARD_CATALOG.filter(c => c.theme === state.binderFilter);
+
+            const grid = document.getElementById('binder-grid');
+            grid.innerHTML = visibleCards.map(card => {
+                const unlockedTier = state.binder[card.id];
+                const isUnlocked = unlockedTier !== undefined;
+
+                if (!isUnlocked) {
+                    return `
+                    <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 flex flex-col items-center justify-center text-center h-28 opacity-55">
+                        <div class="text-xl grayscale mb-1">❓</div>
+                        <div class="text-[10px] font-bold text-slate-500 truncate w-full">${card.theme}</div>
+                        <div class="text-[9px] text-slate-600">Undiscovered</div>
+                    </div>`;
+                }
+
+                const rarity = RARITIES[unlockedTier] || RARITIES[0];
+                return `
+                <div class="relative rounded-xl border ${rarity.css} p-2 flex flex-col items-center justify-between text-center h-28 overflow-hidden">
+                    <span class="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded ${rarity.badge}">${rarity.name}</span>
+                    <div class="text-2xl leading-none">${card.icon}</div>
+                    <div class="w-full">
+                        <div class="text-[10px] font-extrabold text-white truncate">${card.name}</div>
+                        <div class="text-[8px] text-slate-400 truncate">${card.theme}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function updateAllUI() {
+            updateTopBarUI();
+            updateAutoRipButton();
+
+            if (activeTab === 'rip') {
+                renderPackStore();
+            } else if (activeTab === 'inventory') {
+                renderInventoryTab();
+            } else if (activeTab === 'empire') {
+                renderEmpireTab();
+            } else if (activeTab === 'binder') {
+                renderBinderTab();
+            }
+        }
+
+        function setupTouchSwipeReveal() {
+            const stage = document.getElementById('reveal-stage');
+            if (!stage) return;
+            let touchStartX = 0;
+
+            stage.addEventListener('touchstart', (e) => {
+                if (e.touches && e.touches.length > 0) {
+                    touchStartX = e.touches[0].clientX;
+                    isSwipingCards = true;
+                }
+            }, { passive: true });
+
+            stage.addEventListener('touchend', (e) => {
+                if (!isSwipingCards) return;
+                isSwipingCards = false;
+                const endX = e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0].clientX : touchStartX;
+                if (Math.abs(endX - touchStartX) > 40 && currentRevealedPack.length > 0) {
+                    flipAllRevealedCards();
+                }
+            }, { passive: true });
+        }
+
+        /* ==========================================================================
+           10. SAVE / LOAD & INITIALIZATION
+           ========================================================================== */
+        function saveGame() {
+            try {
+                state.lastTick = Date.now();
+                localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+            } catch (err) {
+                console.warn('Could not save game state:', err);
+            }
+        }
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                state = {
+                    ...state,
+                    ...parsed,
+                    upgrades: {
+                        ...state.upgrades,
+                        ...(parsed.upgrades || {})
+                    },
+                    binder: parsed.binder || {},
+                    inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
+                    listings: Array.isArray(parsed.listings) ? parsed.listings : [],
+                    gradingQueue: Array.isArray(parsed.gradingQueue) ? parsed.gradingQueue : []
+                };
+
+                const muteBtn = document.getElementById('mute-toggle-btn');
+                if (muteBtn) muteBtn.textContent = state.muted ? '🔇' : '🔊';
+
+                const elapsedSec = Math.max(0, Math.min(8 * 3600, (Date.now() - (state.lastTick || Date.now())) / 1000));
+                const netRate = getPassiveIncomePerSec();
+                if (elapsedSec > 5 && netRate > 0) {
+                    const offlineEarned = netRate * elapsedSec * 0.75;
+                    state.cash += offlineEarned;
+                    state.lifetimeCash += offlineEarned;
+                    setTimeout(() => {
+                        spawnFloatingCash(`+${formatMoney(offlineEarned)} offline`, 'text-emerald-400', 25);
+                    }, 400);
+                }
+            } catch (err) {
+                console.warn('Could not load save state:', err);
+            }
+        }
+
+        function initApp() {
+            loadGame();
+            setThemeFilter(state.themeFilter || 'ALL');
+            setBinderFilter(state.binderFilter || 'ALL');
+            setupTouchSwipeReveal();
+            updateAllUI();
+
+            setInterval(gameTick, 100);
+            setInterval(saveGame, 10000);
+            window.addEventListener('beforeunload', saveGame);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) saveGame();
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
 </body>
 </html>
