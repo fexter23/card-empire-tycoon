@@ -2707,9 +2707,10 @@
             document.getElementById('btn-claim-promo-done').addEventListener('click', closePromo);
         }
 
-        function simulationTick(now) {
-            const dt = Math.min(1.0, Math.max(0.01, (now - lastFrameTime) / 1000));
-            lastFrameTime = now;
+        function simulationTick(rafNow) {
+            const now = Date.now();
+            const dt = Math.min(1.0, Math.max(0.01, (rafNow - lastFrameTime) / 1000));
+            lastFrameTime = rafNow;
 
             // Passive shop income
             const passivePerSec = (state.upgrades.footTraffic || 0) * 4.5 * getBinderValueMultiplier();
@@ -2739,7 +2740,7 @@
                 }
             }
 
-            // Grading queue completion
+            // Grading queue completion (using wall-clock Date.now() to match job.completesAt)
             let gradingChanged = false;
             for (let i = state.gradingQueue.length - 1; i >= 0; i--) {
                 const job = state.gradingQueue[i];
@@ -2783,9 +2784,13 @@
             if (shouldSyncUi) {
                 lastUiSyncTime = now;
                 renderHeaderHud();
-                if (activeTab === 'inventory' && (gradingChanged || state.inventoryDirty || state.gradingQueue.length > 0)) {
-                    renderInventoryTab();
-                    state.inventoryDirty = false;
+                if (activeTab === 'inventory') {
+                    if (state.inventoryDirty) {
+                        renderInventoryTab();
+                        state.inventoryDirty = false;
+                    } else if (gradingChanged || state.gradingQueue.some(j => !j.readyToClaim)) {
+                        renderGradingQueue();
+                    }
                 } else if (activeTab === 'market') {
                     renderMarketTab();
                 } else if (activeTab === 'binder') {
